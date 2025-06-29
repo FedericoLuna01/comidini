@@ -1,4 +1,4 @@
-import * as z from "zod/v4";
+import z from "zod";
 import { authClient } from '@repo/auth/client'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/card'
 import { Button } from '@repo/ui/components/button'
@@ -18,7 +18,6 @@ import { useForm } from "react-hook-form"
 
 export const Route = createFileRoute('/login')({
   beforeLoad: async () => {
-    // Check if the user is already authenticated
     const session = await authClient.getSession();
     if (!session.data) return
 
@@ -90,7 +89,6 @@ function LoginPage() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          {/* TODO: Arreglar estos errores, aunque siga funcionando */}
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}

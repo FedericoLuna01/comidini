@@ -19,7 +19,7 @@ function Index() {
     <>
       <Outlet />
       <Toaster position="top-center" richColors />
-      {/* <TanStackRouterDevtools /> */}
+      <TanStackRouterDevtools />
       <ReactQueryDevtools initialIsOpen={false} />
     </>
   )

@@ -82,6 +82,7 @@ function RouteComponent() {
   const { session } = Route.useRouteContext()
 
   // Adaptar el usuario de la sesión para el componente AppSidebar
+  // TODO: Arreglar este type
   const userForSidebar = session.data?.user ? {
     name: session.data.user.name,
     email: session.data.user.email,

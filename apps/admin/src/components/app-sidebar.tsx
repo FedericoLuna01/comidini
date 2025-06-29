@@ -61,7 +61,7 @@ export function AppSidebar({ user }: {
             <SidebarMenuButton size="lg" asChild>
               <Link
                 to="/"
-                className="flex items-center justify-center w-full h-full text-lg font-bold text-sidebar-foreground hover:text-sidebar-foreground/80 active:text-sidebar-foreground/90"
+                className="flex items-center justify-center w-full h-full text-lg font-bold text-sidebar-foreground hover:text-sidebar-foreground"
               >
                 <Logo />
               </Link>
@@ -81,7 +81,7 @@ export function AppSidebar({ user }: {
                   <SidebarMenuButton asChild>
                     <Link
                       to={item.to}
-                      className="[&.active]:font-bold [&.active]:bg-sidebar-accent group"
+                      className="[&.active]:font-bold [&.active]:bg-primary/40 group"
                     >
                       <item.icon className="group-[.active]:stroke-[3px]" />
                       <span>{item.title}</span>
@@ -91,13 +91,13 @@ export function AppSidebar({ user }: {
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+        </SidebarGroup >
+      </SidebarContent >
       <SidebarFooter>
         <NavUser
           user={user}
         />
       </SidebarFooter>
-    </Sidebar>
+    </Sidebar >
   )
 }
