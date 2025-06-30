@@ -81,17 +81,13 @@ function RouteComponent() {
 
   const { session } = Route.useRouteContext()
 
-  // Adaptar el usuario de la sesión para el componente AppSidebar
-  // TODO: Arreglar este type
-  const userForSidebar = session.data?.user ? {
-    name: session.data.user.name,
-    email: session.data.user.email,
-    image: session.data.user.image || '' // Usamos image como avatar, con fallback a string vacío
-  } : undefined
+  if (!session.data) {
+    return null // O manejar el caso de usuario no autenticado
+  }
 
   return (
     <SidebarProvider>
-      {userForSidebar && <AppSidebar user={userForSidebar} />}
+      <AppSidebar user={session.data.user} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

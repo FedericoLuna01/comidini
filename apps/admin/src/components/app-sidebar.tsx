@@ -15,6 +15,7 @@ import { Link } from "@tanstack/react-router"
 
 import { Home, Inbox, Settings, UsersIcon, UtensilsIcon } from "lucide-react"
 import { NavUser } from "./nav-user"
+import { Session } from "@repo/auth/client"
 
 const items = [
   {
@@ -45,11 +46,7 @@ const items = [
 ]
 
 export function AppSidebar({ user }: {
-  user: {
-    name: string
-    email: string
-    image: string
-  }
+  user: Session["user"]
 }) {
   return (
     <Sidebar

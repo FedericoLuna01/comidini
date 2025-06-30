@@ -23,6 +23,7 @@ function RegisterPage() {
       password,
       name: "test",
       image: "https://example.com/image.png",
+      allowedApps: ['admin', "web", "shop"],
     });
 
     if (error) {

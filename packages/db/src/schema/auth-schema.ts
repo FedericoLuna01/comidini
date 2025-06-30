@@ -1,4 +1,7 @@
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, pgEnum } from "drizzle-orm/pg-core";
+
+export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'shop_admin']);
+export const userAppEnum = pgEnum('user_app', ['web', 'admin', 'shop']);
 
 export const user = pgTable("user", {
 	id: text('id').primaryKey(),
@@ -6,9 +9,10 @@ export const user = pgTable("user", {
 	email: text('email').notNull().unique(),
 	emailVerified: boolean('email_verified').$defaultFn(() => false).notNull(),
 	image: text('image'),
+	role: userRoleEnum('role').$defaultFn(() => 'user').notNull(),
+	allowedApps: userAppEnum('allowed_apps').array().$defaultFn(() => ['web']).notNull(),
 	createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
 	updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
-	role: text('role'),
 	banned: boolean('banned'),
 	banReason: text('ban_reason'),
 	banExpires: timestamp('ban_expires')

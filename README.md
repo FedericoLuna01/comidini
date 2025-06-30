@@ -14,16 +14,11 @@ Aplicación gastronómica desarrollada con el objetivo de gestionar menús, pedi
 - React
 - Node.js / Express
 - PostgreSQL
+- TurboRepo
 
 ## Cómo clonar el repositorio
 
 ```bash
-git clone https://github.com/LucianoTessa/app-gastronom-a.git
-cd app-gastronom-a
+git clone https://github.com/FedericoLuna01/comidini.git
+cd comidini
 ```
-
-## To dos
-
-- [ ] Eliminar la apps/web y agregar otra de vite
-- [ ] Implementar drizzle + better auth
-- [ ] Sacar tsup de package/db

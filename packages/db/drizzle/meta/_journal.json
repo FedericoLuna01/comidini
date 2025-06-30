@@ -15,6 +15,20 @@
       "when": 1750727736154,
       "tag": "0001_milky_edwin_jarvis",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1751238814286,
+      "tag": "0002_mysterious_sleepwalker",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1751240493758,
+      "tag": "0003_perfect_gideon",
+      "breakpoints": true
     }
   ]
 }

@@ -53,6 +53,7 @@ function LoginPage() {
     const { error } = await authClient.signIn.email({
       email: values.email,
       password: values.password,
+      callbackURL: '/'
     });
 
     if (error) {
@@ -68,12 +69,6 @@ function LoginPage() {
 
       return toast.error("Inicio de sesión fallido. Por favor, inténtalo de nuevo.");
     }
-
-    toast.success("Inicio de sesión exitoso.");
-    navigate({
-      to: '/',
-      replace: true,
-    })
   }
 
   return (

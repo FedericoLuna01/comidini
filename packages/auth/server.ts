@@ -1,4 +1,4 @@
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "./src/auth";
+import { adminAuth } from "./src/auth";
 
-export const authHandler = toNodeHandler(auth);
+export const authHandler = toNodeHandler(adminAuth);

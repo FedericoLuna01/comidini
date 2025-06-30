@@ -10,12 +10,8 @@ export default defineConfig({
       target: 'react',
       autoCodeSplitting: true,
     }),
-    react()],
-  resolve: {
-    alias: {
-      "@repo/ui": path.resolve(__dirname, "../../packages/ui/src"),
-    },
-  },
+    react()
+  ],
   server: {
     port: 5174,
   },

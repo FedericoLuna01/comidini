@@ -13,6 +13,7 @@ export const Route = createFileRoute('/register')({
 function RegisterPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,6 +24,7 @@ function RegisterPage() {
       password,
       name: "test",
       image: "https://example.com/image.png",
+      allowedApps: ["web"]
     });
 
     if (error) {
@@ -53,6 +55,18 @@ function RegisterPage() {
             onSubmit={handleSubmit}
           >
             <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="name">Nombre</Label>
+                </div>
+                <Input
+                  id="name"
+                  type="text"
+                  required
+                  placeholder="Juan Perez"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
