@@ -4,16 +4,19 @@
       "url": "https://context7.com/tanstack/query/llms.txt"
     },
     "tanstack router": {
+
       "url": "https://context7.com/tanstack/router/llms.txt"
     },
     "better auth": {
+
       "url": "https://www.better-auth.com/llms.txt"
     },
     "drizzle": {
+
       "url": "https://context7.com/drizzle-team/drizzle-orm-docs/llms.txt"
     },
     "turborepo": {
       "url": "https://context7.com/vercel/turborepo/llms.txt"
-    }
+    },
   }
 }

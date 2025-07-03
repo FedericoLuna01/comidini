@@ -1,7 +1,6 @@
-import React from 'react'
-import { MoreHorizontal } from "lucide-react"
-
-import { Button } from "@repo/ui/components/button"
+import React from "react";
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "@repo/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@repo/ui/components/dropdown-menu"
+} from "@repo/ui/components/dropdown-menu";
 
 export const RowActionsDropdown = () => {
   return (
@@ -23,13 +22,11 @@ export const RowActionsDropdown = () => {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
         {/* TODO: Implementar acciones: borrar, editar, ban */}
-        <DropdownMenuItem>
-          Copy payment ID
-        </DropdownMenuItem>
+        <DropdownMenuItem>Copy payment ID</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem>View customer</DropdownMenuItem>
         <DropdownMenuItem>View payment details</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
+  );
+};
