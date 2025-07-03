@@ -12,6 +12,11 @@ export default defineConfig({
     }),
     react()
   ],
+  resolve: {
+    alias: {
+      "@repo/ui": path.resolve(__dirname, "../../packages/ui/src"),
+    },
+  },
   server: {
     port: 5174,
   },

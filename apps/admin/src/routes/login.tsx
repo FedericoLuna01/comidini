@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from '@repo/ui/components/form'
 import { toast } from '@repo/ui/components/sonner'
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
@@ -22,7 +22,7 @@ export const Route = createFileRoute('/login')({
     if (!session.data) return
 
     throw redirect({
-      to: '/',
+      to: '/login',
     })
 
   },
@@ -35,12 +35,12 @@ const formSchema = z.object({
   }),
   password: z.string().min(6, {
     message: "La contraseña debe tener al menos 6 caracteres",
+  }).max(100, {
+    message: "La contraseña no puede tener más de 100 caracteres"
   })
 })
 
 function LoginPage() {
-  const navigate = useNavigate()
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,10 +50,15 @@ function LoginPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { email, password } = values;
     const { error } = await authClient.signIn.email({
-      email: values.email,
-      password: values.password,
+      email,
+      password,
       callbackURL: '/'
+    }, {
+      onSuccess(context) {
+        console.log("Login successful:", context)
+      }
     });
 
     if (error) {
@@ -80,7 +85,13 @@ function LoginPage() {
             Enter your email below to login to your account
           </CardDescription>
           <CardAction>
-            <Button variant="link">Sign Up</Button>
+            <Button variant="link" asChild>
+              <Link
+                to="/register"
+              >
+                Registrarse
+              </Link>
+            </Button>
           </CardAction>
         </CardHeader>
         <CardContent>

@@ -12,30 +12,22 @@ interface BreadcrumbRoute {
   label: string;
 }
 
-// Define la interfaz para el usuario con las propiedades que realmente tiene
-interface UserFromAuth {
-  id: string;
-  name: string;
-  email: string;
-  emailVerified: boolean;
-  image?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  banned: boolean | null;
-  role?: string;
-  banReason?: string;
-  banExpires?: Date;
-}
-
 export const Route = createFileRoute('/_protected_routes')({
   beforeLoad: async () => {
     // Check if the user is authenticated
-    const session = await authClient.getSession()
+    const session = await authClient.getSession({})
+    console.log(session)
     if (!session.data) {
       throw redirect({
         to: "/login",
       })
     }
+
+    // if (session.data.user.role !== 'admin') {
+    //   throw redirect({
+    //     to: "/login",
+    //   })
+    // }
 
     return { session }
   },

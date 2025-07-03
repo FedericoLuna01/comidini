@@ -3,7 +3,7 @@ import { Button } from '@repo/ui/components/button'
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/components/card'
 import { Input } from '@repo/ui/components/input'
 import { Label } from '@repo/ui/components/label'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/register')({
@@ -13,6 +13,7 @@ export const Route = createFileRoute('/register')({
 function RegisterPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,7 +22,7 @@ function RegisterPage() {
     const { data, error } = await authClient.signUp.email({
       email,
       password,
-      name: "test",
+      name,
       image: "https://example.com/image.png",
       allowedApps: ['admin', "web", "shop"],
     });
@@ -46,7 +47,13 @@ function RegisterPage() {
             Enter your email below to create a new account
           </CardDescription>
           <CardAction>
-            <Button variant="link">Sign In</Button>
+            <Button type="button" variant="link" asChild>
+              <Link
+                to="/login"
+              >
+                Iniciar Sesión
+              </Link>
+            </Button>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -54,6 +61,16 @@ function RegisterPage() {
             onSubmit={handleSubmit}
           >
             <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Nombre</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Juan Perez"
+                  required
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input

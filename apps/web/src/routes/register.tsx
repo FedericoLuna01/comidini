@@ -24,7 +24,8 @@ function RegisterPage() {
       password,
       name: "test",
       image: "https://example.com/image.png",
-      allowedApps: ["web"]
+      allowedApps: ["web"],
+      role: "user",
     });
 
     if (error) {

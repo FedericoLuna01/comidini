@@ -8,8 +8,8 @@ export const authClient = createAuthClient({
   baseURL: "http://localhost:3001",
   plugins: [
     adminClient(),
-    inferAdditionalFields<typeof adminAuth>()
-  ],
+    inferAdditionalFields<typeof adminAuth>(),
+  ]
 })
 
 export type Session = typeof authClient.$Infer.Session

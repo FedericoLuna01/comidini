@@ -35,20 +35,52 @@ const baseConfig = {
     enabled: true
   },
   secret: process.env.BETTER_AUTH_SECRET,
+  // trustedOrigins: [
+  //   process.env.WEB_BETTER_AUTH_URL,
+  //   process.env.SHOP_BETTER_AUTH_URL,
+  // ],
+  plugins: [
+    admin()
+  ]
 }
 
 export const adminAuth = betterAuth({
   ...baseConfig,
   baseURL: process.env.ADMIN_BETTER_AUTH_URL,
+  trustedOrigins: [
+    process.env.ADMIN_BETTER_AUTH_URL,
+  ],
   user: {
     modelName: "user",
     additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: "admin",
+        returned: true,
+        input: false,
+      },
       allowedApps: {
         type: "string[]"
       },
     }
   },
-  plugins: [
-    admin()
-  ]
+});
+
+export const webAuth = betterAuth({
+  ...baseConfig,
+  baseURL: process.env.WEB_BETTER_AUTH_URL,
+  trustedOrigins: [
+    process.env.WEB_BETTER_AUTH_URL,
+  ],
+  user: {
+    modelName: "user",
+    additionalFields: {
+      role: {
+        type: "string"
+      },
+      allowedApps: {
+        type: "string[]"
+      },
+    }
+  },
 });

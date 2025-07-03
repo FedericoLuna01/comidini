@@ -19,6 +19,7 @@ export const columns: ColumnDef<UserWithRole>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
+
       return (
         <RowActionsDropdown />
       )
