@@ -20,12 +20,21 @@ export const columns: ColumnDef<UserWithRole>[] = [
     cell: ({ row }) => {
       const role = row.getValue("role");
       return (
-        <Badge variant={role === "admin" ? "destructive" : "secondary"}>
+        <Badge
+          className={cn("", {
+            "bg-blue-500 text-white": role === "admin",
+            "bg-gray-400 text-white": role === "user",
+          })}
+        >
           {role === "admin" ? "Administrador" : "Usuario"}
         </Badge>
       );
     },
   },
+  //    className={cn("fixed bottom-4 right-4 z-50 duration-300", {
+  //   "animate-in fade-in slide-in-from-bottom": role === admin,
+  //   "animate-out fade-out slide-out-to-bottom": role === user,
+  // })}
   {
     id: "actions",
     cell: ({ row }) => {
