@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Heading, HeadingTitle, HeadingDescription, HeadingSeparator } from '@repo/ui/components/heading'
+import { Heading, HeadingTitle, HeadingDescription, HeadingSeparator } from '@repo/ui/components/ui/heading'
 import { NewUserForm } from './-components/new-user-form'
 
 export const Route = createFileRoute(

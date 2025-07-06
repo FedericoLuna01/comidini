@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@repo/ui/*": ["./src/*"]
+      "@repo/ui/*": ["./src/*"],
+      "@repo/auth/*": ["../auth/*"]
     }
   },
   "include": ["."],

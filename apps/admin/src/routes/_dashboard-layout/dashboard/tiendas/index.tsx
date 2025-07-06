@@ -1,7 +1,7 @@
 import { authClient } from '@repo/auth/client';
-import { DataTable } from '@repo/ui/components/data-table';
-import { Heading, HeadingDescription, HeadingTitle } from '@repo/ui/components/heading';
-import { Separator } from '@repo/ui/components/separator';
+import { DataTable } from '@repo/ui/components/ui/data-table';
+import { Heading, HeadingDescription, HeadingTitle } from '@repo/ui/components/ui/heading';
+import { Separator } from '@repo/ui/components/ui/separator';
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_dashboard-layout/dashboard/tiendas/')({

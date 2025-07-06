@@ -9,7 +9,7 @@ export const schema = {
   shop,
   shopHours,
   shopCategory,
-  shopCategoryRelation
+  shopCategoryRelation,
 } as const;
 
 export * from "./auth-schema";

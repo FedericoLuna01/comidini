@@ -1,8 +1,8 @@
 import z from "zod";
 import { authClient } from '@repo/auth/client'
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/card'
-import { Button } from '@repo/ui/components/button'
-import { Input } from '@repo/ui/components/input'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/ui/card'
+import { Button } from '@repo/ui/components/ui/button'
+import { Input } from '@repo/ui/components/ui/input'
 import {
   Form,
   FormControl,
@@ -10,8 +10,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@repo/ui/components/form'
-import { toast } from '@repo/ui/components/sonner'
+} from '@repo/ui/components/ui/form'
+import { toast } from '@repo/ui/components/ui/sonner'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"

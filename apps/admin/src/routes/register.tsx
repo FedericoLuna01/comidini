@@ -1,8 +1,8 @@
 import { authClient } from '@repo/auth/client'
-import { Button } from '@repo/ui/components/button'
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/components/card'
-import { Input } from '@repo/ui/components/input'
-import { Label } from '@repo/ui/components/label'
+import { Button } from '@repo/ui/components/ui/button'
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/components/ui/card'
+import { Input } from '@repo/ui/components/ui/input'
+import { Label } from '@repo/ui/components/ui/label'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 

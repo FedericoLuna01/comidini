@@ -1,11 +1,11 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { type Session } from "@repo/auth/client";
 import { RowActionsDropdown } from "./row-actions-dropdown";
-import { Badge } from "@repo/ui/components/badge";
+import { Badge } from "@repo/ui/components/ui/badge";
 import { cn } from "@repo/ui/lib/utils";
 import { displayRole } from "./new-user-form";
 import { type UserWithRole } from "@repo/auth/client";
-import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/ui/avatar";
 import { BadgeCheckIcon, BadgeXIcon } from "lucide-react";
 
 export const columns: ColumnDef<UserWithRole>[] = [

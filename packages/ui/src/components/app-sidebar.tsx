@@ -1,4 +1,4 @@
-import { Logo } from "@repo/ui/components/logo"
+import { Logo } from "@repo/ui/components/ui/logo"
 import {
   Sidebar,
   SidebarContent,
@@ -10,43 +10,21 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@repo/ui/components/sidebar"
+} from "@repo/ui/components/ui/sidebar"
 import { Link, useLocation } from "@tanstack/react-router"
+import { NavUser } from "@repo/ui/components/nav-user"
+import { type Session } from "@repo/auth/client.js"
+import { type LucideIcon } from "lucide-react"
 
-import { Home, Inbox, Settings, UsersIcon, UtensilsIcon } from "lucide-react"
-import { NavUser } from "./nav-user"
-import { Session } from "@repo/auth/client"
+export type AppSidebarItem = {
+  title: string,
+  to: string,
+  icon: LucideIcon
+}
 
-const items = [
-  {
-    title: "Inicio",
-    to: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Usuarios",
-    to: "/dashboard/usuarios",
-    icon: UsersIcon,
-  },
-  {
-    title: "Tiendas",
-    to: "/dashboard/tiendas",
-    icon: UtensilsIcon,
-  },
-  {
-    title: "Tickets",
-    to: "/dashboard/tickets",
-    icon: Inbox,
-  },
-  {
-    title: "Configuración",
-    to: "/dashboard/configuracion",
-    icon: Settings,
-  },
-]
-
-export function AppSidebar({ user }: {
-  user: Session["user"]
+export function AppSidebar({ user, items }: {
+  user: Session["user"],
+  items: AppSidebarItem[]
 }) {
   const location = useLocation()
   return (

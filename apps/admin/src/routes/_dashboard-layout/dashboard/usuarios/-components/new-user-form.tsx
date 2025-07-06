@@ -1,6 +1,6 @@
 import z from "zod";
-import { Button } from '@repo/ui/components/button'
-import { Input } from '@repo/ui/components/input'
+import { Button } from '@repo/ui/components/ui/button'
+import { Input } from '@repo/ui/components/ui/input'
 import {
   Form,
   FormControl,
@@ -9,18 +9,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@repo/ui/components/form'
+} from '@repo/ui/components/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui/components/select"
-import { toast } from '@repo/ui/components/sonner'
+} from "@repo/ui/components/ui/select"
+import { toast } from '@repo/ui/components/ui/sonner'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Spinner } from '@repo/ui/components/spinner';
+import { Spinner } from '@repo/ui/components/ui/spinner';
 import { userRoleEnum } from '@repo/db/src/schema/auth-schema';
 import { useMutation } from '@tanstack/react-query';
 import { createUser } from '../../../../../api/users';

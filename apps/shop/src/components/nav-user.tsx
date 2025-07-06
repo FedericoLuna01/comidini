@@ -9,7 +9,7 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@repo/ui/components/avatar"
+} from "@repo/ui/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,13 +18,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@repo/ui/components/dropdown-menu"
+} from "@repo/ui/components/ui/dropdown-menu"
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@repo/ui/components/sidebar"
+} from "@repo/ui/components/ui/sidebar"
 import { authClient, Session } from "@repo/auth/client"
 import { useNavigate } from "@tanstack/react-router"
 

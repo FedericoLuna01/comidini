@@ -1,6 +1,6 @@
 import { createRootRoute, Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { Button } from "@repo/ui/components/button"
+import { Button } from "@repo/ui/components/ui/button"
 import { authClient } from '@repo/auth/client';
 
 export const Route = createRootRoute({

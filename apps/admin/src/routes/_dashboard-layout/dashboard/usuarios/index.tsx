@@ -1,5 +1,5 @@
-import { DataTable } from '@repo/ui/components/data-table'
-import { Heading, HeadingButton, HeadingDescription, HeadingSeparator, HeadingTitle } from '@repo/ui/components/heading'
+import { DataTable } from '@repo/ui/components/ui/data-table'
+import { Heading, HeadingButton, HeadingDescription, HeadingSeparator, HeadingTitle } from '@repo/ui/components/ui/heading'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { columns } from './-components/columns'
 import { allUsersQueryOptions } from '../../../../api/users'

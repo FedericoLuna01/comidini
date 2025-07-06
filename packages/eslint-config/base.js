@@ -29,4 +29,9 @@ export const config = [
   {
     ignores: ["dist/**"],
   },
+  {
+    rules: {
+      "no-unused-vars": "warn",
+    },
+  },
 ]

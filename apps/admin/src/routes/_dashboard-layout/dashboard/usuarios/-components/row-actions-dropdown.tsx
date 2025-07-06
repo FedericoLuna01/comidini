@@ -1,6 +1,6 @@
 import React from "react";
 import { MoreHorizontal } from "lucide-react";
-import { Button } from "@repo/ui/components/button";
+import { Button } from "@repo/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@repo/ui/components/dropdown-menu";
+} from "@repo/ui/components/ui/dropdown-menu";
 
 export const RowActionsDropdown = () => {
   return (

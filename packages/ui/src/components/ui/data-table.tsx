@@ -14,9 +14,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui/components/table"
-import { Button } from "@repo/ui/components/button"
-import { Input } from "@repo/ui/components/input"
+} from "@repo/ui/components/ui/table"
+import { Button } from "@repo/ui/components/ui/button"
+import { Input } from "@repo/ui/components/ui/input"
 import { useState } from "react"
 import { Skeleton } from "./skeleton.js"
 
