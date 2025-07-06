@@ -2,9 +2,9 @@ import React from 'react'
 import { Link, Outlet, useMatches, createFileRoute, redirect } from '@tanstack/react-router'
 import { authClient } from '@repo/auth/client'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@repo/ui/components/sidebar';
-import { AppSidebar } from '../components/app-sidebar';
 import { Separator } from '@repo/ui/components/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@repo/ui/components/breadcrumb';
+import { AppSidebar } from '../components/app-sidebar';
 
 interface BreadcrumbRoute {
   id: string;
@@ -12,26 +12,26 @@ interface BreadcrumbRoute {
   label: string;
 }
 
-export const Route = createFileRoute('/_protected_routes')({
+export const Route = createFileRoute('/_dashboard-layout')({
   beforeLoad: async () => {
     // Check if the user is authenticated
     const session = await authClient.getSession({})
-    console.log(session)
     if (!session.data) {
       throw redirect({
         to: "/login",
       })
     }
 
-    // if (session.data.user.role !== 'admin') {
-    //   throw redirect({
-    //     to: "/login",
-    //   })
-    // }
+    if (session.data.user.role !== 'admin') {
+      throw redirect({
+        to: "/",
+      })
+    }
 
     return { session }
   },
   component: RouteComponent,
+  errorComponent: () => <div>Error loading dashboard</div>,
 })
 
 function getBreadcrumbItems(matches: ReturnType<typeof useMatches>): BreadcrumbRoute[] {

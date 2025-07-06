@@ -1,0 +1,70 @@
+import { pgTable, text, timestamp, boolean, integer, decimal, pgEnum } from "drizzle-orm/pg-core";
+import { user } from "./auth-schema";
+
+export const shopStatusEnum = pgEnum('shop_status', ['active', 'inactive', 'pending', 'suspended']);
+
+export const shop = pgTable("shop", {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  phone: text('phone'),
+  email: text('email'),
+  website: text('website'),
+
+  // Ubicación
+  address: text('address'),
+  city: text('city'),
+  state: text('state'),
+  country: text('country'),
+  postalCode: text('postal_code'),
+  latitude: decimal('latitude', { precision: 10, scale: 8 }),
+  longitude: decimal('longitude', { precision: 11, scale: 8 }),
+
+  // Información de negocio
+  status: shopStatusEnum('status').$defaultFn(() => 'pending').notNull(),
+  businessHours: text('business_hours'), // JSON string con horarios
+  deliveryRadius: integer('delivery_radius'), // en metros
+  minimumOrder: decimal('minimum_order', { precision: 10, scale: 2 }),
+  deliveryFee: decimal('delivery_fee', { precision: 10, scale: 2 }),
+
+  // Configuración
+  acceptsDelivery: boolean('accepts_delivery').$defaultFn(() => true),
+  acceptsPickup: boolean('accepts_pickup').$defaultFn(() => true),
+  acceptsReservations: boolean('accepts_reservations').$defaultFn(() => false),
+
+  // Metadatos
+  logo: text('logo'),
+  banner: text('banner'),
+  tags: text('tags').array(), // Array de tags/categorías
+
+  createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updated_at').$defaultFn(() => new Date()).notNull(),
+});
+
+export const shopHours = pgTable("shop_hours", {
+  id: text('id').primaryKey(),
+  shopId: text('shop_id').notNull().references(() => shop.id, { onDelete: 'cascade' }),
+  dayOfWeek: integer('day_of_week').notNull(), // 0 = domingo, 1 = lunes, etc.
+  openTime: text('open_time'), // formato "HH:MM"
+  closeTime: text('close_time'), // formato "HH:MM"
+  isClosed: boolean('is_closed').$defaultFn(() => false),
+  createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updated_at').$defaultFn(() => new Date()).notNull(),
+});
+
+export const shopCategory = pgTable("shop_category", {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  icon: text('icon'),
+  createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updated_at').$defaultFn(() => new Date()).notNull(),
+});
+
+export const shopCategoryRelation = pgTable("shop_category_relation", {
+  id: text('id').primaryKey(),
+  shopId: text('shop_id').notNull().references(() => shop.id, { onDelete: 'cascade' }),
+  categoryId: text('category_id').notNull().references(() => shopCategory.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),
+});

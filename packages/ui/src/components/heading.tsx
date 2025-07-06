@@ -1,12 +1,14 @@
 import * as React from "react"
 import { cn } from "../lib/utils.js"
+import { Button } from "./button.js"
+import { Separator } from "./separator.js"
 
 function Heading({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="heading"
       className={cn(
-        "flex flex-col mb-5 gap-1",
+        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 has-data-[slot=heading-button]:grid-cols-[1fr_auto] mb-4",
         className
       )}
       {...props}
@@ -34,8 +36,31 @@ function HeadingDescription({ className, ...props }: React.ComponentProps<"div">
   )
 }
 
+function HeadingButton({ className, asChild = false, ...props }: React.ComponentProps<typeof Button> & { asChild?: boolean }) {
+  return (
+    <Button
+      data-slot="heading-button"
+      className={cn("col-start-2 row-span-2 row-start-1 self-center justify-self-end", className)}
+      asChild={asChild}
+      {...props}
+    />
+  );
+}
+
+function HeadingSeparator({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <Separator
+      data-slot="heading-separator"
+      className={cn("col-span-full", className)}
+      {...props}
+    />
+  )
+}
+
 export {
   Heading,
   HeadingTitle,
   HeadingDescription,
+  HeadingButton,
+  HeadingSeparator
 }

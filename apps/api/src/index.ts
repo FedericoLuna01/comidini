@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { authHandler, webAuthHandler } from "@repo/auth/server";
+import { authHandler } from "@repo/auth/server";
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -18,7 +18,6 @@ app.use(cors({
 
 // Better Auth handler - debe ir antes del express.json()
 app.all("/api/auth/{*any}", authHandler);
-app.all("/api/web/auth/{*any}", webAuthHandler);
 
 // Mount express json middleware after Better Auth handler
 app.use(express.json());

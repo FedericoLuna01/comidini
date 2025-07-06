@@ -11,13 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as Protected_routesRouteImport } from './routes/_protected_routes'
-import { Route as Protected_routesIndexRouteImport } from './routes/_protected_routes/index'
-import { Route as Protected_routesTicketsRouteImport } from './routes/_protected_routes/tickets'
-import { Route as Protected_routesConfiguracionRouteImport } from './routes/_protected_routes/configuracion'
-import { Route as Protected_routesUsuariosIndexRouteImport } from './routes/_protected_routes/usuarios/index'
-import { Route as Protected_routesRestaurantsIndexRouteImport } from './routes/_protected_routes/restaurants/index'
-import { Route as Protected_routesUsuariosNuevoUsuarioRouteImport } from './routes/_protected_routes/usuarios/nuevo-usuario'
+import { Route as DashboardLayoutRouteImport } from './routes/_dashboard-layout'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardLayoutDashboardIndexRouteImport } from './routes/_dashboard-layout/dashboard/index'
+import { Route as DashboardLayoutDashboardTicketsRouteImport } from './routes/_dashboard-layout/dashboard/tickets'
+import { Route as DashboardLayoutDashboardConfiguracionRouteImport } from './routes/_dashboard-layout/dashboard/configuracion'
+import { Route as DashboardLayoutDashboardUsuariosIndexRouteImport } from './routes/_dashboard-layout/dashboard/usuarios/index'
+import { Route as DashboardLayoutDashboardTiendasIndexRouteImport } from './routes/_dashboard-layout/dashboard/tiendas/index'
+import { Route as DashboardLayoutDashboardUsuariosNuevoUsuarioRouteImport } from './routes/_dashboard-layout/dashboard/usuarios/nuevo-usuario'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -29,113 +30,127 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Protected_routesRoute = Protected_routesRouteImport.update({
-  id: '/_protected_routes',
+const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
+  id: '/_dashboard-layout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Protected_routesIndexRoute = Protected_routesIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => Protected_routesRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const Protected_routesTicketsRoute = Protected_routesTicketsRouteImport.update({
-  id: '/tickets',
-  path: '/tickets',
-  getParentRoute: () => Protected_routesRoute,
-} as any)
-const Protected_routesConfiguracionRoute =
-  Protected_routesConfiguracionRouteImport.update({
-    id: '/configuracion',
-    path: '/configuracion',
-    getParentRoute: () => Protected_routesRoute,
+const DashboardLayoutDashboardIndexRoute =
+  DashboardLayoutDashboardIndexRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => DashboardLayoutRoute,
   } as any)
-const Protected_routesUsuariosIndexRoute =
-  Protected_routesUsuariosIndexRouteImport.update({
-    id: '/usuarios/',
-    path: '/usuarios/',
-    getParentRoute: () => Protected_routesRoute,
+const DashboardLayoutDashboardTicketsRoute =
+  DashboardLayoutDashboardTicketsRouteImport.update({
+    id: '/dashboard/tickets',
+    path: '/dashboard/tickets',
+    getParentRoute: () => DashboardLayoutRoute,
   } as any)
-const Protected_routesRestaurantsIndexRoute =
-  Protected_routesRestaurantsIndexRouteImport.update({
-    id: '/restaurants/',
-    path: '/restaurants/',
-    getParentRoute: () => Protected_routesRoute,
+const DashboardLayoutDashboardConfiguracionRoute =
+  DashboardLayoutDashboardConfiguracionRouteImport.update({
+    id: '/dashboard/configuracion',
+    path: '/dashboard/configuracion',
+    getParentRoute: () => DashboardLayoutRoute,
   } as any)
-const Protected_routesUsuariosNuevoUsuarioRoute =
-  Protected_routesUsuariosNuevoUsuarioRouteImport.update({
-    id: '/usuarios/nuevo-usuario',
-    path: '/usuarios/nuevo-usuario',
-    getParentRoute: () => Protected_routesRoute,
+const DashboardLayoutDashboardUsuariosIndexRoute =
+  DashboardLayoutDashboardUsuariosIndexRouteImport.update({
+    id: '/dashboard/usuarios/',
+    path: '/dashboard/usuarios/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutDashboardTiendasIndexRoute =
+  DashboardLayoutDashboardTiendasIndexRouteImport.update({
+    id: '/dashboard/tiendas/',
+    path: '/dashboard/tiendas/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutDashboardUsuariosNuevoUsuarioRoute =
+  DashboardLayoutDashboardUsuariosNuevoUsuarioRouteImport.update({
+    id: '/dashboard/usuarios/nuevo-usuario',
+    path: '/dashboard/usuarios/nuevo-usuario',
+    getParentRoute: () => DashboardLayoutRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/configuracion': typeof Protected_routesConfiguracionRoute
-  '/tickets': typeof Protected_routesTicketsRoute
-  '/': typeof Protected_routesIndexRoute
-  '/usuarios/nuevo-usuario': typeof Protected_routesUsuariosNuevoUsuarioRoute
-  '/restaurants': typeof Protected_routesRestaurantsIndexRoute
-  '/usuarios': typeof Protected_routesUsuariosIndexRoute
+  '/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionRoute
+  '/dashboard/tickets': typeof DashboardLayoutDashboardTicketsRoute
+  '/dashboard': typeof DashboardLayoutDashboardIndexRoute
+  '/dashboard/usuarios/nuevo-usuario': typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRoute
+  '/dashboard/tiendas': typeof DashboardLayoutDashboardTiendasIndexRoute
+  '/dashboard/usuarios': typeof DashboardLayoutDashboardUsuariosIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/configuracion': typeof Protected_routesConfiguracionRoute
-  '/tickets': typeof Protected_routesTicketsRoute
-  '/': typeof Protected_routesIndexRoute
-  '/usuarios/nuevo-usuario': typeof Protected_routesUsuariosNuevoUsuarioRoute
-  '/restaurants': typeof Protected_routesRestaurantsIndexRoute
-  '/usuarios': typeof Protected_routesUsuariosIndexRoute
+  '/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionRoute
+  '/dashboard/tickets': typeof DashboardLayoutDashboardTicketsRoute
+  '/dashboard': typeof DashboardLayoutDashboardIndexRoute
+  '/dashboard/usuarios/nuevo-usuario': typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRoute
+  '/dashboard/tiendas': typeof DashboardLayoutDashboardTiendasIndexRoute
+  '/dashboard/usuarios': typeof DashboardLayoutDashboardUsuariosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_protected_routes': typeof Protected_routesRouteWithChildren
+  '/': typeof IndexRoute
+  '/_dashboard-layout': typeof DashboardLayoutRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/_protected_routes/configuracion': typeof Protected_routesConfiguracionRoute
-  '/_protected_routes/tickets': typeof Protected_routesTicketsRoute
-  '/_protected_routes/': typeof Protected_routesIndexRoute
-  '/_protected_routes/usuarios/nuevo-usuario': typeof Protected_routesUsuariosNuevoUsuarioRoute
-  '/_protected_routes/restaurants/': typeof Protected_routesRestaurantsIndexRoute
-  '/_protected_routes/usuarios/': typeof Protected_routesUsuariosIndexRoute
+  '/_dashboard-layout/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionRoute
+  '/_dashboard-layout/dashboard/tickets': typeof DashboardLayoutDashboardTicketsRoute
+  '/_dashboard-layout/dashboard/': typeof DashboardLayoutDashboardIndexRoute
+  '/_dashboard-layout/dashboard/usuarios/nuevo-usuario': typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRoute
+  '/_dashboard-layout/dashboard/tiendas/': typeof DashboardLayoutDashboardTiendasIndexRoute
+  '/_dashboard-layout/dashboard/usuarios/': typeof DashboardLayoutDashboardUsuariosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/login'
     | '/register'
-    | '/configuracion'
-    | '/tickets'
-    | '/'
-    | '/usuarios/nuevo-usuario'
-    | '/restaurants'
-    | '/usuarios'
+    | '/dashboard/configuracion'
+    | '/dashboard/tickets'
+    | '/dashboard'
+    | '/dashboard/usuarios/nuevo-usuario'
+    | '/dashboard/tiendas'
+    | '/dashboard/usuarios'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/login'
     | '/register'
-    | '/configuracion'
-    | '/tickets'
-    | '/'
-    | '/usuarios/nuevo-usuario'
-    | '/restaurants'
-    | '/usuarios'
+    | '/dashboard/configuracion'
+    | '/dashboard/tickets'
+    | '/dashboard'
+    | '/dashboard/usuarios/nuevo-usuario'
+    | '/dashboard/tiendas'
+    | '/dashboard/usuarios'
   id:
     | '__root__'
-    | '/_protected_routes'
+    | '/'
+    | '/_dashboard-layout'
     | '/login'
     | '/register'
-    | '/_protected_routes/configuracion'
-    | '/_protected_routes/tickets'
-    | '/_protected_routes/'
-    | '/_protected_routes/usuarios/nuevo-usuario'
-    | '/_protected_routes/restaurants/'
-    | '/_protected_routes/usuarios/'
+    | '/_dashboard-layout/dashboard/configuracion'
+    | '/_dashboard-layout/dashboard/tickets'
+    | '/_dashboard-layout/dashboard/'
+    | '/_dashboard-layout/dashboard/usuarios/nuevo-usuario'
+    | '/_dashboard-layout/dashboard/tiendas/'
+    | '/_dashboard-layout/dashboard/usuarios/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  Protected_routesRoute: typeof Protected_routesRouteWithChildren
+  IndexRoute: typeof IndexRoute
+  DashboardLayoutRoute: typeof DashboardLayoutRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
 }
@@ -156,82 +171,94 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_protected_routes': {
-      id: '/_protected_routes'
+    '/_dashboard-layout': {
+      id: '/_dashboard-layout'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof Protected_routesRouteImport
+      preLoaderRoute: typeof DashboardLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_protected_routes/': {
-      id: '/_protected_routes/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof Protected_routesIndexRouteImport
-      parentRoute: typeof Protected_routesRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_protected_routes/tickets': {
-      id: '/_protected_routes/tickets'
-      path: '/tickets'
-      fullPath: '/tickets'
-      preLoaderRoute: typeof Protected_routesTicketsRouteImport
-      parentRoute: typeof Protected_routesRoute
+    '/_dashboard-layout/dashboard/': {
+      id: '/_dashboard-layout/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardLayoutDashboardIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
-    '/_protected_routes/configuracion': {
-      id: '/_protected_routes/configuracion'
-      path: '/configuracion'
-      fullPath: '/configuracion'
-      preLoaderRoute: typeof Protected_routesConfiguracionRouteImport
-      parentRoute: typeof Protected_routesRoute
+    '/_dashboard-layout/dashboard/tickets': {
+      id: '/_dashboard-layout/dashboard/tickets'
+      path: '/dashboard/tickets'
+      fullPath: '/dashboard/tickets'
+      preLoaderRoute: typeof DashboardLayoutDashboardTicketsRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
-    '/_protected_routes/usuarios/': {
-      id: '/_protected_routes/usuarios/'
-      path: '/usuarios'
-      fullPath: '/usuarios'
-      preLoaderRoute: typeof Protected_routesUsuariosIndexRouteImport
-      parentRoute: typeof Protected_routesRoute
+    '/_dashboard-layout/dashboard/configuracion': {
+      id: '/_dashboard-layout/dashboard/configuracion'
+      path: '/dashboard/configuracion'
+      fullPath: '/dashboard/configuracion'
+      preLoaderRoute: typeof DashboardLayoutDashboardConfiguracionRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
-    '/_protected_routes/restaurants/': {
-      id: '/_protected_routes/restaurants/'
-      path: '/restaurants'
-      fullPath: '/restaurants'
-      preLoaderRoute: typeof Protected_routesRestaurantsIndexRouteImport
-      parentRoute: typeof Protected_routesRoute
+    '/_dashboard-layout/dashboard/usuarios/': {
+      id: '/_dashboard-layout/dashboard/usuarios/'
+      path: '/dashboard/usuarios'
+      fullPath: '/dashboard/usuarios'
+      preLoaderRoute: typeof DashboardLayoutDashboardUsuariosIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
-    '/_protected_routes/usuarios/nuevo-usuario': {
-      id: '/_protected_routes/usuarios/nuevo-usuario'
-      path: '/usuarios/nuevo-usuario'
-      fullPath: '/usuarios/nuevo-usuario'
-      preLoaderRoute: typeof Protected_routesUsuariosNuevoUsuarioRouteImport
-      parentRoute: typeof Protected_routesRoute
+    '/_dashboard-layout/dashboard/tiendas/': {
+      id: '/_dashboard-layout/dashboard/tiendas/'
+      path: '/dashboard/tiendas'
+      fullPath: '/dashboard/tiendas'
+      preLoaderRoute: typeof DashboardLayoutDashboardTiendasIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/_dashboard-layout/dashboard/usuarios/nuevo-usuario': {
+      id: '/_dashboard-layout/dashboard/usuarios/nuevo-usuario'
+      path: '/dashboard/usuarios/nuevo-usuario'
+      fullPath: '/dashboard/usuarios/nuevo-usuario'
+      preLoaderRoute: typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
   }
 }
 
-interface Protected_routesRouteChildren {
-  Protected_routesConfiguracionRoute: typeof Protected_routesConfiguracionRoute
-  Protected_routesTicketsRoute: typeof Protected_routesTicketsRoute
-  Protected_routesIndexRoute: typeof Protected_routesIndexRoute
-  Protected_routesUsuariosNuevoUsuarioRoute: typeof Protected_routesUsuariosNuevoUsuarioRoute
-  Protected_routesRestaurantsIndexRoute: typeof Protected_routesRestaurantsIndexRoute
-  Protected_routesUsuariosIndexRoute: typeof Protected_routesUsuariosIndexRoute
+interface DashboardLayoutRouteChildren {
+  DashboardLayoutDashboardConfiguracionRoute: typeof DashboardLayoutDashboardConfiguracionRoute
+  DashboardLayoutDashboardTicketsRoute: typeof DashboardLayoutDashboardTicketsRoute
+  DashboardLayoutDashboardIndexRoute: typeof DashboardLayoutDashboardIndexRoute
+  DashboardLayoutDashboardUsuariosNuevoUsuarioRoute: typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRoute
+  DashboardLayoutDashboardTiendasIndexRoute: typeof DashboardLayoutDashboardTiendasIndexRoute
+  DashboardLayoutDashboardUsuariosIndexRoute: typeof DashboardLayoutDashboardUsuariosIndexRoute
 }
 
-const Protected_routesRouteChildren: Protected_routesRouteChildren = {
-  Protected_routesConfiguracionRoute: Protected_routesConfiguracionRoute,
-  Protected_routesTicketsRoute: Protected_routesTicketsRoute,
-  Protected_routesIndexRoute: Protected_routesIndexRoute,
-  Protected_routesUsuariosNuevoUsuarioRoute:
-    Protected_routesUsuariosNuevoUsuarioRoute,
-  Protected_routesRestaurantsIndexRoute: Protected_routesRestaurantsIndexRoute,
-  Protected_routesUsuariosIndexRoute: Protected_routesUsuariosIndexRoute,
+const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
+  DashboardLayoutDashboardConfiguracionRoute:
+    DashboardLayoutDashboardConfiguracionRoute,
+  DashboardLayoutDashboardTicketsRoute: DashboardLayoutDashboardTicketsRoute,
+  DashboardLayoutDashboardIndexRoute: DashboardLayoutDashboardIndexRoute,
+  DashboardLayoutDashboardUsuariosNuevoUsuarioRoute:
+    DashboardLayoutDashboardUsuariosNuevoUsuarioRoute,
+  DashboardLayoutDashboardTiendasIndexRoute:
+    DashboardLayoutDashboardTiendasIndexRoute,
+  DashboardLayoutDashboardUsuariosIndexRoute:
+    DashboardLayoutDashboardUsuariosIndexRoute,
 }
 
-const Protected_routesRouteWithChildren =
-  Protected_routesRoute._addFileChildren(Protected_routesRouteChildren)
+const DashboardLayoutRouteWithChildren = DashboardLayoutRoute._addFileChildren(
+  DashboardLayoutRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
-  Protected_routesRoute: Protected_routesRouteWithChildren,
+  IndexRoute: IndexRoute,
+  DashboardLayoutRoute: DashboardLayoutRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
 }

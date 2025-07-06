@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin } from "better-auth/plugins";
-import type { MiddlewareInputContext } from "better-auth";
+import { admin as adminPlugin } from "better-auth/plugins";
 import { db } from "@repo/db/src"
 import { schema } from "@repo/db/src/schema"
+import { ac, admin, shop, user } from "./permissions";
 
 // Cargar variables de entorno desde el archivo .env en la raíz del proyecto
 dotenv.config({ path: "../../../.env" });
@@ -26,61 +26,49 @@ if (!process.env.SHOP_BETTER_AUTH_URL) {
   throw new Error("SHOP_BETTER_AUTH_URL environment variable is required");
 }
 
-const baseConfig = {
+export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,
   }),
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60 // Cache duration in seconds
+    }
+  },
   emailAndPassword: {
     enabled: true
   },
-  secret: process.env.BETTER_AUTH_SECRET,
-  // trustedOrigins: [
-  //   process.env.WEB_BETTER_AUTH_URL,
-  //   process.env.SHOP_BETTER_AUTH_URL,
-  // ],
   plugins: [
-    admin()
-  ]
-}
-
-export const adminAuth = betterAuth({
-  ...baseConfig,
-  baseURL: process.env.ADMIN_BETTER_AUTH_URL,
+    adminPlugin({
+      ac,
+      roles: {
+        admin,
+        user,
+        shop
+      }
+    })
+  ],
+  secret: process.env.BETTER_AUTH_SECRET,
+  baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins: [
     process.env.ADMIN_BETTER_AUTH_URL,
+    process.env.WEB_BETTER_AUTH_URL,
+    process.env.SHOP_BETTER_AUTH_URL,
   ],
   user: {
     modelName: "user",
     additionalFields: {
       role: {
         type: "string",
-        defaultValue: "admin",
+        defaultValue: "user",
         returned: true,
         input: false,
       },
       allowedApps: {
         type: "string[]"
       },
-    }
-  },
-});
-
-export const webAuth = betterAuth({
-  ...baseConfig,
-  baseURL: process.env.WEB_BETTER_AUTH_URL,
-  trustedOrigins: [
-    process.env.WEB_BETTER_AUTH_URL,
-  ],
-  user: {
-    modelName: "user",
-    additionalFields: {
-      role: {
-        type: "string"
-      },
-      allowedApps: {
-        type: "string[]"
-      },
-    }
+    },
   },
 });

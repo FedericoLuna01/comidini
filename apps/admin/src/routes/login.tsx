@@ -22,7 +22,7 @@ export const Route = createFileRoute('/login')({
     if (!session.data) return
 
     throw redirect({
-      to: '/login',
+      to: '/',
     })
 
   },
@@ -54,26 +54,24 @@ function LoginPage() {
     const { error } = await authClient.signIn.email({
       email,
       password,
-      callbackURL: '/'
+      callbackURL: '/dashboard'
     }, {
       onSuccess(context) {
         console.log("Login successful:", context)
+      },
+      onError(context) {
+        if (context.error.code === "INVALID_EMAIL_OR_PASSWORD") {
+          form.setError("email", {
+            type: "manual",
+            message: "Correo electrónico o contraseña incorrectos.",
+          });
+          return;
+        }
+
+        toast.error("Inicio de sesión fallido. Por favor, inténtalo de nuevo.");
+
       }
     });
-
-    if (error) {
-      console.error("Registration error:", error);
-
-      if (error.code === "INVALID_EMAIL_OR_PASSWORD") {
-        form.setError("email", {
-          type: "manual",
-          message: "Correo electrónico o contraseña incorrectos.",
-        });
-        return;
-      }
-
-      return toast.error("Inicio de sesión fallido. Por favor, inténtalo de nuevo.");
-    }
   }
 
   return (

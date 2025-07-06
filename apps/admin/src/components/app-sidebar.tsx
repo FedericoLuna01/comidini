@@ -11,7 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@repo/ui/components/sidebar"
-import { Link } from "@tanstack/react-router"
+import { Link, useLocation } from "@tanstack/react-router"
 
 import { Home, Inbox, Settings, UsersIcon, UtensilsIcon } from "lucide-react"
 import { NavUser } from "./nav-user"
@@ -20,27 +20,27 @@ import { Session } from "@repo/auth/client"
 const items = [
   {
     title: "Inicio",
-    to: "/",
+    to: "/dashboard",
     icon: Home,
   },
   {
     title: "Usuarios",
-    to: "/usuarios",
+    to: "/dashboard/usuarios",
     icon: UsersIcon,
   },
   {
-    title: "Restaurants",
-    to: "/restaurants",
+    title: "Tiendas",
+    to: "/dashboard/tiendas",
     icon: UtensilsIcon,
   },
   {
     title: "Tickets",
-    to: "/tickets",
+    to: "/dashboard/tickets",
     icon: Inbox,
   },
   {
     title: "Configuración",
-    to: "/configuracion",
+    to: "/dashboard/configuracion",
     icon: Settings,
   },
 ]
@@ -48,6 +48,7 @@ const items = [
 export function AppSidebar({ user }: {
   user: Session["user"]
 }) {
+  const location = useLocation()
   return (
     <Sidebar
       variant="inset"
@@ -75,12 +76,17 @@ export function AppSidebar({ user }: {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    className="group-[.active]:bg-primary/40 group-[.active]:font-bold hover:bg-primary/20 hover:font-bold"
+                  >
                     <Link
                       to={item.to}
-                      className="[&.active]:font-bold [&.active]:bg-primary/40 group"
+                      className={`${location.pathname === item.to ? "font-bold bg-primary/40 hover:font-bold hover:bg-primary/40" : ""}`}
                     >
-                      <item.icon className="group-[.active]:stroke-[3px]" />
+                      <item.icon
+                        className={`${location.pathname === item.to ? "stroke-[3px]" : "hover:stroke-[2px]"}`}
+                      />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
