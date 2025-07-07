@@ -58,7 +58,7 @@ export function NavUser({
       fetchOptions: {
         onSuccess: () => {
           navigate({
-            to: "/login",
+            to: "/iniciar-sesion",
             replace: true,
           })
         },

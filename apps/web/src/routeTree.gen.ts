@@ -9,154 +9,109 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as Protected_routesRouteImport } from './routes/_protected_routes'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as Protected_routesProtectedRouteImport } from './routes/_protected_routes/protected'
+import { Route as landingPageIndexRouteImport } from './routes/(landing-page)/index'
+import { Route as authRegistrarseRouteImport } from './routes/(auth)/registrarse'
+import { Route as authIniciarSesionRouteImport } from './routes/(auth)/iniciar-sesion'
+import { Route as appTiendasRouteImport } from './routes/(app)/tiendas'
 
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Protected_routesRoute = Protected_routesRouteImport.update({
-  id: '/_protected_routes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
+const landingPageIndexRoute = landingPageIndexRouteImport.update({
+  id: '/(landing-page)/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Protected_routesProtectedRoute =
-  Protected_routesProtectedRouteImport.update({
-    id: '/protected',
-    path: '/protected',
-    getParentRoute: () => Protected_routesRoute,
-  } as any)
+const authRegistrarseRoute = authRegistrarseRouteImport.update({
+  id: '/(auth)/registrarse',
+  path: '/registrarse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authIniciarSesionRoute = authIniciarSesionRouteImport.update({
+  id: '/(auth)/iniciar-sesion',
+  path: '/iniciar-sesion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appTiendasRoute = appTiendasRouteImport.update({
+  id: '/(app)/tiendas',
+  path: '/tiendas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/protected': typeof Protected_routesProtectedRoute
+  '/tiendas': typeof appTiendasRoute
+  '/iniciar-sesion': typeof authIniciarSesionRoute
+  '/registrarse': typeof authRegistrarseRoute
+  '/': typeof landingPageIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/protected': typeof Protected_routesProtectedRoute
+  '/tiendas': typeof appTiendasRoute
+  '/iniciar-sesion': typeof authIniciarSesionRoute
+  '/registrarse': typeof authRegistrarseRoute
+  '/': typeof landingPageIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_protected_routes': typeof Protected_routesRouteWithChildren
-  '/about': typeof AboutRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/_protected_routes/protected': typeof Protected_routesProtectedRoute
+  '/(app)/tiendas': typeof appTiendasRoute
+  '/(auth)/iniciar-sesion': typeof authIniciarSesionRoute
+  '/(auth)/registrarse': typeof authRegistrarseRoute
+  '/(landing-page)/': typeof landingPageIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/login' | '/register' | '/protected'
+  fullPaths: '/tiendas' | '/iniciar-sesion' | '/registrarse' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/login' | '/register' | '/protected'
+  to: '/tiendas' | '/iniciar-sesion' | '/registrarse' | '/'
   id:
     | '__root__'
-    | '/'
-    | '/_protected_routes'
-    | '/about'
-    | '/login'
-    | '/register'
-    | '/_protected_routes/protected'
+    | '/(app)/tiendas'
+    | '/(auth)/iniciar-sesion'
+    | '/(auth)/registrarse'
+    | '/(landing-page)/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  Protected_routesRoute: typeof Protected_routesRouteWithChildren
-  AboutRoute: typeof AboutRoute
-  LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
+  appTiendasRoute: typeof appTiendasRoute
+  authIniciarSesionRoute: typeof authIniciarSesionRoute
+  authRegistrarseRoute: typeof authRegistrarseRoute
+  landingPageIndexRoute: typeof landingPageIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected_routes': {
-      id: '/_protected_routes'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof Protected_routesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
+    '/(landing-page)/': {
+      id: '/(landing-page)/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof landingPageIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_protected_routes/protected': {
-      id: '/_protected_routes/protected'
-      path: '/protected'
-      fullPath: '/protected'
-      preLoaderRoute: typeof Protected_routesProtectedRouteImport
-      parentRoute: typeof Protected_routesRoute
+    '/(auth)/registrarse': {
+      id: '/(auth)/registrarse'
+      path: '/registrarse'
+      fullPath: '/registrarse'
+      preLoaderRoute: typeof authRegistrarseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/iniciar-sesion': {
+      id: '/(auth)/iniciar-sesion'
+      path: '/iniciar-sesion'
+      fullPath: '/iniciar-sesion'
+      preLoaderRoute: typeof authIniciarSesionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/tiendas': {
+      id: '/(app)/tiendas'
+      path: '/tiendas'
+      fullPath: '/tiendas'
+      preLoaderRoute: typeof appTiendasRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface Protected_routesRouteChildren {
-  Protected_routesProtectedRoute: typeof Protected_routesProtectedRoute
-}
-
-const Protected_routesRouteChildren: Protected_routesRouteChildren = {
-  Protected_routesProtectedRoute: Protected_routesProtectedRoute,
-}
-
-const Protected_routesRouteWithChildren =
-  Protected_routesRoute._addFileChildren(Protected_routesRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  Protected_routesRoute: Protected_routesRouteWithChildren,
-  AboutRoute: AboutRoute,
-  LoginRoute: LoginRoute,
-  RegisterRoute: RegisterRoute,
+  appTiendasRoute: appTiendasRoute,
+  authIniciarSesionRoute: authIniciarSesionRoute,
+  authRegistrarseRoute: authRegistrarseRoute,
+  landingPageIndexRoute: landingPageIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
