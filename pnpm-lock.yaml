@@ -236,6 +236,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@hookform/resolvers':
+        specifier: ^5.1.1
+        version: 5.1.1(react-hook-form@7.58.1(react@19.1.0))
       '@repo/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -260,6 +263,9 @@ importers:
       react-hook-form:
         specifier: 7.58.1
         version: 7.58.1(react@19.1.0)
+      zod:
+        specifier: ^3.25.67
+        version: 3.25.67
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:^

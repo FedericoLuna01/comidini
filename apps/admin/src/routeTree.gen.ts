@@ -9,8 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LoginRouteImport } from './routes/login'
+import { Route as IniciarSesionRouteImport } from './routes/iniciar-sesion'
 import { Route as DashboardLayoutRouteImport } from './routes/_dashboard-layout'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardLayoutDashboardIndexRouteImport } from './routes/_dashboard-layout/dashboard/index'
@@ -20,14 +19,9 @@ import { Route as DashboardLayoutDashboardUsuariosIndexRouteImport } from './rou
 import { Route as DashboardLayoutDashboardTiendasIndexRouteImport } from './routes/_dashboard-layout/dashboard/tiendas/index'
 import { Route as DashboardLayoutDashboardUsuariosNuevoUsuarioRouteImport } from './routes/_dashboard-layout/dashboard/usuarios/nuevo-usuario'
 
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const IniciarSesionRoute = IniciarSesionRouteImport.update({
+  id: '/iniciar-sesion',
+  path: '/iniciar-sesion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
@@ -78,8 +72,7 @@ const DashboardLayoutDashboardUsuariosNuevoUsuarioRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
+  '/iniciar-sesion': typeof IniciarSesionRoute
   '/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionRoute
   '/dashboard/tickets': typeof DashboardLayoutDashboardTicketsRoute
   '/dashboard': typeof DashboardLayoutDashboardIndexRoute
@@ -89,8 +82,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
+  '/iniciar-sesion': typeof IniciarSesionRoute
   '/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionRoute
   '/dashboard/tickets': typeof DashboardLayoutDashboardTicketsRoute
   '/dashboard': typeof DashboardLayoutDashboardIndexRoute
@@ -102,8 +94,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_dashboard-layout': typeof DashboardLayoutRouteWithChildren
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
+  '/iniciar-sesion': typeof IniciarSesionRoute
   '/_dashboard-layout/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionRoute
   '/_dashboard-layout/dashboard/tickets': typeof DashboardLayoutDashboardTicketsRoute
   '/_dashboard-layout/dashboard/': typeof DashboardLayoutDashboardIndexRoute
@@ -115,8 +106,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/login'
-    | '/register'
+    | '/iniciar-sesion'
     | '/dashboard/configuracion'
     | '/dashboard/tickets'
     | '/dashboard'
@@ -126,8 +116,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/login'
-    | '/register'
+    | '/iniciar-sesion'
     | '/dashboard/configuracion'
     | '/dashboard/tickets'
     | '/dashboard'
@@ -138,8 +127,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_dashboard-layout'
-    | '/login'
-    | '/register'
+    | '/iniciar-sesion'
     | '/_dashboard-layout/dashboard/configuracion'
     | '/_dashboard-layout/dashboard/tickets'
     | '/_dashboard-layout/dashboard/'
@@ -151,24 +139,16 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardLayoutRoute: typeof DashboardLayoutRouteWithChildren
-  LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
+  IniciarSesionRoute: typeof IniciarSesionRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/iniciar-sesion': {
+      id: '/iniciar-sesion'
+      path: '/iniciar-sesion'
+      fullPath: '/iniciar-sesion'
+      preLoaderRoute: typeof IniciarSesionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_dashboard-layout': {
@@ -259,8 +239,7 @@ const DashboardLayoutRouteWithChildren = DashboardLayoutRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardLayoutRoute: DashboardLayoutRouteWithChildren,
-  LoginRoute: LoginRoute,
-  RegisterRoute: RegisterRoute,
+  IniciarSesionRoute: IniciarSesionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

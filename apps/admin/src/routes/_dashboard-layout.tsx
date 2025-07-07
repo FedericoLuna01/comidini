@@ -37,7 +37,7 @@ export const Route = createFileRoute('/_dashboard-layout')({
     const session = await authClient.getSession({})
     if (!session.data) {
       throw redirect({
-        to: "/login",
+        to: "/iniciar-sesion",
       })
     }
 

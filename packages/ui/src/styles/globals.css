@@ -172,6 +172,10 @@
     font-weight: var(--text-weight);
   }
 
+  .gradient-comidini {
+    @apply bg-gradient-to-r from-orange-400 to-rose-400;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }

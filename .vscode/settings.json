@@ -5,6 +5,7 @@
     "configuracion",
     "italian",
     "postgres",
-    "postgresql"
+    "postgresql",
+    "sesion"
   ]
 }
