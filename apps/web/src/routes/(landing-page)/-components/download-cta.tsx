@@ -9,7 +9,7 @@ const DownloadCTA = () => {
           <div className="mb-12">
             <h2 className="text-4xl lg:text-5xl font-fredoka font-bold mb-6">
               ¡Probá
-              <span className="text-primary"> Morfy</span> gratis!
+              <span className="text-primary"> Comidini</span> gratis!
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
               Comenzá a ahorrar en tus lugares favoritos y descubrí nuevos sabores. Disponible para iOS y Android.
