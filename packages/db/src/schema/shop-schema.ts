@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, decimal, pgEnum, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, serial, numeric } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
 export const shop = pgTable("shop", {
@@ -12,18 +12,14 @@ export const shop = pgTable("shop", {
 
   // Ubicación
   address: text("address"),
-  city: text("city"),
-  state: text("state"),
-  country: text("country"),
-  postalCode: text("postal_code"),
-  latitude: decimal("latitude", { precision: 10, scale: 8 }),
-  longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  latitude: numeric("latitude", { precision: 10, scale: 8 }),
+  longitude: numeric("longitude", { precision: 11, scale: 8 }),
 
   // Información de negocio
   businessHours: text("business_hours"), // JSON string con horarios
   deliveryRadius: integer("delivery_radius"), // en metros
-  minimumOrder: decimal("minimum_order", { precision: 10, scale: 2 }),
-  deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }),
+  minimumOrder: numeric("minimum_order", { precision: 10, scale: 2 }),
+  deliveryFee: numeric("delivery_fee", { precision: 10, scale: 2 }),
 
   // Configuración
   acceptsDelivery: boolean("accepts_delivery").$defaultFn(() => true),
