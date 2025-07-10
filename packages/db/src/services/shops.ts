@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "../config";
 import { shop } from "../schema";
+import { InsertShop } from "../types/shop";
 
 export const getShopByUserId = async (userId: string) => {
   const shopData = await db
@@ -16,15 +17,10 @@ export const getShopByUserId = async (userId: string) => {
   return shopData[0];
 }
 
-export const createShop = async (userId: string, shopData: any) => {
-  const newShop = {
-    userId,
-    ...shopData,
-  };
-
+export const createShop = async (shopData: InsertShop) => {
   const [createdShop] = await db
     .insert(shop)
-    .values(newShop)
+    .values(shopData)
     .returning();
 
   return createdShop;

@@ -3,7 +3,6 @@ import React from "react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import { Button } from "@repo/ui/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/ui/card"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/ui/form"
@@ -27,14 +26,14 @@ import {
   Calendar,
 } from "lucide-react"
 import { createFileRoute } from '@tanstack/react-router'
-import { shopOnboardingSchema } from '@repo/db/src/types/shop'
+import { createShopSchema, CreateShop } from '@repo/db/src/types/shop'
 import { Stepper, StepperDescription, StepperIndicator, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from "@repo/ui/components/ui/stepper"
+import { useMutation } from '@tanstack/react-query';
+import { createShop } from "../../api/shop"
 
 export const Route = createFileRoute('/primeros-pasos/')({
   component: RouteComponent,
 })
-
-type ShopOnboardingData = z.infer<typeof shopOnboardingSchema>
 
 const DAYS_OF_WEEK = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
 
@@ -48,40 +47,39 @@ const STEPS = [
 
 function RouteComponent() {
   const [currentStep, setCurrentStep] = useState(1)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const form = useForm<ShopOnboardingData>({
-    resolver: zodResolver(shopOnboardingSchema),
+  const form = useForm<CreateShop>({
+    resolver: zodResolver(createShopSchema),
     defaultValues: {
-      //   name: "",
-      //   address: "",
-      //   city: "",
-      //   state: "",
-      //   country: "",
-      //   description: "",
-      //   phone: "",
-      //   email: "",
-      //   website: "",
+      name: "",
+      description: "",
+      phone: "",
+      address: "",
+      deliveryFee: "",
+      minimumOrder: "",
       acceptsDelivery: false,
       acceptsPickup: false,
       acceptsReservations: false,
-      //   deliveryRadius: 0,
-      //   minimumOrder: 0,
-      //   deliveryFee: 0,
-      businessHours: DAYS_OF_WEEK.map((_, index) => ({
-        dayOfWeek: index,
-        isClosed: false,
-        // openTime: "09:00",
-        // closeTime: "18:00",
-      })),
-      //   postalCode: "",
-      //   categoryIds: [],
+      logo: "",
+      banner: "",
+      tags: [],
     },
   })
 
-  const nextStep = async () => {
+  const mutation = useMutation({
+    mutationFn: async (data: CreateShop) => {
+      await createShop(data)
+    }
+  })
+
+  const isValidForm = async () => {
     const fieldsToValidate = getFieldsForStep(currentStep)
     const isValid = await form.trigger(fieldsToValidate)
+    return isValid
+  }
+
+  const nextStep = async () => {
+    const isValid = await isValidForm()
 
     if (isValid && currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1)
@@ -94,12 +92,12 @@ function RouteComponent() {
     }
   }
 
-  const getFieldsForStep = (step: number): (keyof ShopOnboardingData)[] => {
+  const getFieldsForStep = (step: number): (keyof CreateShop)[] => {
     switch (step) {
       case 1:
         return ["name", "description", "phone", "email", "website"]
       case 2:
-        return ["address", "city", "state", "country", "postalCode"]
+        return ["address"]
       case 3:
         return [
           "deliveryRadius",
@@ -110,30 +108,18 @@ function RouteComponent() {
           "acceptsReservations",
         ]
       case 4:
-        return ["businessHours"]
+        return []
       default:
         return []
     }
   }
 
-  const onSubmit = async (data: ShopOnboardingData) => {
-    setIsSubmitting(true)
-    try {
-      // Aquí iría la lógica para enviar los datos
-      console.log("Datos del onboarding:", data)
-      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simular envío
-      alert("¡Tienda creada exitosamente!")
-    } catch (error) {
-      console.error("Error al crear la tienda:", error)
-    } finally {
-      setIsSubmitting(false)
-    }
+  const onSubmit = async (data: CreateShop) => {
+    mutation.mutate(data)
   }
 
-  // const progress = (currentStep / STEPS.length) * 100
-
   return (
-    <div className="container mx-auto min-h-screen flex items-center justify-center flex-col gap-y-6">
+    <div className="container mx-auto min-h-screen flex items-center justify-center flex-col gap-y-6 py-10">
       <div className=" text-center">
         <h1 className="text-4xl font-bold">
           Primeros pasos para crear tu tienda
@@ -152,8 +138,16 @@ function RouteComponent() {
               key={id}
               step={id}
               className="relative flex-1 flex-col!"
+
             >
-              <StepperTrigger className="flex-col gap-3 rounded">
+              <StepperTrigger
+                className="flex-col gap-3 rounded"
+                onClick={async () => {
+                  const isValid = await isValidForm()
+                  if (!isValid) return
+                  setCurrentStep(id)
+                }}
+              >
                 <StepperIndicator />
                 <div className="space-y-0.5 px-2">
                   <StepperTitle>{title}</StepperTitle>
@@ -171,7 +165,7 @@ function RouteComponent() {
       </div>
       <Form {...form}>
         <form
-          className="min-w-xl"
+          className="min-w-xl h-auto transition-all duration-300 ease-in-out"
           onSubmit={form.handleSubmit(onSubmit)}>
           <Card className="shadow-lg">
             <CardHeader>
@@ -199,7 +193,7 @@ function RouteComponent() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Store className="w-4 h-4" />
-                          Nombre de la tienda *
+                          Nombre de la tienda
                         </FormLabel>
                         <FormControl>
                           <Input placeholder="Mi Tienda Favorita" {...field} />
@@ -304,66 +298,7 @@ function RouteComponent() {
                       </FormItem>
                     )}
                   />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Ciudad *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ciudad de México" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Estado *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Santa Fe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="country"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>País *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Argentina" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="postalCode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Código Postal</FormLabel>
-                          <FormControl>
-                            <Input placeholder="01000" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  {/* TODO: Poner un mapa para marcar el lugar */}
                 </div>
               )}
 
@@ -468,7 +403,7 @@ function RouteComponent() {
                                   type="number"
                                   placeholder="100"
                                   {...field}
-                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  onChange={(e) => field.onChange(e.target.value || "0")}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -487,7 +422,7 @@ function RouteComponent() {
                                   type="number"
                                   placeholder="30"
                                   {...field}
-                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  onChange={(e) => field.onChange(e.target.value || "0")}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -509,8 +444,8 @@ function RouteComponent() {
                       Define los horarios en que tu tienda estará disponible para recibir pedidos
                     </p>
                   </div>
-
-                  <div className="space-y-4">
+                  {/* TODO: Poner los horarios */}
+                  {/* <div className="space-y-4">
                     {DAYS_OF_WEEK.map((day, index) => (
                       <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
                         <div className="w-20 text-sm font-medium">{day}</div>
@@ -562,7 +497,7 @@ function RouteComponent() {
                         )}
                       </div>
                     ))}
-                  </div>
+                  </div> */}
                 </div>
               )}
 
@@ -611,10 +546,6 @@ function RouteComponent() {
                       </h4>
                       <div className="text-sm">
                         <p>{form.watch("address")}</p>
-                        <p>
-                          {form.watch("city")}, {form.watch("state")}, {form.watch("country")}
-                        </p>
-                        {form.watch("postalCode") && <p>CP: {form.watch("postalCode")}</p>}
                       </div>
                     </div>
 
@@ -650,13 +581,24 @@ function RouteComponent() {
             </Button>
 
             {currentStep < STEPS.length ? (
-              <Button type="button" onClick={nextStep} className="flex items-center gap-2">
+              <Button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  nextStep()
+                }}
+                className="flex items-center gap-2"
+              >
                 Siguiente
                 <ChevronRight className="w-4 h-4" />
               </Button>
             ) : (
-              <Button type="submit" disabled={isSubmitting} className="flex items-center gap-2">
-                {isSubmitting ? "Creando..." : "Crear Tienda"}
+              <Button
+                type="submit"
+                disabled={mutation.isPending || currentStep !== STEPS.length}
+                className="flex items-center gap-2"
+              >
+                {mutation.isPending ? "Creando..." : "Crear Tienda"}
                 <CheckCircle className="w-4 h-4" />
               </Button>
             )}
