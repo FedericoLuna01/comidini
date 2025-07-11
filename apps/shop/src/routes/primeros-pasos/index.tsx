@@ -31,6 +31,8 @@ import { Stepper, StepperDescription, StepperIndicator, StepperItem, StepperSepa
 import { useMutation } from '@tanstack/react-query';
 import { createShop } from "../../api/shop"
 
+import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
+
 export const Route = createFileRoute('/primeros-pasos/')({
   component: RouteComponent,
 })
@@ -138,7 +140,6 @@ function RouteComponent() {
               key={id}
               step={id}
               className="relative flex-1 flex-col!"
-
             >
               <StepperTrigger
                 className="flex-col gap-3 rounded"
@@ -298,7 +299,17 @@ function RouteComponent() {
                       </FormItem>
                     )}
                   />
-                  {/* TODO: Poner un mapa para marcar el lugar */}
+                  <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+                    <Map
+                      className="w-full h-64 rounded-lg"
+                      defaultCenter={{ lat: 22.54992, lng: 0 }}
+                      defaultZoom={3}
+                      gestureHandling={'greedy'}
+                      disableDefaultUI={true}
+                    >
+                      <Marker position={{ lat: 22.54992, lng: 0 }} />
+                    </Map>
+                  </APIProvider>
                 </div>
               )}
 

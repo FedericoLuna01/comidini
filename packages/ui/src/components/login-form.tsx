@@ -15,6 +15,7 @@ import {
 import { toast } from '@repo/ui/components/ui/sonner'
 import { authClient } from "@repo/auth/client.js";
 import { Link } from "@tanstack/react-router";
+import { GoogleIcon } from "./icons/index.js";
 
 
 const formSchema = z.object({
@@ -36,6 +37,13 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
       password: "",
     },
   })
+
+  const handleLoginWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "http://localhost:5174/",
+    })
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { email, password } = values;
@@ -115,6 +123,15 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
             />
             <Button type="submit" className="w-full">
               Iniciar sesión
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full "
+              onClick={handleLoginWithGoogle}
+            >
+              <GoogleIcon />
+              Ingresar con Google
             </Button>
           </form>
         </Form>

@@ -34,7 +34,7 @@ const AvatarDropdown = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="text-white cursor-pointer w-11 h-11">
+        <Avatar className="text-white cursor-pointer w-10 h-10">
           <AvatarImage src={session.data?.user.image ?? undefined} alt={session.data?.user.name} />
           <AvatarFallback className="bg-primary">{session.data?.user.name?.[0]}</AvatarFallback>
         </Avatar>

@@ -2,7 +2,7 @@ import { authClient } from '@repo/auth/client'
 import { Button } from '@repo/ui/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/ui/card'
 import { Input } from '@repo/ui/components/ui/input'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import z from 'zod'
@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from '@repo/ui/components/ui/form';
 import { Link } from '@tanstack/react-router';
+import { GoogleIcon } from '@repo/ui/components/icons/index'
 
 export const Route = createFileRoute('/(auth)/registrarse')({
   component: RegisterPage,
@@ -45,6 +46,13 @@ function RegisterPage() {
     },
   });
 
+  const handleLoginWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "http://localhost:5174/",
+    })
+  }
+
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     const { name, email, password } = values;
     const { data, error } = await authClient.signUp.email({
@@ -52,7 +60,6 @@ function RegisterPage() {
       password,
       name,
       image: "",
-      allowedApps: ["web"],
     });
 
     if (error && error.code === 'USER_ALREADY_EXISTS') {
@@ -138,8 +145,14 @@ function RegisterPage() {
                 <Button type="submit" className="w-full">
                   Registrarse
                 </Button>
-                <Button variant="outline" className="w-full">
-                  Iniciar sesión con Google
+                <Button
+                  type='button'
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleLoginWithGoogle}
+                >
+                  <GoogleIcon />
+                  Ingresar con Google
                 </Button>
               </div>
             </form>

@@ -204,3 +204,11 @@ select,
 label {
   @apply font-text;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 2rem;
+}
