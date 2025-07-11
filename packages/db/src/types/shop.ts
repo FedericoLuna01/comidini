@@ -1,9 +1,6 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import {
   shop,
-  shopHours,
-  shopCategory,
-  shopCategoryRelation,
   product,
   productCategory,
   productVariant,
@@ -17,9 +14,6 @@ import {
 } from "../schema/shop-schema";
 import { z } from "zod/v4";
 import { createInsertSchema } from "drizzle-zod";
-
-export type Shop = InferSelectModel<typeof shop>;
-export type NewShop = InferInsertModel<typeof shop>;
 
 export const insertShopSchema = createInsertSchema(shop, {
   name: z.string()
@@ -46,48 +40,52 @@ export const insertShopSchema = createInsertSchema(shop, {
   acceptsPickup: z.boolean(),
   acceptsReservations: z.boolean(),
 
-  // Horarios de negocio (opcional para el onboarding)
-  businessHours: z.array(z.object({
-    dayOfWeek: z.number().min(0).max(6),
-    openTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato de hora inválido (HH:MM)").optional(),
-    closeTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato de hora inválido (HH:MM)").optional(),
-    isClosed: z.boolean(),
-  })).optional(),
+  logo: z.string().optional(),
+  banner: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 
-  // Categorías (opcional para el onboarding)
-  categoryIds: z.array(z.string()).optional(),
-});
+  userId: z.string(),
+}).omit({
+  updatedAt: true,
+  createdAt: true,
+})
 
+export const createShopSchema = insertShopSchema.omit({
+  userId: true,
+})
+
+export type InsertShop = z.infer<typeof insertShopSchema>;
+export type CreateShop = z.infer<typeof createShopSchema>;
 
 export const insertProductSchema = createInsertSchema(product, {
-    name: z.string()
+  name: z.string()
     .min(1, { message: "El nombre del producto es requerido" })
     .max(100, { message: "El nombre del producto no puede exceder los 100 caracteres" }),
-    description: z.string().max(100, { message: "La descripción debe ser mas corta." }).optional(),
-    price: z.number().min(1,{message:"El precio es requerido"}),
-    sku: z.string().min(1,{message:"El SKU es requerido"}).max(50, { message: "El SKU no puede exceder los 50 caracteres" }),
-    trackQuantity: z.boolean().default(true),
-    quantity: z.number().min(0,{message:"La cantidad de productos no puede ser negativo" }).default(0),
-    lowStockThreshold: z.number().min(0).default(0),
-    images: z.string().url({ message: "La imagen debe ser una URL válida" }).optional(),
-    isActive: z.boolean().default(true),
-    isDigital: z.boolean().default(false),
-    taxable: z.boolean().default(true),
-    tags: z.array(z.string()).optional(),
-    sortOrder: z.number().min(0).default(0),
+  description: z.string().max(100, { message: "La descripción debe ser mas corta." }).optional(),
+  price: z.number().min(1, { message: "El precio es requerido" }),
+  sku: z.string().min(1, { message: "El SKU es requerido" }).max(50, { message: "El SKU no puede exceder los 50 caracteres" }),
+  trackQuantity: z.boolean().default(true),
+  quantity: z.number().min(0, { message: "La cantidad de productos no puede ser negativo" }).default(0),
+  lowStockThreshold: z.number().min(0).default(0),
+  images: z.string().url({ message: "La imagen debe ser una URL válida" }).optional(),
+  isActive: z.boolean().default(true),
+  isDigital: z.boolean().default(false),
+  taxable: z.boolean().default(true),
+  tags: z.array(z.string()).optional(),
+  sortOrder: z.number().min(0).default(0),
 }).omit({
   updatedAt: true,
   createdAt: true,
 })
 
 export const insertProductCategorySchema = createInsertSchema(productCategory, {
-    name: z.string()
+  name: z.string()
     .min(1, { message: "El nombre de la categoría es requerida" })
     .max(50, { message: "El nombre de la categoría no puede exceder los 100 caracteres" }),
-    description: z.string().max(100, { message: "La descripción debe ser mas corta." }).optional(),
-    image: z.string().url({ message: "La imagen debe ser una URL válida" }).optional(),
-    isActive: z.boolean().default(true),
-    sortOrder: z.number().min(0).default(0),
+  description: z.string().max(100, { message: "La descripción debe ser mas corta." }).optional(),
+  image: z.string().url({ message: "La imagen debe ser una URL válida" }).optional(),
+  isActive: z.boolean().default(true),
+  sortOrder: z.number().min(0).default(0),
 }).omit({
   updatedAt: true,
   createdAt: true,
@@ -95,29 +93,29 @@ export const insertProductCategorySchema = createInsertSchema(productCategory, {
 
 
 export const insertProductVariantSchema = createInsertSchema(productVariant, {
-    name: z.string()
+  name: z.string()
     .min(1, { message: "El nombre de la variante es requerido" })
     .max(50, { message: "El nombre de la variante no puede exceder los 50 caracteres" }),
-    extraPrice: z.number().min(0, { message: "El precio adicional no puede ser negativo" }).optional(),
-    sku: z.string().min(1,{message:"El SKU es requerido"}).max(50, { message: "El SKU no puede exceder los 50 caracteres" }),
-    quantity: z.number().min(0, { message: "La cantidad no puede ser negativa" }).default(0),
-    isActive: z.boolean().default(true),
-    sortOrder: z.number().min(0).default(0),
+  extraPrice: z.number().min(0, { message: "El precio adicional no puede ser negativo" }).optional(),
+  sku: z.string().min(1, { message: "El SKU es requerido" }).max(50, { message: "El SKU no puede exceder los 50 caracteres" }),
+  quantity: z.number().min(0, { message: "La cantidad no puede ser negativa" }).default(0),
+  isActive: z.boolean().default(true),
+  sortOrder: z.number().min(0).default(0),
 }).omit({
   updatedAt: true,
   createdAt: true,
 })
 
 export const insertProductAddonSchema = createInsertSchema(productAddon, {
-    name: z.string()
+  name: z.string()
     .min(1, { message: "El nombre del complemento es requerido" })
     .max(50, { message: "El nombre del complemento no puede exceder los 50 caracteres" }),
-    description: z.string().max(200, { message: "La descripción debe ser más corta." }).optional(),
-    price: z.number().min(0, { message: "El precio no puede ser negativo" }),
-    isRequired: z.boolean().default(false),
-    maxQuantity: z.number().min(1, { message: "La cantidad máxima debe ser mayor a 0" }).default(1),
-    isActive: z.boolean().default(true),
-    sortOrder: z.number().min(0).default(0),
+  description: z.string().max(200, { message: "La descripción debe ser más corta." }).optional(),
+  price: z.number().min(0, { message: "El precio no puede ser negativo" }),
+  isRequired: z.boolean().default(false),
+  maxQuantity: z.number().min(1, { message: "La cantidad máxima debe ser mayor a 0" }).default(1),
+  isActive: z.boolean().default(true),
+  sortOrder: z.number().min(0).default(0),
 }).omit({
   updatedAt: true,
   createdAt: true,
@@ -125,26 +123,26 @@ export const insertProductAddonSchema = createInsertSchema(productAddon, {
 
 // Esquema para cupones
 export const insertCouponSchema = createInsertSchema(coupon, {
-    code: z.string()
+  code: z.string()
     .min(3, { message: "El código debe tener al menos 3 caracteres" })
     .max(30, { message: "El código no puede exceder los 30 caracteres" })
     .regex(/^[A-Z0-9]+$/, { message: "El código solo puede contener letras mayúsculas y números" }),
-    name: z.string()
+  name: z.string()
     .min(1, { message: "El nombre del cupón es requerido" })
     .max(100, { message: "El nombre no puede exceder los 100 caracteres" }),
-    description: z.string().max(500, { message: "La descripción debe ser más corta." }).optional(),
-    discountType: z.enum(["percentage", "fixed_amount"], {
-        message: "El tipo de descuento debe ser 'percentage' o 'fixed_amount'"
-    }),
-    discountValue: z.number().min(0.01, { message: "El valor del descuento debe ser mayor a 0" }),
-    minimumAmount: z.number().min(0, { message: "El monto mínimo no puede ser negativo" }).optional(),
-    maximumDiscount: z.number().min(0, { message: "El descuento máximo no puede ser negativo" }).optional(),
-    usageLimit: z.number().min(1, { message: "El límite de uso debe ser mayor a 0" }).optional(),
-    usageLimitPerCustomer: z.number().min(1, { message: "El límite por cliente debe ser mayor a 0" }).optional(),
-    usedCount: z.number().min(0, { message: "El conteo de uso no puede ser negativo" }).default(0),
-    startsAt: z.date().optional(),
-    expiresAt: z.date().optional(),
-    isActive: z.boolean().default(true),
+  description: z.string().max(500, { message: "La descripción debe ser más corta." }).optional(),
+  discountType: z.enum(["percentage", "fixed_amount"], {
+    message: "El tipo de descuento debe ser 'percentage' o 'fixed_amount'"
+  }),
+  discountValue: z.number().min(0.01, { message: "El valor del descuento debe ser mayor a 0" }),
+  minimumAmount: z.number().min(0, { message: "El monto mínimo no puede ser negativo" }).optional(),
+  maximumDiscount: z.number().min(0, { message: "El descuento máximo no puede ser negativo" }).optional(),
+  usageLimit: z.number().min(1, { message: "El límite de uso debe ser mayor a 0" }).optional(),
+  usageLimitPerCustomer: z.number().min(1, { message: "El límite por cliente debe ser mayor a 0" }).optional(),
+  usedCount: z.number().min(0, { message: "El conteo de uso no puede ser negativo" }).default(0),
+  startsAt: z.date().optional(),
+  expiresAt: z.date().optional(),
+  isActive: z.boolean().default(true),
 }).omit({
   updatedAt: true,
   createdAt: true,
@@ -154,48 +152,48 @@ export const insertCouponSchema = createInsertSchema(coupon, {
 
 //  TODO: Revisar necesidad de Order y envios
 export const insertOrderSchema = createInsertSchema(order, {
-    orderNumber: z.string().min(1, { message: "El número de orden es requerido" }),
-    status: z.enum(["pending", "confirmed", "preparing", "ready", "in_delivery", "delivered", "cancelled", "refunded"]).default("pending"),
-    type: z.enum(["delivery", "pickup", "dine_in"]).default("delivery"),
-    customerName: z.string().min(1, { message: "El nombre del cliente es requerido" }),
-    customerEmail: z.string().email({ message: "Email inválido" }).optional(),
-    customerPhone: z.string().min(1, { message: "El teléfono del cliente es requerido" }),
+  orderNumber: z.string().min(1, { message: "El número de orden es requerido" }),
+  status: z.enum(["pending", "confirmed", "preparing", "ready", "in_delivery", "delivered", "cancelled", "refunded"]).default("pending"),
+  type: z.enum(["delivery", "pickup", "dine_in"]).default("delivery"),
+  customerName: z.string().min(1, { message: "El nombre del cliente es requerido" }),
+  customerEmail: z.string().email({ message: "Email inválido" }).optional(),
+  customerPhone: z.string().min(1, { message: "El teléfono del cliente es requerido" }),
 
-    // Dirección de entrega
-    deliveryAddress: z.string().optional(),
-    deliveryCity: z.string().optional(),
-    deliveryState: z.string().optional(),
-    deliveryPostalCode: z.string().optional(),
-    deliveryInstructions: z.string().max(500, { message: "Las instrucciones son muy largas" }).optional(),
+  // Dirección de entrega
+  deliveryAddress: z.string().optional(),
+  deliveryCity: z.string().optional(),
+  deliveryState: z.string().optional(),
+  deliveryPostalCode: z.string().optional(),
+  deliveryInstructions: z.string().max(500, { message: "Las instrucciones son muy largas" }).optional(),
 
-    // Totales
-    subtotal: z.number().min(0, { message: "El subtotal no puede ser negativo" }),
-    taxAmount: z.number().min(0, { message: "El impuesto no puede ser negativo" }).default(0),
-    deliveryFee: z.number().min(0, { message: "La tarifa de entrega no puede ser negativa" }).default(0),
-    discountAmount: z.number().min(0, { message: "El descuento no puede ser negativo" }).default(0),
-    total: z.number().min(0, { message: "El total no puede ser negativo" }),
+  // Totales
+  subtotal: z.number().min(0, { message: "El subtotal no puede ser negativo" }),
+  taxAmount: z.number().min(0, { message: "El impuesto no puede ser negativo" }).default(0),
+  deliveryFee: z.number().min(0, { message: "La tarifa de entrega no puede ser negativa" }).default(0),
+  discountAmount: z.number().min(0, { message: "El descuento no puede ser negativo" }).default(0),
+  total: z.number().min(0, { message: "El total no puede ser negativo" }),
 
-    // Información de pago
-    paymentMethod: z.enum(["cash", "card", "transfer", "digital_wallet"]),
-    paymentStatus: z.enum(["pending", "paid", "failed", "refunded"]).default("pending"),
-    paymentId: z.string().optional(),
+  // Información de pago
+  paymentMethod: z.enum(["cash", "card", "transfer", "digital_wallet"]),
+  paymentStatus: z.enum(["pending", "paid", "failed", "refunded"]).default("pending"),
+  paymentId: z.string().optional(),
 
-    // Tiempos
-    estimatedDeliveryTime: z.number().min(1, { message: "El tiempo estimado debe ser mayor a 0" }).optional(),
+  // Tiempos
+  estimatedDeliveryTime: z.number().min(1, { message: "El tiempo estimado debe ser mayor a 0" }).optional(),
 
-    // Notas
-    notes: z.string().max(1000, { message: "Las notas son muy largas" }).optional(),
-    internalNotes: z.string().max(1000, { message: "Las notas internas son muy largas" }).optional(),
+  // Notas
+  notes: z.string().max(1000, { message: "Las notas son muy largas" }).optional(),
+  internalNotes: z.string().max(1000, { message: "Las notas internas son muy largas" }).optional(),
 });
 
 // Esquema para items de orden
 export const insertOrderItemSchema = createInsertSchema(orderItem, {
-    productName: z.string().min(1, { message: "El nombre del producto es requerido" }),
-    productSku: z.string().optional(),
-    quantity: z.number().min(1, { message: "La cantidad debe ser mayor a 0" }),
-    unitPrice: z.number().min(0, { message: "El precio unitario no puede ser negativo" }),
-    totalPrice: z.number().min(0, { message: "El precio total no puede ser negativo" }),
-    notes: z.string().max(500, { message: "Las notas son muy largas" }).optional(),
+  productName: z.string().min(1, { message: "El nombre del producto es requerido" }),
+  productSku: z.string().optional(),
+  quantity: z.number().min(1, { message: "La cantidad debe ser mayor a 0" }),
+  unitPrice: z.number().min(0, { message: "El precio unitario no puede ser negativo" }),
+  totalPrice: z.number().min(0, { message: "El precio total no puede ser negativo" }),
+  notes: z.string().max(500, { message: "Las notas son muy largas" }).optional(),
 }).omit({
   updatedAt: true,
   createdAt: true,
@@ -203,25 +201,25 @@ export const insertOrderItemSchema = createInsertSchema(orderItem, {
 
 // Esquema para complementos de items de orden
 export const insertOrderItemAddonSchema = createInsertSchema(orderItemAddon, {
-    addonName: z.string().min(1, { message: "El nombre del complemento del producto es requerido" }),
-    quantity: z.number().min(1, { message: "La cantidad debe ser mayor a 0" }),
-    unitPrice: z.number().min(0, { message: "El precio unitario no puede ser negativo" }),
-    // TODO: Ver si el precio total es con el complemento + producto o solo del complemento
-    totalPrice: z.number().min(0, { message: "El precio total no puede ser negativo" }),
+  addonName: z.string().min(1, { message: "El nombre del complemento del producto es requerido" }),
+  quantity: z.number().min(1, { message: "La cantidad debe ser mayor a 0" }),
+  unitPrice: z.number().min(0, { message: "El precio unitario no puede ser negativo" }),
+  // TODO: Ver si el precio total es con el complemento + producto o solo del complemento
+  totalPrice: z.number().min(0, { message: "El precio total no puede ser negativo" }),
 });
 
 // Esquema para historial de estados
 export const insertOrderStatusHistorySchema = createInsertSchema(orderStatusHistory, {
-    status: z.enum(["pending", "confirmed", "preparing", "ready", "in_delivery", "delivered", "cancelled", "refunded"]),
-    notes: z.string().max(1000, { message: "Las notas son muy largas" }).optional(),
-    createdBy: z.string().min(1, { message: "El usuario que crea el estado es requerido" }),
+  status: z.enum(["pending", "confirmed", "preparing", "ready", "in_delivery", "delivered", "cancelled", "refunded"]),
+  notes: z.string().max(1000, { message: "Las notas son muy largas" }).optional(),
+  createdBy: z.string().min(1, { message: "El usuario que crea el estado es requerido" }),
 }).omit({
   createdAt: true,
 })
 
 // Esquema para uso de cupones
 export const insertCouponUsageSchema = createInsertSchema(couponUsage, {
-    discountAmount: z.number().min(0, { message: "El descuento no puede ser negativo" }),
+  discountAmount: z.number().min(0, { message: "El descuento no puede ser negativo" }),
 }).omit({
   createdAt: true,
 })

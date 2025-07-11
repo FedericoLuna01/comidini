@@ -1,5 +1,7 @@
 import { pgTable, text, timestamp, boolean, integer, serial, numeric } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
+import { pgEnum } from "drizzle-orm/pg-core";
+import { decimal } from "drizzle-orm/pg-core";
 
 export const shop = pgTable("shop", {
   id: serial("id").primaryKey(),
@@ -61,9 +63,6 @@ export const shopCategoryRelation = pgTable("shop_category_relation", {
   categoryId: integer("category_id").notNull().references(() => shopCategory.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").$defaultFn(() => new Date()).notNull(),
 });
-
-
-
 
 
 // Estados de orden
