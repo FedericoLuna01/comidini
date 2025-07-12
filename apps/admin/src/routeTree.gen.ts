@@ -18,6 +18,7 @@ import { Route as DashboardLayoutDashboardConfiguracionRouteImport } from './rou
 import { Route as DashboardLayoutDashboardUsuariosIndexRouteImport } from './routes/_dashboard-layout/dashboard/usuarios/index'
 import { Route as DashboardLayoutDashboardTiendasIndexRouteImport } from './routes/_dashboard-layout/dashboard/tiendas/index'
 import { Route as DashboardLayoutDashboardUsuariosNuevoUsuarioRouteImport } from './routes/_dashboard-layout/dashboard/usuarios/nuevo-usuario'
+import { Route as DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRouteImport } from './routes/_dashboard-layout/dashboard/usuarios/editar-usuario/$userId'
 
 const IniciarSesionRoute = IniciarSesionRouteImport.update({
   id: '/iniciar-sesion',
@@ -69,6 +70,12 @@ const DashboardLayoutDashboardUsuariosNuevoUsuarioRoute =
     path: '/dashboard/usuarios/nuevo-usuario',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRoute =
+  DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRouteImport.update({
+    id: '/dashboard/usuarios/editar-usuario/$userId',
+    path: '/dashboard/usuarios/editar-usuario/$userId',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/usuarios/nuevo-usuario': typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRoute
   '/dashboard/tiendas': typeof DashboardLayoutDashboardTiendasIndexRoute
   '/dashboard/usuarios': typeof DashboardLayoutDashboardUsuariosIndexRoute
+  '/dashboard/usuarios/editar-usuario/$userId': typeof DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -89,6 +97,7 @@ export interface FileRoutesByTo {
   '/dashboard/usuarios/nuevo-usuario': typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRoute
   '/dashboard/tiendas': typeof DashboardLayoutDashboardTiendasIndexRoute
   '/dashboard/usuarios': typeof DashboardLayoutDashboardUsuariosIndexRoute
+  '/dashboard/usuarios/editar-usuario/$userId': typeof DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -101,6 +110,7 @@ export interface FileRoutesById {
   '/_dashboard-layout/dashboard/usuarios/nuevo-usuario': typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRoute
   '/_dashboard-layout/dashboard/tiendas/': typeof DashboardLayoutDashboardTiendasIndexRoute
   '/_dashboard-layout/dashboard/usuarios/': typeof DashboardLayoutDashboardUsuariosIndexRoute
+  '/_dashboard-layout/dashboard/usuarios/editar-usuario/$userId': typeof DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/dashboard/usuarios/nuevo-usuario'
     | '/dashboard/tiendas'
     | '/dashboard/usuarios'
+    | '/dashboard/usuarios/editar-usuario/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
     | '/dashboard/usuarios/nuevo-usuario'
     | '/dashboard/tiendas'
     | '/dashboard/usuarios'
+    | '/dashboard/usuarios/editar-usuario/$userId'
   id:
     | '__root__'
     | '/'
@@ -134,6 +146,7 @@ export interface FileRouteTypes {
     | '/_dashboard-layout/dashboard/usuarios/nuevo-usuario'
     | '/_dashboard-layout/dashboard/tiendas/'
     | '/_dashboard-layout/dashboard/usuarios/'
+    | '/_dashboard-layout/dashboard/usuarios/editar-usuario/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/_dashboard-layout/dashboard/usuarios/editar-usuario/$userId': {
+      id: '/_dashboard-layout/dashboard/usuarios/editar-usuario/$userId'
+      path: '/dashboard/usuarios/editar-usuario/$userId'
+      fullPath: '/dashboard/usuarios/editar-usuario/$userId'
+      preLoaderRoute: typeof DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
   }
 }
 
@@ -217,6 +237,7 @@ interface DashboardLayoutRouteChildren {
   DashboardLayoutDashboardUsuariosNuevoUsuarioRoute: typeof DashboardLayoutDashboardUsuariosNuevoUsuarioRoute
   DashboardLayoutDashboardTiendasIndexRoute: typeof DashboardLayoutDashboardTiendasIndexRoute
   DashboardLayoutDashboardUsuariosIndexRoute: typeof DashboardLayoutDashboardUsuariosIndexRoute
+  DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRoute: typeof DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRoute
 }
 
 const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
@@ -230,6 +251,8 @@ const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
     DashboardLayoutDashboardTiendasIndexRoute,
   DashboardLayoutDashboardUsuariosIndexRoute:
     DashboardLayoutDashboardUsuariosIndexRoute,
+  DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRoute:
+    DashboardLayoutDashboardUsuariosEditarUsuarioUserIdRoute,
 }
 
 const DashboardLayoutRouteWithChildren = DashboardLayoutRoute._addFileChildren(

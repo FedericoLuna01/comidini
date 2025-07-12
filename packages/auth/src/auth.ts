@@ -54,7 +54,8 @@ export const auth = betterAuth({
         admin,
         user,
         shop
-      }
+      },
+      bannedUserMessage: "Tu cuenta ha sido suspendida. Si crees que esto es un error, contacta al administrador.",
     })
   ],
   secret: process.env.BETTER_AUTH_SECRET,
