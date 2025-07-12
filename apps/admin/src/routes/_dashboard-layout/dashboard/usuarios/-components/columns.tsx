@@ -18,12 +18,13 @@ export const columns: ColumnDef<UserWithRole>[] = [
       return (
         <div className="flex items-center gap-2">
           <Avatar>
-            <AvatarImage
-              src={row.original.image || ""}
-              alt={`${name}'s avatar`}
-            />
+            <AvatarImage src={row.original.image || ""} alt={`${name}'s avatar`} />
             <AvatarFallback>
-              {name.split(" ").slice(0, 2).map((n) => n[0]).join("")}
+              {name
+                .split(" ")
+                .slice(0, 2)
+                .map((n) => n[0])
+                .join("")}
             </AvatarFallback>
           </Avatar>
           <span className="font-medium">{name}</span>
@@ -55,32 +56,21 @@ export const columns: ColumnDef<UserWithRole>[] = [
   },
   {
     accessorKey: "banned",
-    header: () => (
-      <div className="flex items-center justify-center">
-        Estado
-      </div>
-    ),
+    header: () => <div className="flex items-center justify-center">Estado</div>,
     cell: ({ row }) => {
       const { banned } = row.original;
 
       return (
         <div className="flex items-center justify-center">
-          {
-            banned ? (
-              <BadgeXIcon className="text-red-600" />
-            ) : (
-              <BadgeCheckIcon className="text-green-600" />
-            )
-          }
+          {banned ? <BadgeXIcon className="text-red-600" /> : <BadgeCheckIcon className="text-green-600" />}
         </div>
-      )
-
+      );
     },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      return <RowActionsDropdown />;
+      return <RowActionsDropdown user={row.original} />;
     },
   },
 ];
