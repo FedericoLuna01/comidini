@@ -10,13 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@repo/ui/components/ui/form'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@repo/ui/components/ui/select"
 import { toast } from '@repo/ui/components/ui/sonner'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -24,6 +17,7 @@ import { Spinner } from '@repo/ui/components/ui/spinner';
 import { userRoleEnum } from '@repo/db/src/schema/auth-schema';
 import { useMutation } from '@tanstack/react-query';
 import { createUser } from '../../../../../api/users';
+import { UserRoleSelect } from "./user-role-select";
 
 export const createUserSchema = z.object({
   name: z.string().min(2, {
@@ -40,12 +34,6 @@ export const createUserSchema = z.object({
     message: "El rol debe ser admin o user",
   }),
 })
-
-export const displayRole: Record<string, string> = {
-  user: "Usuario",
-  admin: "Administrador",
-  shop: "Tienda",
-};
 
 export function NewUserForm() {
   const form = useForm<z.infer<typeof createUserSchema>>({
@@ -141,24 +129,11 @@ export function NewUserForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Rol</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
+              <UserRoleSelect
+                onChange={field.onChange}
+                value={field.value}
                 disabled={mutation.isPending}
-              >
-                <FormControl>
-                  <SelectTrigger
-                    className="w-40"
-                  >
-                    <SelectValue placeholder="Rol de usuario" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {userRoles.map((role) => (
-                    <SelectItem key={role} value={role}>{displayRole[role]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
               <FormDescription>
                 Selecciona el rol del usuario. Los administradores tienen acceso completo al sistema.
               </FormDescription>

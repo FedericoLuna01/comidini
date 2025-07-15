@@ -19,16 +19,24 @@ export const allUsersQueryOptions = queryOptions({
 })
 
 export const getUserById = async (userId: string) => {
-  // Since there's no direct getUserById in the auth client, we'll get all users and filter
-  // In a real app, you'd want a dedicated getUserById API endpoint
-  const allUsers = await getAllUsers();
-  const user = allUsers.data?.users.find(user => user.id === userId);
+  const data = await authClient.admin.listUsers({
+    query: {
+      limit: 1,
+      filterField: "id",
+      filterOperator: "eq",
+      filterValue: userId,
+    }
+  })
 
-  if (!user) {
+  if (!data) {
     throw new Error('Usuario no encontrado');
   }
 
-  return { data: { user } };
+  if (data.error) {
+    throw new Error('Error al obtener el usuario');
+  }
+
+  return data;
 }
 
 export const getUserByIdQueryOptions = (userId: string) => queryOptions({

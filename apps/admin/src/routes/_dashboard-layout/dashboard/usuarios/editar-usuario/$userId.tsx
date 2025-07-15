@@ -13,6 +13,7 @@ function RouteComponent() {
   const { userId } = useParams({ from: "/_dashboard-layout/dashboard/usuarios/editar-usuario/$userId" });
 
   const { data, isLoading, error } = useQuery(getUserByIdQueryOptions(userId));
+  const user = data?.data.users[0]
 
   if (isLoading) {
     return (
@@ -34,7 +35,7 @@ function RouteComponent() {
     );
   }
 
-  if (!data?.data?.user) {
+  if (!user && !isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -49,10 +50,10 @@ function RouteComponent() {
     <div>
       <Heading>
         <HeadingTitle>Editar Usuario</HeadingTitle>
-        <HeadingDescription>Modificar la información del usuario {data.data.user.name}</HeadingDescription>
+        <HeadingDescription>Modificar la información del usuario {user?.name}</HeadingDescription>
         <HeadingSeparator />
       </Heading>
-      <EditUserForm user={data.data.user} />
+      <EditUserForm user={user} />
     </div>
   );
 }
