@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1751827865995,
-      "tag": "0000_amusing_night_thrasher",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1752126705257,
-      "tag": "0001_worthless_shatterstar",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1752132031842,
-      "tag": "0002_sturdy_impossible_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1752224227940,
-      "tag": "0003_brave_impossible_man",
+      "when": 1752552641392,
+      "tag": "0000_luxuriant_sleeper",
       "breakpoints": true
     }
   ]
