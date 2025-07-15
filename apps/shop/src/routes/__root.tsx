@@ -1,18 +1,18 @@
-import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { Toaster } from '@repo/ui/components/ui/sonner';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { QueryClient } from '@tanstack/react-query';
+import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Toaster } from "@repo/ui/components/ui/sonner";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import type { QueryClient } from "@tanstack/react-query";
+import { NotFound } from "../components/not-found";
 
 interface MyRouterContext {
-  queryClient: QueryClient
+  queryClient: QueryClient;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: Index,
-  // TODO: Agregar un not found copado
-  notFoundComponent: () => <div>Not Found</div>,
-})
+  notFoundComponent: () => <NotFound />,
+});
 
 function Index() {
   return (
@@ -22,5 +22,5 @@ function Index() {
       <TanStackRouterDevtools />
       <ReactQueryDevtools initialIsOpen={false} />
     </>
-  )
+  );
 }
