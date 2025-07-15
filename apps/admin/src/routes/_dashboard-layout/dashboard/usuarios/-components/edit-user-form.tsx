@@ -19,6 +19,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUser, editUserSchema } from "../../../../../api/users";
 import { UserWithRole } from "@repo/auth/client";
 import { useNavigate } from "@tanstack/react-router";
+import { UserRoleSelect } from "./user-role-select";
 
 // Esquema específico para el formulario con validaciones adicionales
 export const editUserFormSchema = z
@@ -88,19 +89,15 @@ export const editUserFormSchema = z
     },
   );
 
-export const displayRole = {
-  user: "Usuario",
-  admin: "Administrador",
-  shop: "Tienda",
-};
-
 interface EditUserFormProps {
-  user: UserWithRole;
+  user: UserWithRole | undefined;
 }
 
 export const EditUserForm: React.FC<EditUserFormProps> = ({ user }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  if (!user) return null;
 
   const form = useForm<z.infer<typeof editUserFormSchema>>({
     resolver: zodResolver(editUserFormSchema),
@@ -198,34 +195,14 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ user }) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Rol del Usuario</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona el rol del usuario" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="user">
-                    <div className="flex flex-col">
-                      <span>{displayRole.user}</span>
-                      <span className="text-xs text-muted-foreground">Acceso básico a la plataforma</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="admin">
-                    <div className="flex flex-col">
-                      <span>{displayRole.admin}</span>
-                      <span className="text-xs text-muted-foreground">Acceso completo al sistema</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="shop">
-                    <div className="flex flex-col">
-                      <span>{displayRole.shop}</span>
-                      <span className="text-xs text-muted-foreground">Gestión de tienda y productos</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>El rol determina los permisos y acceso del usuario en la plataforma.</FormDescription>
+              <UserRoleSelect
+                onChange={field.onChange}
+                value={field.value}
+                disabled={updateUserMutation.isPending}
+              />
+              <FormDescription>
+                El rol determina los permisos y acceso del usuario en la plataforma.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

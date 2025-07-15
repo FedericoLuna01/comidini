@@ -17,27 +17,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@repo/ui/components/ui/sheet";
-import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import { Textarea } from "@repo/ui/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@repo/ui/components/ui/alert-dialog";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserWithRole } from "@repo/auth/client";
 import { banUser, unbanUser, deleteUser, setUserRole, getBanDurationInSeconds } from "../../../../../api/users";
-import { displayRole } from "./new-user-form";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@repo/ui/components/ui/alert-dialog";
+import { displayRole } from "./user-role-select";
 
 interface RowActionsDropdownProps {
   user: UserWithRole;
@@ -58,7 +47,7 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
     mutationFn: ({ userId, reason, banExpiresIn }: { userId: string; reason?: string; banExpiresIn?: number }) =>
       banUser(userId, reason, banExpiresIn),
     onSuccess: () => {
-      toast.success("Usuario baneado exitosamente");
+      toast.success("Usuario suspendido exitosamente");
       queryClient.invalidateQueries({ queryKey: ["get-all-users"] });
       setShowBanSheet(false);
       setBanReason("");
@@ -72,7 +61,7 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
   const unbanMutation = useMutation({
     mutationFn: (userId: string) => unbanUser(userId),
     onSuccess: () => {
-      toast.success("Usuario desbaneado exitosamente");
+      toast.success("Usuario habilitado exitosamente");
       queryClient.invalidateQueries({ queryKey: ["get-all-users"] });
     },
     onError: () => {
@@ -148,38 +137,41 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
 
           {user.banned ? (
             <DropdownMenuItem onClick={handleUnbanUser}>
-              <ShieldCheck className="mr-2 h-4 w-4 text-green-600" />
-              Desbanear usuario
+              <ShieldCheck className="mr-2 h-4 w-4 " />
+              Habilitar usuario
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem onClick={() => setShowBanSheet(true)}>
-              <Ban className="mr-2 h-4 w-4 text-orange-600" />
-              Banear usuario
+              <Ban className="mr-2 h-4 w-4 " />
+              Suspender usuario
             </DropdownMenuItem>
           )}
 
           <DropdownMenuSeparator />
 
           <DropdownMenuItem onClick={() => setShowDeleteConfirm(true)} className="text-red-600 focus:text-red-600">
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2 className="mr-2 h-4 w-4 text-red-600" />
             Eliminar usuario
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Sheet para editar usuario */}
+      {/* Sheet para editar rol del usuario */}
       <Sheet open={showEditSheet} onOpenChange={setShowEditSheet}>
         <SheetContent>
           <SheetHeader>
-            <SheetTitle>Editar Usuario</SheetTitle>
+            <SheetTitle>Editar Rol Del Usuario</SheetTitle>
             <SheetDescription>Cambiar el rol del usuario {user.name}</SheetDescription>
           </SheetHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-4 px-4">
+            <div className="flex flex-col gap-4">
               <Label htmlFor="role" className="text-right">
                 Rol
               </Label>
-              <Select value={editRole} onValueChange={(value: "user" | "admin" | "shop") => setEditRole(value)}>
+              <Select
+                value={editRole}
+                onValueChange={(value: "user" | "admin" | "shop") =>
+                  setEditRole(value)}>
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Seleccionar rol" />
                 </SelectTrigger>
@@ -209,8 +201,8 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
             <SheetTitle>Banear Usuario</SheetTitle>
             <SheetDescription>¿Estás seguro de que deseas banear a {user.name}?</SheetDescription>
           </SheetHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-4 px-4">
+            <div className="flex flex-col gap-4">
               <Label htmlFor="reason" className="text-right">
                 Razón
               </Label>
@@ -222,7 +214,7 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
                 className="col-span-3"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="flex flex-col gap-4">
               <Label htmlFor="duration" className="text-right">
                 Duración
               </Label>
@@ -254,30 +246,28 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
         </SheetContent>
       </Sheet>
 
-      {/* AlertDialog para confirmar eliminación */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-white p-6 rounded-lg shadow-lg max-w-lg w-full mx-4 border">
-            <h2 className="text-lg font-semibold mb-2">¿Eliminar usuario?</h2>
-            <p className="text-gray-600 mb-4">
-              Se eliminará a <b>{user.name}</b> y sus datos.
-            </p>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
-                Cancelar
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => deleteMutation.mutate(user.id)}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AlertDialog
+        onOpenChange={setShowDeleteConfirm}
+        open={showDeleteConfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás totalmente seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará a <b>{user.name}</b> y todos sus datos asociados. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteMutation.mutate(user.id)}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

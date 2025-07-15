@@ -121,6 +121,7 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
                 </FormItem>
               )}
             />
+            {/* TODO: Agregar un mensaje para el código de BANNED_USER */}
             <Button type="submit" className="w-full">
               Iniciar sesión
             </Button>
