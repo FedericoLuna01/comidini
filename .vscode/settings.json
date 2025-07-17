@@ -1,13 +1,8 @@
 {
   "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
   "cSpell.words": [
-    "Baneando",
-    "banear",
-    "baneo",
     "comidini",
     "configuracion",
-    "desbaneado",
-    "desbanear",
     "italian",
     "postgres",
     "postgresql",

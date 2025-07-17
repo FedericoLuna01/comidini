@@ -56,7 +56,7 @@ export function AppSidebar({ user, items }: {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    className="group-[.active]:bg-primary/40 group-[.active]:font-bold hover:bg-primary/20 hover:font-bold"
+                    className="group-[.active]:bg-primary/40 group-[.active]:font-bold hover:bg-primary/20"
                   >
                     <Link
                       to={item.to}

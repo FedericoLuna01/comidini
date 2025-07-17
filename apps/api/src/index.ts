@@ -3,11 +3,13 @@ import cors from "cors";
 import { authHandler } from "@repo/auth/server";
 import shopsRoutes from "./routes/shops.routes";
 import { type Session } from "@repo/auth/client"
+import { SelectShop } from "@repo/db/src/types/shop";
 
 declare global {
   namespace Express {
     interface Request {
       session?: Session;
+      shop?: SelectShop;
     }
   }
 }
