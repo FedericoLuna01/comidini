@@ -46,8 +46,6 @@ export function NewUserForm() {
     },
   });
 
-  const userRoles = Object.values(userRoleEnum.enumValues);
-
   const mutation = useMutation({
     mutationFn: async (user: z.infer<typeof createUserSchema>) => await createUser(user),
   })

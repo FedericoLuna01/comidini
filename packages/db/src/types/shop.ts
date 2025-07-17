@@ -10,7 +10,8 @@ import {
   orderItem,
   orderItemAddon,
   orderStatusHistory,
-  couponUsage
+  couponUsage,
+  shopHours
 } from "../schema/shop-schema";
 import { z } from "zod/v4";
 import { createInsertSchema } from "drizzle-zod";
@@ -30,7 +31,6 @@ export const insertShopSchema = createInsertSchema(shop, {
   longitude: z.string().optional(),
 
   // Información de negocio
-  businessHours: z.string().optional(), // JSON string con horarios
   deliveryRadius: z.number().int().min(0, { message: "El radio de entrega debe ser un número entero positivo" }).optional(),
   minimumOrder: z.string().min(0, { message: "El pedido mínimo debe ser un número positivo" }).optional(),
   deliveryFee: z.string().min(0, { message: "La tarifa de entrega debe ser un número positivo" }).optional(),
@@ -56,6 +56,23 @@ export const createShopSchema = insertShopSchema.omit({
 
 export type InsertShop = z.infer<typeof insertShopSchema>;
 export type CreateShop = z.infer<typeof createShopSchema>;
+
+export const insertShopHoursSchema = createInsertSchema(shopHours, {
+  isClosed: z.boolean().default(false),
+  dayOfWeek: z.number().int().min(0).max(6, { message: "El día de la semana debe ser un número entre 0 (domingo) y 6 (sábado)" }),
+  openTime: z.string().regex(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Hora de apertura inválida" }),
+  closeTime: z.string().regex(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Hora de cierre inválida" }),
+}).omit({
+  updatedAt: true,
+  createdAt: true,
+})
+
+export const createShopHoursSchema = insertShopHoursSchema.omit({
+  shopId: true,
+})
+
+export type InsertShopHours = z.infer<typeof insertShopHoursSchema>;
+export type CreateShopHours = z.infer<typeof createShopHoursSchema>;
 
 export const insertProductSchema = createInsertSchema(product, {
   name: z.string()
@@ -90,7 +107,6 @@ export const insertProductCategorySchema = createInsertSchema(productCategory, {
   updatedAt: true,
   createdAt: true,
 })
-
 
 export const insertProductVariantSchema = createInsertSchema(productVariant, {
   name: z.string()

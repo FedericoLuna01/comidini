@@ -1,5 +1,5 @@
 {
-  "id": "0de1993c-6652-44fb-b054-ccc4277741c7",
+  "id": "f11cca12-16fe-47a0-b096-81f709cfdbc0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1579,12 +1579,6 @@
         "longitude": {
           "name": "longitude",
           "type": "numeric(11, 8)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "business_hours": {
-          "name": "business_hours",
-          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

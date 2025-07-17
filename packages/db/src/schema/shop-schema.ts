@@ -18,7 +18,6 @@ export const shop = pgTable("shop", {
   longitude: numeric("longitude", { precision: 11, scale: 8 }),
 
   // Información de negocio
-  businessHours: text("business_hours"), // JSON string con horarios
   deliveryRadius: integer("delivery_radius"), // en metros
   minimumOrder: numeric("minimum_order", { precision: 10, scale: 2 }),
   deliveryFee: numeric("delivery_fee", { precision: 10, scale: 2 }),

@@ -1,5 +1,4 @@
 import React from "react"
-
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -26,14 +25,31 @@ import {
   Calendar,
 } from "lucide-react"
 import { createFileRoute } from '@tanstack/react-router'
+import { z } from "zod/v4"
 import { createShopSchema, CreateShop } from '@repo/db/src/types/shop'
-import { Stepper, StepperDescription, StepperIndicator, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from "@repo/ui/components/ui/stepper"
-import { useMutation } from '@tanstack/react-query';
-import { createShop } from "../../api/shop"
 
-import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
+const businessHoursSchema = z.object({
+  dayOfWeek: z.number().min(0).max(6),
+  openTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  closeTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  isClosed: z.boolean(),
+})
+
+const formSchema = createShopSchema.extend({
+  businessHours: z.array(businessHoursSchema)
+})
+
+type FormValues = z.infer<typeof formSchema>
+
+import { Stepper, StepperDescription, StepperIndicator, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from "@repo/ui/components/ui/stepper"
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { createShop } from "../../api/shop"
+import { APIProvider, Map, type MapMouseEvent, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { useDebounceInput } from "../../hooks/useDebounceInput"
+import { AutoCompleteInput } from "../../components/auto-complete-select"
 
 export const Route = createFileRoute('/primeros-pasos/')({
+  // TODO: add a loader to check if the user already has a shop
   component: RouteComponent,
 })
 
@@ -47,26 +63,76 @@ const STEPS = [
   { id: 5, title: "Resumen", description: "Revisa la información", icon: CheckCircle },
 ]
 
-function RouteComponent() {
-  const [currentStep, setCurrentStep] = useState(1)
+const fetchPlaceSuggestions = async (address: string): Promise<google.maps.places.AutocompleteSuggestion[]> => {
+  if (!address) return [];
+  if (!window.google?.maps?.places) {
+    throw new Error('Google Maps Places no está disponible');
+  }
 
-  const form = useForm<CreateShop>({
-    resolver: zodResolver(createShopSchema),
+  const request: google.maps.places.AutocompleteRequest = {
+    input: address,
+    language: 'es',
+    region: 'AR',
+    locationRestriction: new google.maps.LatLngBounds(
+      new google.maps.LatLng(-55.0, -73.0), // Suroeste de Argentina
+      new google.maps.LatLng(-21.0, -53.0)  // Noreste de Argentina
+    )
+  };
+
+  try {
+    console.log("FETCHING SUGGESTIONS")
+    const response = await window.google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+    return response.suggestions;
+  } catch (error) {
+    console.error('Error al buscar sugerencias:', error);
+    return [];
+  }
+};
+
+function RouteComponent() {
+  const [currentStep, setCurrentStep] = useState(4)
+  const [markerPosition, setMarkerPosition] = useState<google.maps.LatLngLiteral | null>(null);
+  const defaultCenter = { lat: -32.9526405, lng: -60.6776039 }; // Centro de Rosario
+  const [mapCenter, setMapCenter] = useState(defaultCenter);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      name: "Nombre de mi tienda",
       description: "",
       phone: "",
-      address: "",
-      deliveryFee: "",
-      minimumOrder: "",
+      address: "Urquiza 1234, Rosario, Santa Fe, Argentina",
+      latitude: "-33.0168041",
+      longitude: "-60.8760917",
       acceptsDelivery: false,
       acceptsPickup: false,
       acceptsReservations: false,
       logo: "",
       banner: "",
       tags: [],
+      businessHours: DAYS_OF_WEEK.map((_, index) => ({
+        dayOfWeek: index,
+        openTime: "09:00",
+        closeTime: "18:00",
+        isClosed: false
+      }))
     },
   })
+
+  const addressValue = form.watch("address");
+  const debouncedAddress = useDebounceInput(addressValue, 650);
+
+  const { data: suggestions = [], isLoading } = useQuery({
+    queryKey: ['placeSuggestions', debouncedAddress],
+    queryFn: () => fetchPlaceSuggestions(debouncedAddress),
+    enabled: !!debouncedAddress,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+
+  const onMapClick = (event: MapMouseEvent) => {
+    // TODO: terminar la lógica para manejar el clic en el mapa
+    console.log(event)
+  }
 
   const mutation = useMutation({
     mutationFn: async (data: CreateShop) => {
@@ -94,7 +160,7 @@ function RouteComponent() {
     }
   }
 
-  const getFieldsForStep = (step: number): (keyof CreateShop)[] => {
+  const getFieldsForStep = (step: number): (keyof FormValues)[] => {
     switch (step) {
       case 1:
         return ["name", "description", "phone", "email", "website"]
@@ -110,13 +176,14 @@ function RouteComponent() {
           "acceptsReservations",
         ]
       case 4:
-        return []
+        return ["businessHours"]
       default:
         return []
     }
   }
 
   const onSubmit = async (data: CreateShop) => {
+    console.log(data)
     mutation.mutate(data)
   }
 
@@ -293,23 +360,58 @@ function RouteComponent() {
                           Dirección *
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="Calle Principal 123, Colonia Centro" {...field} />
+                          <AutoCompleteInput
+                            isLoading={isLoading}
+                            emptyMessage="No hay resultados"
+                            suggestions={suggestions}
+                            onChange={(value) => field.onChange(value)}
+                            onSelect={async (suggestion) => {
+                              field.onChange(suggestion.placePrediction?.text.text || "")
+                              const place = suggestion.placePrediction?.toPlace();
+                              await place?.fetchFields({
+                                fields: ["location"]
+                              })
+                              if (place?.location) {
+                                const newPosition = {
+                                  lat: place.location.lat(),
+                                  lng: place.location.lng()
+                                };
+                                console.log(newPosition)
+                                form.setValue("latitude", newPosition.lat.toString())
+                                form.setValue("longitude", newPosition.lng.toString())
+                                setMarkerPosition(newPosition);
+                                setMapCenter(newPosition);
+                              }
+                            }}
+                            value={field.value}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-                    <Map
-                      className="w-full h-64 rounded-lg"
-                      defaultCenter={{ lat: 22.54992, lng: 0 }}
-                      defaultZoom={3}
-                      gestureHandling={'greedy'}
-                      disableDefaultUI={true}
+                  <div className="rounded-lg overflow-hidden">
+                    <APIProvider
+                      apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                      libraries={['places', 'marker']}
+                      language="es"
                     >
-                      <Marker position={{ lat: 22.54992, lng: 0 }} />
-                    </Map>
-                  </APIProvider>
+                      <Map
+                        className="w-full h-64 rounded-lg"
+                        mapId="314bbedb82bc2f89918544e5"
+                        center={mapCenter}
+                        onCameraChanged={(e) => setMapCenter(e.detail.center)}
+                        defaultZoom={13}
+                        minZoom={13}
+                        gestureHandling={'greedy'}
+                        disableDefaultUI={true}
+                        clickableIcons={false}
+                        onClick={(e) => onMapClick(e)}
+                      >
+                        {markerPosition && <AdvancedMarker position={markerPosition} />}
+                      </Map>
+                    </APIProvider>
+                  </div>
                 </div>
               )}
 
@@ -455,8 +557,8 @@ function RouteComponent() {
                       Define los horarios en que tu tienda estará disponible para recibir pedidos
                     </p>
                   </div>
-                  {/* TODO: Poner los horarios */}
-                  {/* <div className="space-y-4">
+                  {/* TODO: Agregar posibilidad de 2 turnos */}
+                  <div className="space-y-4">
                     {DAYS_OF_WEEK.map((day, index) => (
                       <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
                         <div className="w-20 text-sm font-medium">{day}</div>
@@ -508,7 +610,7 @@ function RouteComponent() {
                         )}
                       </div>
                     ))}
-                  </div> */}
+                  </div>
                 </div>
               )}
 

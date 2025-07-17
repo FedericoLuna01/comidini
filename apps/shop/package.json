@@ -20,6 +20,7 @@
     "@tanstack/react-router-devtools": "^1.121.27",
     "@tanstack/react-table": "^8.21.3",
     "@vis.gl/react-google-maps": "^1.5.4",
+    "cmdk": "^1.1.1",
     "lucide-react": "^0.475.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

@@ -14,9 +14,11 @@ import {
 } from '@repo/ui/components/ui/form'
 import { toast } from '@repo/ui/components/ui/sonner'
 import { authClient } from "@repo/auth/client.js";
-import { Link } from "@tanstack/react-router";
+import { getRouteApi, Link, useSearch } from "@tanstack/react-router";
 import { GoogleIcon } from "./icons/index.js";
-
+import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert.js";
+import { AlertCircleIcon } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -30,6 +32,7 @@ const formSchema = z.object({
 })
 
 export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
+  const [userBanned, setUserBanned] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,7 +44,7 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
   const handleLoginWithGoogle = async () => {
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "http://localhost:5174/",
+      callbackURL,
     })
   }
 
@@ -50,7 +53,7 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
     await authClient.signIn.email({
       email,
       password,
-      callbackURL
+      callbackURL,
     }, {
       onSuccess(context) {
         console.log("Login successful:", context)
@@ -62,6 +65,11 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
             message: "Correo electrónico o contraseña incorrectos.",
           });
           return;
+        }
+
+        if (context.error.code === "BANNED_USER") {
+          setUserBanned(true);
+          return
         }
 
         toast.error("Inicio de sesión fallido. Por favor, inténtalo de nuevo.");
@@ -121,7 +129,19 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
                 </FormItem>
               )}
             />
-            {/* TODO: Agregar un mensaje para el código de BANNED_USER */}
+            {
+              userBanned && (
+                <Alert variant="destructive">
+                  <AlertCircleIcon />
+                  <AlertTitle>Cuenta suspendida</AlertTitle>
+                  <AlertDescription>
+                    <p>
+                      Tu cuenta ha sido suspendida. Si crees que esto es un error, por favor contacta al soporte.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              )
+            }
             <Button type="submit" className="w-full">
               Iniciar sesión
             </Button>
