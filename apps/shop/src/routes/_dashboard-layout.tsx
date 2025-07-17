@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { authClient } from '@repo/auth/client'
-import { Home, PackageOpenIcon, Settings, UtensilsIcon } from 'lucide-react'
+import { ClockIcon, Home, PackageOpenIcon, Settings, UtensilsIcon } from 'lucide-react'
 import { SidebarLayout } from '@repo/ui/components/sidebar-layout'
 
 const shopItems = [
@@ -23,6 +23,11 @@ const shopItems = [
     title: "Configuración",
     to: "/dashboard/configuracion",
     icon: Settings,
+  },
+  {
+    title: "Horarios",
+    to: "/dashboard/horarios",
+    icon: ClockIcon,
   },
 ]
 
@@ -98,8 +103,6 @@ function RouteComponent() {
   if (!session.data) {
     return null // O manejar el caso de usuario no autenticado
   }
-
-  console.log(shop)
 
   return (
     <SidebarLayout items={shopItems} user={session.data.user} />

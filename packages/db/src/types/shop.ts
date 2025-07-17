@@ -14,7 +14,7 @@ import {
   shopHours
 } from "../schema/shop-schema";
 import { z } from "zod/v4";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const insertShopSchema = createInsertSchema(shop, {
   name: z.string()
@@ -57,6 +57,10 @@ export const createShopSchema = insertShopSchema.omit({
 export type InsertShop = z.infer<typeof insertShopSchema>;
 export type CreateShop = z.infer<typeof createShopSchema>;
 
+export const selectShopSchema = createSelectSchema(shop)
+
+export type SelectShop = z.infer<typeof selectShopSchema>;
+
 export const insertShopHoursSchema = createInsertSchema(shopHours, {
   isClosed: z.boolean().default(false),
   dayOfWeek: z.number().int().min(0).max(6, { message: "El día de la semana debe ser un número entre 0 (domingo) y 6 (sábado)" }),
@@ -73,6 +77,10 @@ export const createShopHoursSchema = insertShopHoursSchema.omit({
 
 export type InsertShopHours = z.infer<typeof insertShopHoursSchema>;
 export type CreateShopHours = z.infer<typeof createShopHoursSchema>;
+
+export const selectShopHoursSchema = createSelectSchema(shopHours)
+
+export type SelectShopHours = z.infer<typeof selectShopHoursSchema>;
 
 export const insertProductSchema = createInsertSchema(product, {
   name: z.string()
