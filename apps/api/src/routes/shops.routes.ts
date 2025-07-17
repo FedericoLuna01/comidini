@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { createShop, getShopByUserId } from "@repo/db/src/services/shops";
+import { createManyShopHours, createShop, getShopByUserId } from "@repo/db/src/services/shops";
 import { requireShopUser } from "../middlewares/requireShopUser";
-import { createShopSchema } from "@repo/db/src/types/shop";
+import { CreateShopHours, createShopSchema } from "@repo/db/src/types/shop";
 
 const router: Router = Router();
 
@@ -32,10 +32,17 @@ router.post("/create", requireShopUser, async (req: Request, res: Response): Pro
       return;
     }
 
-    // TODO: Ver que el usuario no tenga una tienda creada
+    const shop = await getShopByUserId(session.user.id);
+
+    if (shop) {
+      res.status(400).json({ error: "Ya tienes una tienda creada" });
+      return;
+    }
 
     const userId = session.user.id;
     const shopData = req.body;
+
+    const businessHours: CreateShopHours[] = shopData.businessHours || [];
 
     // Validar los datos de la tienda usando el esquema de base de datos
     const validatedFields = createShopSchema.safeParse({ ...shopData, userId });
@@ -46,10 +53,24 @@ router.post("/create", requireShopUser, async (req: Request, res: Response): Pro
       return;
     }
 
-    await createShop({
+    const createdShop = await createShop({
       ...validatedFields.data,
       userId,
     });
+
+    if (!createdShop) {
+      res.status(500).json({ error: "Error al crear la tienda" });
+      return;
+    }
+
+    const shopHoursValues = businessHours.map((hours) => ({
+      shopId: createdShop.id,
+      ...hours
+    }));
+
+    if (shopHoursValues.length > 0) {
+      await createManyShopHours(shopHoursValues);
+    }
 
     res.status(201).json({ message: "Tienda creada exitosamente" });
   } catch (error) {

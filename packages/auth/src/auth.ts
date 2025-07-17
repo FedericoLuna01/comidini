@@ -31,6 +31,9 @@ export const auth = betterAuth({
     provider: "pg",
     schema,
   }),
+  onAPIError: {
+    errorURL: `${process.env.WEB_BETTER_AUTH_URL}/iniciar-sesion`,
+  },
   session: {
     cookieCache: {
       enabled: true,

@@ -19,7 +19,7 @@ const PointsSystem = () => {
             <span className="text-transparent bg-clip-text gradient-comidini font-bold"> Puntos Comidini</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Cada peso que gastes se convierte en puntos. Cuanto más usés Morfy, más beneficios ganás.
+            Cada peso que gastes se convierte en puntos. Cuanto más usés Comidini, más beneficios ganás.
           </p>
         </div>
 

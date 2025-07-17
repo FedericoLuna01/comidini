@@ -60,15 +60,15 @@ const Footer = () => {
             <h4 className="font-fredoka font-semibold text-lg mb-6">Contacto</h4>
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <MapPin className="w-5 h-5 text-morfy-red" />
+                <MapPin className="w-5 h-5" />
                 <span className="text-gray-400">Buenos Aires, Argentina</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-morfy-red" />
+                <Mail className="w-5 h-5" />
                 <span className="text-gray-400">hola@comidini.app</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-morfy-red" />
+                <Phone className="w-5 h-5" />
                 <span className="text-gray-400">+54 11 1234-5678</span>
               </div>
             </div>

@@ -198,8 +198,8 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
       <Sheet open={showBanSheet} onOpenChange={setShowBanSheet}>
         <SheetContent>
           <SheetHeader>
-            <SheetTitle>Banear Usuario</SheetTitle>
-            <SheetDescription>¿Estás seguro de que deseas banear a {user.name}?</SheetDescription>
+            <SheetTitle>Suspender Usuario</SheetTitle>
+            <SheetDescription>¿Estás seguro de que deseas suspender a {user.name}?</SheetDescription>
           </SheetHeader>
           <div className="grid gap-4 px-4">
             <div className="flex flex-col gap-4">
@@ -210,7 +210,7 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
                 id="reason"
                 value={banReason}
                 onChange={(e) => setBanReason(e.target.value)}
-                placeholder="Razón del baneo (opcional)"
+                placeholder="Razón de la suspension (opcional)"
                 className="col-span-3"
               />
             </div>
@@ -240,7 +240,7 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
               Cancelar
             </Button>
             <Button onClick={handleBanUser} disabled={banMutation.isPending} variant="destructive">
-              {banMutation.isPending ? "Baneando..." : "Banear"}
+              {banMutation.isPending ? "Suspendiendo..." : "Suspender"}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -254,7 +254,7 @@ export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({ user }) 
           <AlertDialogHeader>
             <AlertDialogTitle>¿Estás totalmente seguro?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción eliminará a <b>{user.name}</b> y todos sus datos asociados. Esta acción no se puede deshacer.
+              Esta acción eliminará a <b>{`${user.name} (${user.email})`}</b> y todos sus datos asociados. Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

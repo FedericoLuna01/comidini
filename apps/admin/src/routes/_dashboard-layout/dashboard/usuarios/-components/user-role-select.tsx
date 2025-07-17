@@ -22,26 +22,24 @@ export const UserRoleSelect = ({
       defaultValue={value}
       {...props}
     >
-      <FormControl>
-        <SelectTrigger>
-          <SelectValue placeholder="Selecciona el rol del usuario" />
-        </SelectTrigger>
-      </FormControl>
+      <SelectTrigger>
+        <SelectValue placeholder="Selecciona el rol del usuario" />
+      </SelectTrigger>
       <SelectContent>
         <SelectItem value="user">
-          <div className="flex flex-col">
+          <div className="flex flex-col items-start">
             <span>{displayRole.user}</span>
             <span className="text-xs text-muted-foreground">Acceso básico a la plataforma</span>
           </div>
         </SelectItem>
         <SelectItem value="admin">
-          <div className="flex flex-col">
+          <div className="flex flex-col items-start">
             <span>{displayRole.admin}</span>
             <span className="text-xs text-muted-foreground">Acceso completo al sistema</span>
           </div>
         </SelectItem>
         <SelectItem value="shop">
-          <div className="flex flex-col">
+          <div className="flex flex-col items-start">
             <span>{displayRole.shop}</span>
             <span className="text-xs text-muted-foreground">Gestión de tienda y productos</span>
           </div>
