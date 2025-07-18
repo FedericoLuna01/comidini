@@ -15,6 +15,7 @@ import { Route as authRegistrarseRouteImport } from './routes/(auth)/registrarse
 import { Route as authOlvideContrasenaRouteImport } from './routes/(auth)/olvide-contrasena'
 import { Route as authIniciarSesionRouteImport } from './routes/(auth)/iniciar-sesion'
 import { Route as appTiendasRouteImport } from './routes/(app)/tiendas'
+import { Route as appPerfilRouteImport } from './routes/(app)/perfil'
 
 const landingPageIndexRoute = landingPageIndexRouteImport.update({
   id: '/(landing-page)/',
@@ -47,8 +48,14 @@ const appTiendasRoute = appTiendasRouteImport.update({
   path: '/tiendas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appPerfilRoute = appPerfilRouteImport.update({
+  id: '/(app)/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/perfil': typeof appPerfilRoute
   '/tiendas': typeof appTiendasRoute
   '/iniciar-sesion': typeof authIniciarSesionRoute
   '/olvide-contrasena': typeof authOlvideContrasenaRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/': typeof landingPageIndexRoute
 }
 export interface FileRoutesByTo {
+  '/perfil': typeof appPerfilRoute
   '/tiendas': typeof appTiendasRoute
   '/iniciar-sesion': typeof authIniciarSesionRoute
   '/olvide-contrasena': typeof authOlvideContrasenaRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/(app)/perfil': typeof appPerfilRoute
   '/(app)/tiendas': typeof appTiendasRoute
   '/(auth)/iniciar-sesion': typeof authIniciarSesionRoute
   '/(auth)/olvide-contrasena': typeof authOlvideContrasenaRoute
@@ -76,6 +85,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/perfil'
     | '/tiendas'
     | '/iniciar-sesion'
     | '/olvide-contrasena'
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
     | '/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/perfil'
     | '/tiendas'
     | '/iniciar-sesion'
     | '/olvide-contrasena'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
     | '/'
   id:
     | '__root__'
+    | '/(app)/perfil'
     | '/(app)/tiendas'
     | '/(auth)/iniciar-sesion'
     | '/(auth)/olvide-contrasena'
@@ -101,6 +113,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  appPerfilRoute: typeof appPerfilRoute
   appTiendasRoute: typeof appTiendasRoute
   authIniciarSesionRoute: typeof authIniciarSesionRoute
   authOlvideContrasenaRoute: typeof authOlvideContrasenaRoute
@@ -153,10 +166,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appTiendasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/perfil': {
+      id: '/(app)/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof appPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  appPerfilRoute: appPerfilRoute,
   appTiendasRoute: appTiendasRoute,
   authIniciarSesionRoute: authIniciarSesionRoute,
   authOlvideContrasenaRoute: authOlvideContrasenaRoute,
