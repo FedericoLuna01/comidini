@@ -40,9 +40,13 @@ export const auth = betterAuth({
       maxAge: 5 * 60 // Cache duration in seconds
     }
   },
-  emailAndPassword: {
-    enabled: true
-  },
+  // emailAndPassword: {
+    // enabled: true,
+    // forgotPasswordCallback: async (url, user) => {
+      // En desarrollo, solo loggeamos la URL
+      // console.log(`Password reset URL for ${user.email}: ${url}`);
+      // En producción, aquí enviarías un email
+    // }},
   socialProviders: {
     google: {
       prompt: "select_account",

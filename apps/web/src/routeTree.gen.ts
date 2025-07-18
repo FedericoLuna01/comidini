@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as landingPageIndexRouteImport } from './routes/(landing-page)/index'
+import { Route as authRestablecerContrasenaRouteImport } from './routes/(auth)/restablecer-contrasena'
 import { Route as authRegistrarseRouteImport } from './routes/(auth)/registrarse'
+import { Route as authOlvideContrasenaRouteImport } from './routes/(auth)/olvide-contrasena'
 import { Route as authIniciarSesionRouteImport } from './routes/(auth)/iniciar-sesion'
 import { Route as appTiendasRouteImport } from './routes/(app)/tiendas'
 
@@ -19,9 +21,20 @@ const landingPageIndexRoute = landingPageIndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const authRestablecerContrasenaRoute =
+  authRestablecerContrasenaRouteImport.update({
+    id: '/(auth)/restablecer-contrasena',
+    path: '/restablecer-contrasena',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const authRegistrarseRoute = authRegistrarseRouteImport.update({
   id: '/(auth)/registrarse',
   path: '/registrarse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authOlvideContrasenaRoute = authOlvideContrasenaRouteImport.update({
+  id: '/(auth)/olvide-contrasena',
+  path: '/olvide-contrasena',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authIniciarSesionRoute = authIniciarSesionRouteImport.update({
@@ -38,39 +51,61 @@ const appTiendasRoute = appTiendasRouteImport.update({
 export interface FileRoutesByFullPath {
   '/tiendas': typeof appTiendasRoute
   '/iniciar-sesion': typeof authIniciarSesionRoute
+  '/olvide-contrasena': typeof authOlvideContrasenaRoute
   '/registrarse': typeof authRegistrarseRoute
+  '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/': typeof landingPageIndexRoute
 }
 export interface FileRoutesByTo {
   '/tiendas': typeof appTiendasRoute
   '/iniciar-sesion': typeof authIniciarSesionRoute
+  '/olvide-contrasena': typeof authOlvideContrasenaRoute
   '/registrarse': typeof authRegistrarseRoute
+  '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/': typeof landingPageIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(app)/tiendas': typeof appTiendasRoute
   '/(auth)/iniciar-sesion': typeof authIniciarSesionRoute
+  '/(auth)/olvide-contrasena': typeof authOlvideContrasenaRoute
   '/(auth)/registrarse': typeof authRegistrarseRoute
+  '/(auth)/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/(landing-page)/': typeof landingPageIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/tiendas' | '/iniciar-sesion' | '/registrarse' | '/'
+  fullPaths:
+    | '/tiendas'
+    | '/iniciar-sesion'
+    | '/olvide-contrasena'
+    | '/registrarse'
+    | '/restablecer-contrasena'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/tiendas' | '/iniciar-sesion' | '/registrarse' | '/'
+  to:
+    | '/tiendas'
+    | '/iniciar-sesion'
+    | '/olvide-contrasena'
+    | '/registrarse'
+    | '/restablecer-contrasena'
+    | '/'
   id:
     | '__root__'
     | '/(app)/tiendas'
     | '/(auth)/iniciar-sesion'
+    | '/(auth)/olvide-contrasena'
     | '/(auth)/registrarse'
+    | '/(auth)/restablecer-contrasena'
     | '/(landing-page)/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   appTiendasRoute: typeof appTiendasRoute
   authIniciarSesionRoute: typeof authIniciarSesionRoute
+  authOlvideContrasenaRoute: typeof authOlvideContrasenaRoute
   authRegistrarseRoute: typeof authRegistrarseRoute
+  authRestablecerContrasenaRoute: typeof authRestablecerContrasenaRoute
   landingPageIndexRoute: typeof landingPageIndexRoute
 }
 
@@ -83,11 +118,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof landingPageIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(auth)/restablecer-contrasena': {
+      id: '/(auth)/restablecer-contrasena'
+      path: '/restablecer-contrasena'
+      fullPath: '/restablecer-contrasena'
+      preLoaderRoute: typeof authRestablecerContrasenaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(auth)/registrarse': {
       id: '/(auth)/registrarse'
       path: '/registrarse'
       fullPath: '/registrarse'
       preLoaderRoute: typeof authRegistrarseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/olvide-contrasena': {
+      id: '/(auth)/olvide-contrasena'
+      path: '/olvide-contrasena'
+      fullPath: '/olvide-contrasena'
+      preLoaderRoute: typeof authOlvideContrasenaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/iniciar-sesion': {
@@ -110,7 +159,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   appTiendasRoute: appTiendasRoute,
   authIniciarSesionRoute: authIniciarSesionRoute,
+  authOlvideContrasenaRoute: authOlvideContrasenaRoute,
   authRegistrarseRoute: authRegistrarseRoute,
+  authRestablecerContrasenaRoute: authRestablecerContrasenaRoute,
   landingPageIndexRoute: landingPageIndexRoute,
 }
 export const routeTree = rootRouteImport
