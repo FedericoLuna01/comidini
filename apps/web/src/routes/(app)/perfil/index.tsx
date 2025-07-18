@@ -1,13 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/ui/avatar";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 import { Separator } from "@repo/ui/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs";
-import { MapPin, Star, Clock, ShoppingBag, Settings, Shield, Mail, Calendar, AlertTriangle } from "lucide-react";
+import {
+  MapPin,
+  Star,
+  Clock,
+  ShoppingBag,
+  Settings,
+  Shield,
+  Mail,
+  Calendar,
+  AlertTriangle,
+  DollarSign,
+} from "lucide-react";
+import { authClient } from "@repo/auth/client";
+import { differenceInMonths, differenceInYears } from "date-fns";
 
-export const Route = createFileRoute("/(app)/perfil")({
+export const Route = createFileRoute("/(app)/perfil/")({
   component: RouteComponent,
 });
 
@@ -96,6 +109,8 @@ function RouteComponent() {
     }
   };
 
+  const { data } = authClient.useSession();
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       {/* Header del Perfil */}
@@ -104,9 +119,9 @@ function RouteComponent() {
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={userData.image || "/placeholder.svg"} alt={userData.name} />
+                <AvatarImage src={data?.user.image || "/placeholder.svg"} alt={data?.user.name} />
                 <AvatarFallback className="text-lg">
-                  {userData.name
+                  {data?.user.name
                     .split(" ")
                     .map((n) => n[0])
                     .join("")}
@@ -114,11 +129,8 @@ function RouteComponent() {
               </Avatar>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">{userData.name}</h1>
-                  <Badge className={getRoleColor(userData.role)}>
-                    {userData.role === "user" ? "Usuario" : userData.role}
-                  </Badge>
-                  {userData.emailVerified && (
+                  <h1 className="text-2xl font-bold">{data?.user.name}</h1>
+                  {data?.user.emailVerified && (
                     <Badge variant="outline" className="text-green-600">
                       <Shield className="w-3 h-3 mr-1" />
                       Verificado
@@ -127,17 +139,21 @@ function RouteComponent() {
                 </div>
                 <div className="flex items-center text-muted-foreground">
                   <Mail className="w-4 h-4 mr-2" />
-                  {userData.email}
+                  {data?.user.email}
                 </div>
                 <div className="flex items-center text-muted-foreground">
                   <Calendar className="w-4 h-4 mr-2" />
-                  Miembro desde {userStats.memberSince}
+                  {differenceInYears(new Date(), new Date(data?.user.createdAt || new Date())) >= 1
+                    ? `${differenceInYears(new Date(), new Date(data?.user.createdAt || new Date()))} años`
+                    : `${differenceInMonths(new Date(), new Date(data?.user.createdAt || new Date()))} meses`}
                 </div>
               </div>
             </div>
-            <Button variant="outline">
-              <Settings className="w-4 h-4 mr-2" />
-              Editar Perfil
+            <Button variant="outline" asChild>
+              <Link to="/perfil/editar">
+                <Settings className="w-4 h-4 mr-2" />
+                Editar Perfil
+              </Link>
             </Button>
           </div>
         </CardHeader>
@@ -161,6 +177,7 @@ function RouteComponent() {
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
+            <DollarSign className="w-8 h-8 mx-auto mb-2 text-green-500" />
             <div className="text-2xl font-bold">${userStats.totalSpent}</div>
             <div className="text-sm text-muted-foreground">Total Gastado</div>
           </CardContent>
@@ -273,19 +290,19 @@ function RouteComponent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium">ID de Usuario</label>
-                    <p className="text-sm text-muted-foreground">{userData.id}</p>
+                    <p className="text-sm text-muted-foreground">{data?.user.id}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium">Rol</label>
-                    <p className="text-sm text-muted-foreground capitalize">{userData.role}</p>
+                    <p className="text-sm text-muted-foreground capitalize">{data?.user.role}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium">Fecha de Registro</label>
-                    <p className="text-sm text-muted-foreground">{userData.createdAt.toLocaleDateString()}</p>
+                    <p className="text-sm text-muted-foreground">{data?.user.createdAt.toLocaleDateString()}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium">Última Actualización</label>
-                    <p className="text-sm text-muted-foreground">{userData.updatedAt.toLocaleDateString()}</p>
+                    <p className="text-sm text-muted-foreground">{data?.user.updatedAt.toLocaleDateString()}</p>
                   </div>
                 </div>
 

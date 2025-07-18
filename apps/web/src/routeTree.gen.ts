@@ -15,7 +15,8 @@ import { Route as authRegistrarseRouteImport } from './routes/(auth)/registrarse
 import { Route as authOlvideContrasenaRouteImport } from './routes/(auth)/olvide-contrasena'
 import { Route as authIniciarSesionRouteImport } from './routes/(auth)/iniciar-sesion'
 import { Route as appTiendasRouteImport } from './routes/(app)/tiendas'
-import { Route as appPerfilRouteImport } from './routes/(app)/perfil'
+import { Route as appPerfilIndexRouteImport } from './routes/(app)/perfil/index'
+import { Route as appPerfilEditarRouteImport } from './routes/(app)/perfil/editar'
 
 const landingPageIndexRoute = landingPageIndexRouteImport.update({
   id: '/(landing-page)/',
@@ -48,78 +49,90 @@ const appTiendasRoute = appTiendasRouteImport.update({
   path: '/tiendas',
   getParentRoute: () => rootRouteImport,
 } as any)
-const appPerfilRoute = appPerfilRouteImport.update({
-  id: '/(app)/perfil',
-  path: '/perfil',
+const appPerfilIndexRoute = appPerfilIndexRouteImport.update({
+  id: '/(app)/perfil/',
+  path: '/perfil/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appPerfilEditarRoute = appPerfilEditarRouteImport.update({
+  id: '/(app)/perfil/editar',
+  path: '/perfil/editar',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/perfil': typeof appPerfilRoute
   '/tiendas': typeof appTiendasRoute
   '/iniciar-sesion': typeof authIniciarSesionRoute
   '/olvide-contrasena': typeof authOlvideContrasenaRoute
   '/registrarse': typeof authRegistrarseRoute
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/': typeof landingPageIndexRoute
+  '/perfil/editar': typeof appPerfilEditarRoute
+  '/perfil': typeof appPerfilIndexRoute
 }
 export interface FileRoutesByTo {
-  '/perfil': typeof appPerfilRoute
   '/tiendas': typeof appTiendasRoute
   '/iniciar-sesion': typeof authIniciarSesionRoute
   '/olvide-contrasena': typeof authOlvideContrasenaRoute
   '/registrarse': typeof authRegistrarseRoute
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/': typeof landingPageIndexRoute
+  '/perfil/editar': typeof appPerfilEditarRoute
+  '/perfil': typeof appPerfilIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/(app)/perfil': typeof appPerfilRoute
   '/(app)/tiendas': typeof appTiendasRoute
   '/(auth)/iniciar-sesion': typeof authIniciarSesionRoute
   '/(auth)/olvide-contrasena': typeof authOlvideContrasenaRoute
   '/(auth)/registrarse': typeof authRegistrarseRoute
   '/(auth)/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/(landing-page)/': typeof landingPageIndexRoute
+  '/(app)/perfil/editar': typeof appPerfilEditarRoute
+  '/(app)/perfil/': typeof appPerfilIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/perfil'
     | '/tiendas'
     | '/iniciar-sesion'
     | '/olvide-contrasena'
     | '/registrarse'
     | '/restablecer-contrasena'
     | '/'
+    | '/perfil/editar'
+    | '/perfil'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/perfil'
     | '/tiendas'
     | '/iniciar-sesion'
     | '/olvide-contrasena'
     | '/registrarse'
     | '/restablecer-contrasena'
     | '/'
+    | '/perfil/editar'
+    | '/perfil'
   id:
     | '__root__'
-    | '/(app)/perfil'
     | '/(app)/tiendas'
     | '/(auth)/iniciar-sesion'
     | '/(auth)/olvide-contrasena'
     | '/(auth)/registrarse'
     | '/(auth)/restablecer-contrasena'
     | '/(landing-page)/'
+    | '/(app)/perfil/editar'
+    | '/(app)/perfil/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  appPerfilRoute: typeof appPerfilRoute
   appTiendasRoute: typeof appTiendasRoute
   authIniciarSesionRoute: typeof authIniciarSesionRoute
   authOlvideContrasenaRoute: typeof authOlvideContrasenaRoute
   authRegistrarseRoute: typeof authRegistrarseRoute
   authRestablecerContrasenaRoute: typeof authRestablecerContrasenaRoute
   landingPageIndexRoute: typeof landingPageIndexRoute
+  appPerfilEditarRoute: typeof appPerfilEditarRoute
+  appPerfilIndexRoute: typeof appPerfilIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -166,24 +179,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appTiendasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/perfil': {
-      id: '/(app)/perfil'
+    '/(app)/perfil/': {
+      id: '/(app)/perfil/'
       path: '/perfil'
       fullPath: '/perfil'
-      preLoaderRoute: typeof appPerfilRouteImport
+      preLoaderRoute: typeof appPerfilIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/perfil/editar': {
+      id: '/(app)/perfil/editar'
+      path: '/perfil/editar'
+      fullPath: '/perfil/editar'
+      preLoaderRoute: typeof appPerfilEditarRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  appPerfilRoute: appPerfilRoute,
   appTiendasRoute: appTiendasRoute,
   authIniciarSesionRoute: authIniciarSesionRoute,
   authOlvideContrasenaRoute: authOlvideContrasenaRoute,
   authRegistrarseRoute: authRegistrarseRoute,
   authRestablecerContrasenaRoute: authRestablecerContrasenaRoute,
   landingPageIndexRoute: landingPageIndexRoute,
+  appPerfilEditarRoute: appPerfilEditarRoute,
+  appPerfilIndexRoute: appPerfilIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
