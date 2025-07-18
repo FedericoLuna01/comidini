@@ -108,7 +108,12 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contraseña</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Contraseña</FormLabel>
+                    <Button variant="link" asChild className="p-0 h-auto text-xs">
+                      <Link to="/olvide-contrasena">¿Olvidaste tu contraseña?</Link>
+                    </Button>
+                  </div>
                   <FormControl>
                     <Input type="password" placeholder="********" {...field} />
                   </FormControl>
@@ -116,11 +121,7 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
                 </FormItem>
               )}
             />
-            <div className="text-right">
-              <Button variant="link" asChild className="p-0 h-auto text-sm">
-                <Link to="/olvide-contrasena">¿Olvidaste tu contraseña?</Link>
-              </Button>
-            </div>
+            <div className="text-right"></div>
             {userBanned && (
               <Alert variant="destructive">
                 <AlertCircleIcon />

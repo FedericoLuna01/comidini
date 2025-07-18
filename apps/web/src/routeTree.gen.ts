@@ -15,6 +15,8 @@ import { Route as authRegistrarseRouteImport } from './routes/(auth)/registrarse
 import { Route as authOlvideContrasenaRouteImport } from './routes/(auth)/olvide-contrasena'
 import { Route as authIniciarSesionRouteImport } from './routes/(auth)/iniciar-sesion'
 import { Route as appTiendasRouteImport } from './routes/(app)/tiendas'
+import { Route as appPerfilIndexRouteImport } from './routes/(app)/perfil/index'
+import { Route as appPerfilEditarRouteImport } from './routes/(app)/perfil/editar'
 
 const landingPageIndexRoute = landingPageIndexRouteImport.update({
   id: '/(landing-page)/',
@@ -47,6 +49,16 @@ const appTiendasRoute = appTiendasRouteImport.update({
   path: '/tiendas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appPerfilIndexRoute = appPerfilIndexRouteImport.update({
+  id: '/(app)/perfil/',
+  path: '/perfil/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appPerfilEditarRoute = appPerfilEditarRouteImport.update({
+  id: '/(app)/perfil/editar',
+  path: '/perfil/editar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/tiendas': typeof appTiendasRoute
@@ -55,6 +67,8 @@ export interface FileRoutesByFullPath {
   '/registrarse': typeof authRegistrarseRoute
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/': typeof landingPageIndexRoute
+  '/perfil/editar': typeof appPerfilEditarRoute
+  '/perfil': typeof appPerfilIndexRoute
 }
 export interface FileRoutesByTo {
   '/tiendas': typeof appTiendasRoute
@@ -63,6 +77,8 @@ export interface FileRoutesByTo {
   '/registrarse': typeof authRegistrarseRoute
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/': typeof landingPageIndexRoute
+  '/perfil/editar': typeof appPerfilEditarRoute
+  '/perfil': typeof appPerfilIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -72,6 +88,8 @@ export interface FileRoutesById {
   '/(auth)/registrarse': typeof authRegistrarseRoute
   '/(auth)/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/(landing-page)/': typeof landingPageIndexRoute
+  '/(app)/perfil/editar': typeof appPerfilEditarRoute
+  '/(app)/perfil/': typeof appPerfilIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -82,6 +100,8 @@ export interface FileRouteTypes {
     | '/registrarse'
     | '/restablecer-contrasena'
     | '/'
+    | '/perfil/editar'
+    | '/perfil'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/tiendas'
@@ -90,6 +110,8 @@ export interface FileRouteTypes {
     | '/registrarse'
     | '/restablecer-contrasena'
     | '/'
+    | '/perfil/editar'
+    | '/perfil'
   id:
     | '__root__'
     | '/(app)/tiendas'
@@ -98,6 +120,8 @@ export interface FileRouteTypes {
     | '/(auth)/registrarse'
     | '/(auth)/restablecer-contrasena'
     | '/(landing-page)/'
+    | '/(app)/perfil/editar'
+    | '/(app)/perfil/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -107,6 +131,8 @@ export interface RootRouteChildren {
   authRegistrarseRoute: typeof authRegistrarseRoute
   authRestablecerContrasenaRoute: typeof authRestablecerContrasenaRoute
   landingPageIndexRoute: typeof landingPageIndexRoute
+  appPerfilEditarRoute: typeof appPerfilEditarRoute
+  appPerfilIndexRoute: typeof appPerfilIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -153,6 +179,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appTiendasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/perfil/': {
+      id: '/(app)/perfil/'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof appPerfilIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/perfil/editar': {
+      id: '/(app)/perfil/editar'
+      path: '/perfil/editar'
+      fullPath: '/perfil/editar'
+      preLoaderRoute: typeof appPerfilEditarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -163,6 +203,8 @@ const rootRouteChildren: RootRouteChildren = {
   authRegistrarseRoute: authRegistrarseRoute,
   authRestablecerContrasenaRoute: authRestablecerContrasenaRoute,
   landingPageIndexRoute: landingPageIndexRoute,
+  appPerfilEditarRoute: appPerfilEditarRoute,
+  appPerfilIndexRoute: appPerfilIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
