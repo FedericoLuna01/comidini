@@ -45,7 +45,7 @@ import { Stepper, StepperDescription, StepperIndicator, StepperItem, StepperSepa
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createShop } from "../../api/shop"
 import { APIProvider, Map, type MapMouseEvent, AdvancedMarker } from '@vis.gl/react-google-maps';
-import { useDebounceInput } from "../../hooks/useDebounceInput"
+import { useDebounceInput } from "../../hooks/use-debounce-input"
 import { AutoCompleteInput } from "../../components/auto-complete-select"
 
 export const Route = createFileRoute('/primeros-pasos/')({
@@ -138,6 +138,7 @@ function RouteComponent() {
     mutationFn: async (data: CreateShop) => {
       await createShop(data)
     }
+    // TODO: Agregar un onSuccess para redirigir al usuario a su tienda o dashboard
   })
 
   const isValidForm = async () => {

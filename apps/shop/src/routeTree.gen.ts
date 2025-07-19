@@ -14,8 +14,10 @@ import { Route as DashboardLayoutRouteImport } from './routes/_dashboard-layout'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrimerosPasosIndexRouteImport } from './routes/primeros-pasos/index'
 import { Route as DashboardLayoutDashboardIndexRouteImport } from './routes/_dashboard-layout/dashboard/index'
+import { Route as DashboardLayoutDashboardProductosIndexRouteImport } from './routes/_dashboard-layout/dashboard/productos/index'
 import { Route as DashboardLayoutDashboardHorariosIndexRouteImport } from './routes/_dashboard-layout/dashboard/horarios/index'
 import { Route as DashboardLayoutDashboardConfiguracionIndexRouteImport } from './routes/_dashboard-layout/dashboard/configuracion/index'
+import { Route as DashboardLayoutDashboardProductosNuevoProductoRouteImport } from './routes/_dashboard-layout/dashboard/productos/nuevo-producto'
 
 const IniciarSesionRoute = IniciarSesionRouteImport.update({
   id: '/iniciar-sesion',
@@ -42,6 +44,12 @@ const DashboardLayoutDashboardIndexRoute =
     path: '/dashboard/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutDashboardProductosIndexRoute =
+  DashboardLayoutDashboardProductosIndexRouteImport.update({
+    id: '/dashboard/productos/',
+    path: '/dashboard/productos/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 const DashboardLayoutDashboardHorariosIndexRoute =
   DashboardLayoutDashboardHorariosIndexRouteImport.update({
     id: '/dashboard/horarios/',
@@ -54,22 +62,32 @@ const DashboardLayoutDashboardConfiguracionIndexRoute =
     path: '/dashboard/configuracion/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutDashboardProductosNuevoProductoRoute =
+  DashboardLayoutDashboardProductosNuevoProductoRouteImport.update({
+    id: '/dashboard/productos/nuevo-producto',
+    path: '/dashboard/productos/nuevo-producto',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/iniciar-sesion': typeof IniciarSesionRoute
   '/primeros-pasos': typeof PrimerosPasosIndexRoute
   '/dashboard': typeof DashboardLayoutDashboardIndexRoute
+  '/dashboard/productos/nuevo-producto': typeof DashboardLayoutDashboardProductosNuevoProductoRoute
   '/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionIndexRoute
   '/dashboard/horarios': typeof DashboardLayoutDashboardHorariosIndexRoute
+  '/dashboard/productos': typeof DashboardLayoutDashboardProductosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/iniciar-sesion': typeof IniciarSesionRoute
   '/primeros-pasos': typeof PrimerosPasosIndexRoute
   '/dashboard': typeof DashboardLayoutDashboardIndexRoute
+  '/dashboard/productos/nuevo-producto': typeof DashboardLayoutDashboardProductosNuevoProductoRoute
   '/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionIndexRoute
   '/dashboard/horarios': typeof DashboardLayoutDashboardHorariosIndexRoute
+  '/dashboard/productos': typeof DashboardLayoutDashboardProductosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -78,8 +96,10 @@ export interface FileRoutesById {
   '/iniciar-sesion': typeof IniciarSesionRoute
   '/primeros-pasos/': typeof PrimerosPasosIndexRoute
   '/_dashboard-layout/dashboard/': typeof DashboardLayoutDashboardIndexRoute
+  '/_dashboard-layout/dashboard/productos/nuevo-producto': typeof DashboardLayoutDashboardProductosNuevoProductoRoute
   '/_dashboard-layout/dashboard/configuracion/': typeof DashboardLayoutDashboardConfiguracionIndexRoute
   '/_dashboard-layout/dashboard/horarios/': typeof DashboardLayoutDashboardHorariosIndexRoute
+  '/_dashboard-layout/dashboard/productos/': typeof DashboardLayoutDashboardProductosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,16 +108,20 @@ export interface FileRouteTypes {
     | '/iniciar-sesion'
     | '/primeros-pasos'
     | '/dashboard'
+    | '/dashboard/productos/nuevo-producto'
     | '/dashboard/configuracion'
     | '/dashboard/horarios'
+    | '/dashboard/productos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/iniciar-sesion'
     | '/primeros-pasos'
     | '/dashboard'
+    | '/dashboard/productos/nuevo-producto'
     | '/dashboard/configuracion'
     | '/dashboard/horarios'
+    | '/dashboard/productos'
   id:
     | '__root__'
     | '/'
@@ -105,8 +129,10 @@ export interface FileRouteTypes {
     | '/iniciar-sesion'
     | '/primeros-pasos/'
     | '/_dashboard-layout/dashboard/'
+    | '/_dashboard-layout/dashboard/productos/nuevo-producto'
     | '/_dashboard-layout/dashboard/configuracion/'
     | '/_dashboard-layout/dashboard/horarios/'
+    | '/_dashboard-layout/dashboard/productos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutDashboardIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/_dashboard-layout/dashboard/productos/': {
+      id: '/_dashboard-layout/dashboard/productos/'
+      path: '/dashboard/productos'
+      fullPath: '/dashboard/productos'
+      preLoaderRoute: typeof DashboardLayoutDashboardProductosIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
     '/_dashboard-layout/dashboard/horarios/': {
       id: '/_dashboard-layout/dashboard/horarios/'
       path: '/dashboard/horarios'
@@ -167,21 +200,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutDashboardConfiguracionIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/_dashboard-layout/dashboard/productos/nuevo-producto': {
+      id: '/_dashboard-layout/dashboard/productos/nuevo-producto'
+      path: '/dashboard/productos/nuevo-producto'
+      fullPath: '/dashboard/productos/nuevo-producto'
+      preLoaderRoute: typeof DashboardLayoutDashboardProductosNuevoProductoRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
   }
 }
 
 interface DashboardLayoutRouteChildren {
   DashboardLayoutDashboardIndexRoute: typeof DashboardLayoutDashboardIndexRoute
+  DashboardLayoutDashboardProductosNuevoProductoRoute: typeof DashboardLayoutDashboardProductosNuevoProductoRoute
   DashboardLayoutDashboardConfiguracionIndexRoute: typeof DashboardLayoutDashboardConfiguracionIndexRoute
   DashboardLayoutDashboardHorariosIndexRoute: typeof DashboardLayoutDashboardHorariosIndexRoute
+  DashboardLayoutDashboardProductosIndexRoute: typeof DashboardLayoutDashboardProductosIndexRoute
 }
 
 const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
   DashboardLayoutDashboardIndexRoute: DashboardLayoutDashboardIndexRoute,
+  DashboardLayoutDashboardProductosNuevoProductoRoute:
+    DashboardLayoutDashboardProductosNuevoProductoRoute,
   DashboardLayoutDashboardConfiguracionIndexRoute:
     DashboardLayoutDashboardConfiguracionIndexRoute,
   DashboardLayoutDashboardHorariosIndexRoute:
     DashboardLayoutDashboardHorariosIndexRoute,
+  DashboardLayoutDashboardProductosIndexRoute:
+    DashboardLayoutDashboardProductosIndexRoute,
 }
 
 const DashboardLayoutRouteWithChildren = DashboardLayoutRoute._addFileChildren(

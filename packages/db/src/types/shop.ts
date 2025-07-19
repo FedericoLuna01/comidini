@@ -1,10 +1,6 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import {
   shop,
-  product,
-  productCategory,
-  productVariant,
-  productAddon,
   coupon,
   order,
   orderItem,
@@ -13,6 +9,12 @@ import {
   couponUsage,
   shopHours
 } from "../schema/shop-schema";
+import {
+  product,
+  productCategory,
+  productVariant,
+  productAddon,
+} from "../schema/product-schema";
 import { z } from "zod/v4";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
@@ -82,62 +84,12 @@ export const selectShopHoursSchema = createSelectSchema(shopHours)
 
 export type SelectShopHours = z.infer<typeof selectShopHoursSchema>;
 
-export const insertProductSchema = createInsertSchema(product, {
-  name: z.string()
-    .min(1, { message: "El nombre del producto es requerido" })
-    .max(100, { message: "El nombre del producto no puede exceder los 100 caracteres" }),
-  description: z.string().max(100, { message: "La descripción debe ser mas corta." }).optional(),
-  price: z.number().min(1, { message: "El precio es requerido" }),
-  sku: z.string().min(1, { message: "El SKU es requerido" }).max(50, { message: "El SKU no puede exceder los 50 caracteres" }),
-  trackQuantity: z.boolean().default(true),
-  quantity: z.number().min(0, { message: "La cantidad de productos no puede ser negativo" }).default(0),
-  lowStockThreshold: z.number().min(0).default(0),
-  images: z.string().url({ message: "La imagen debe ser una URL válida" }).optional(),
-  isActive: z.boolean().default(true),
-  isDigital: z.boolean().default(false),
-  taxable: z.boolean().default(true),
-  tags: z.array(z.string()).optional(),
-  sortOrder: z.number().min(0).default(0),
-}).omit({
-  updatedAt: true,
-  createdAt: true,
-})
-
 export const insertProductCategorySchema = createInsertSchema(productCategory, {
   name: z.string()
     .min(1, { message: "El nombre de la categoría es requerida" })
     .max(50, { message: "El nombre de la categoría no puede exceder los 100 caracteres" }),
   description: z.string().max(100, { message: "La descripción debe ser mas corta." }).optional(),
-  image: z.string().url({ message: "La imagen debe ser una URL válida" }).optional(),
-  isActive: z.boolean().default(true),
-  sortOrder: z.number().min(0).default(0),
-}).omit({
-  updatedAt: true,
-  createdAt: true,
-})
-
-export const insertProductVariantSchema = createInsertSchema(productVariant, {
-  name: z.string()
-    .min(1, { message: "El nombre de la variante es requerido" })
-    .max(50, { message: "El nombre de la variante no puede exceder los 50 caracteres" }),
-  extraPrice: z.number().min(0, { message: "El precio adicional no puede ser negativo" }).optional(),
-  sku: z.string().min(1, { message: "El SKU es requerido" }).max(50, { message: "El SKU no puede exceder los 50 caracteres" }),
-  quantity: z.number().min(0, { message: "La cantidad no puede ser negativa" }).default(0),
-  isActive: z.boolean().default(true),
-  sortOrder: z.number().min(0).default(0),
-}).omit({
-  updatedAt: true,
-  createdAt: true,
-})
-
-export const insertProductAddonSchema = createInsertSchema(productAddon, {
-  name: z.string()
-    .min(1, { message: "El nombre del complemento es requerido" })
-    .max(50, { message: "El nombre del complemento no puede exceder los 50 caracteres" }),
-  description: z.string().max(200, { message: "La descripción debe ser más corta." }).optional(),
-  price: z.number().min(0, { message: "El precio no puede ser negativo" }),
-  isRequired: z.boolean().default(false),
-  maxQuantity: z.number().min(1, { message: "La cantidad máxima debe ser mayor a 0" }).default(1),
+  image: z.url({ message: "La imagen debe ser una URL válida" }).optional(),
   isActive: z.boolean().default(true),
   sortOrder: z.number().min(0).default(0),
 }).omit({

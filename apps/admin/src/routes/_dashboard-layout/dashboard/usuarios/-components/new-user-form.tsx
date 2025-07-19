@@ -48,6 +48,9 @@ export function NewUserForm() {
 
   const mutation = useMutation({
     mutationFn: async (user: z.infer<typeof createUserSchema>) => await createUser(user),
+    onSuccess: () => {
+      toast.success("Usuario creado exitosamente");
+    },
   })
 
   async function onSubmit(values: z.infer<typeof createUserSchema>) {
@@ -64,8 +67,6 @@ export function NewUserForm() {
     if (mutation.data?.error || mutation.isError) {
       return toast.error("Error al crear el usuario");
     }
-
-    mutation.isSuccess && toast.success("Usuario creado exitosamente");
 
     form.reset();
   }
