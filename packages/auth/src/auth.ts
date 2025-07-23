@@ -34,12 +34,12 @@ export const auth = betterAuth({
   onAPIError: {
     errorURL: `${process.env.WEB_BETTER_AUTH_URL}/iniciar-sesion`,
   },
-  session: {
-    cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60 // Cache duration in seconds
-    }
-  },
+  // session: {
+  //   cookieCache: {
+  //     enabled: true,
+  //     maxAge: 5 * 60 // Cache duration in seconds
+  //   }
+  // },
   emailAndPassword: {
     enabled: true,
     //        EMAILJS O RESEND

@@ -13,13 +13,14 @@ import {
   FormMessage,
 } from "@repo/ui/components/ui/form";
 import { Separator } from "@repo/ui/components/ui/separator";
-import { ArrowLeft, Upload, User, Save } from "lucide-react";
+import { ArrowLeft, User, Save } from "lucide-react";
 import { authClient } from "@repo/auth/client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
+import { ImageUpload } from "../../../components/image-upload";
 
 export const Route = createFileRoute("/(app)/perfil/editar")({
   component: RouteComponent,
@@ -35,25 +36,7 @@ export const updateUserSchema = z.object({
     .max(50, {
       message: "El nombre no puede tener más de 50 caracteres",
     }),
-  image: z
-    .string()
-    .optional()
-    .refine(
-      (val) => {
-        if (!val || val === "") return true;
-        // Validar URL o base64
-        try {
-          new URL(val);
-          return true;
-        } catch {
-          // Verificar si es base64
-          return val.startsWith("data:image/");
-        }
-      },
-      {
-        message: "Debe ser una URL válida o una imagen",
-      },
-    ),
+  image: z.string().optional(),
 });
 
 type UpdateUserFormData = z.infer<typeof updateUserSchema>;
@@ -65,8 +48,8 @@ function RouteComponent() {
   const [imagePreview, setImagePreview] = useState(data?.user.image || "");
   const [isLoading, setIsLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | undefined>(data?.user.image || undefined);
+  const [uploadedImageKey, setUploadedImageKey] = useState<string | undefined>();
 
   const form = useForm<UpdateUserFormData>({
     resolver: zodResolver(updateUserSchema),
@@ -82,7 +65,7 @@ function RouteComponent() {
     try {
       await authClient.updateUser({
         name: values.name,
-        image: values.image || undefined,
+        image: uploadedImageUrl || values.image || undefined,
       });
 
       toast.success("Perfil actualizado correctamente");
@@ -94,6 +77,21 @@ function RouteComponent() {
       setIsLoading(false);
     }
   }
+
+  const handleImageUploaded = (url: string, key: string) => {
+    setUploadedImageUrl(url);
+    setUploadedImageKey(key);
+    form.setValue("image", url);
+    setImagePreview(url);
+    setImageError(false);
+  };
+
+  const handleImageRemoved = () => {
+    setUploadedImageUrl(undefined);
+    setUploadedImageKey(undefined);
+    form.setValue("image", undefined);
+    setImagePreview("");
+  };
 
   const handleCancel = () => {
     navigate({ to: "/perfil" });
@@ -117,47 +115,7 @@ function RouteComponent() {
     setImageError(false);
   };
 
-  // Manejar subida de archivos locales
-  const handleFileUpload = () => {
-    fileInputRef.current?.click();
-  };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validar tipo de archivo
-    if (!file.type.startsWith("image/")) {
-      toast.error("Por favor selecciona un archivo de imagen válido");
-      return;
-    }
-
-    // Validar tamaño (máximo 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("La imagen debe ser menor a 5MB");
-      return;
-    }
-
-    setIsUploading(true);
-
-    // Convertir a base64 para vista previa
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setImagePreview(result);
-      form.setValue("image", result);
-      setImageError(false);
-      setIsUploading(false);
-      toast.success("Imagen cargada correctamente");
-    };
-
-    reader.onerror = () => {
-      toast.error("Error al cargar la imagen");
-      setIsUploading(false);
-    };
-
-    reader.readAsDataURL(file);
-  };
 
   return (
     <div className="container mx-auto p-6 max-w-2xl">
@@ -217,58 +175,17 @@ function RouteComponent() {
                   name="image"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel>URL de la Imagen</FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input
-                            type="url"
-                            placeholder="https://ejemplo.com/imagen.jpg"
-                            {...field}
-                            disabled={isLoading || isUploading}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              // Actualizar vista previa inmediatamente
-                              setImagePreview(e.target.value);
-                              setImageError(false);
-                            }}
-                          />
-                        </FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          disabled={isLoading || isUploading}
-                          onClick={handleFileUpload}
-                          title="Subir imagen desde tu computadora"
-                        >
-                          {isUploading ? (
-                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Upload className="w-4 h-4" />
-                          )}
-                        </Button>
-                        {/* Input de archivo oculto */}
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          className="hidden"
-                        />
-                      </div>
-                      <FormDescription>
-                        Ingresa la URL de tu imagen de perfil
-                        <button
-                          type="button"
-                          onClick={handleFileUpload}
-                          className="text-primary hover:underline font-medium"
-                          disabled={isLoading || isUploading}
-                        ></button>
-                        {imageError && imagePreview && (
-                          <span className="text-red-500 block mt-1">⚠️ No se pudo cargar la imagen desde esta URL</span>
-                        )}
-                        {isUploading && <span className="text-blue-500 block mt-1">📤 Subiendo imagen...</span>}
-                      </FormDescription>
+                      <ImageUpload
+                        onImageUploaded={handleImageUploaded}
+                        onImageRemoved={handleImageRemoved}
+                        currentImageUrl={uploadedImageUrl}
+                        currentImageKey={uploadedImageKey}
+                        type="user-avatar"
+                        label="Foto de Perfil"
+                        description="Sube una imagen para tu perfil. Formatos permitidos: JPEG, PNG, WebP. Máximo 2MB."
+                        disabled={isLoading}
+                        className="w-full"
+                      />
                       <FormMessage />
                     </FormItem>
                   )}

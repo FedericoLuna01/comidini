@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { authHandler } from "@repo/auth/server";
 import shopsRoutes from "./routes/shops.routes";
+import uploadRoutes from "./routes/upload.routes";
 import { type Session } from "@repo/auth/client"
 import { SelectShop } from "@repo/db/src/types/shop";
 
@@ -45,6 +46,7 @@ apiRouter.get("/", (req, res) => {
 });
 
 apiRouter.use("/shops", shopsRoutes);
+apiRouter.use("/upload", uploadRoutes);
 
 app.listen(port, () => {
   console.log(`API server running at http://localhost:${port}`);

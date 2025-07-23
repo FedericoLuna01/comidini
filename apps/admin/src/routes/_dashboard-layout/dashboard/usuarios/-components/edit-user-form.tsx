@@ -13,10 +13,9 @@ import {
   FormMessage,
 } from "@repo/ui/components/ui/form";
 import { Input } from "@repo/ui/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/ui/select";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateUser, editUserSchema } from "../../../../../api/users";
+import { updateUser } from "../../../../../api/users";
 import { UserWithRole } from "@repo/auth/client";
 import { useNavigate } from "@tanstack/react-router";
 import { UserRoleSelect } from "./user-role-select";
