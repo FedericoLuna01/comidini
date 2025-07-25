@@ -57,10 +57,7 @@ function RouteComponent() {
 
         {/* CTA para registrar negocio */}
         <Link to="/registrar-negocio">
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
-          >
+          <Button size="lg">
             <Plus className="w-5 h-5 mr-2" />
             ¿Tenés un negocio?
           </Button>
