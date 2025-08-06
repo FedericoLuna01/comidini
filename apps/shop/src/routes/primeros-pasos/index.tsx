@@ -74,8 +74,8 @@ const fetchPlaceSuggestions = async (address: string): Promise<google.maps.place
     language: 'es',
     region: 'AR',
     locationRestriction: new google.maps.LatLngBounds(
-      new google.maps.LatLng(-55.0, -73.0), // Suroeste de Argentina
-      new google.maps.LatLng(-21.0, -53.0)  // Noreste de Argentina
+      new google.maps.LatLng(-33.040, -60.740),
+      new google.maps.LatLng(-32.900, -60.600)
     )
   };
 
@@ -90,7 +90,7 @@ const fetchPlaceSuggestions = async (address: string): Promise<google.maps.place
 };
 
 function RouteComponent() {
-  const [currentStep, setCurrentStep] = useState(4)
+  const [currentStep, setCurrentStep] = useState(2)
   const [markerPosition, setMarkerPosition] = useState<google.maps.LatLngLiteral | null>(null);
   const defaultCenter = { lat: -32.9526405, lng: -60.6776039 }; // Centro de Rosario
   const [mapCenter, setMapCenter] = useState(defaultCenter);
@@ -101,7 +101,7 @@ function RouteComponent() {
       name: "Nombre de mi tienda",
       description: "",
       phone: "",
-      address: "Urquiza 1234, Rosario, Santa Fe, Argentina",
+      address: "",
       latitude: "-33.0168041",
       longitude: "-60.8760917",
       acceptsDelivery: false,
@@ -363,7 +363,6 @@ function RouteComponent() {
                         <FormControl>
                           <AutoCompleteInput
                             isLoading={isLoading}
-                            emptyMessage="No hay resultados"
                             suggestions={suggestions}
                             onChange={(value) => field.onChange(value)}
                             onSelect={async (suggestion) => {

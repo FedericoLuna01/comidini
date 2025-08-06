@@ -10,7 +10,8 @@
     "ui": "pnpm --filter @repo/ui ui",
     "db:migrate": "pnpm --filter @repo/db migrate",
     "db:generate": "pnpm --filter @repo/db generate",
-    "db:studio": "pnpm --filter @repo/db studio"
+    "db:studio": "pnpm --filter @repo/db studio",
+    "db:start": "docker compose up db"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

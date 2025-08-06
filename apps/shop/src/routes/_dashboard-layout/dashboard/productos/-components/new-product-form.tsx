@@ -27,7 +27,7 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
     defaultValues: {
       name: "",
       description: "",
-      price: 0,
+      price: "",
       sku: "",
       quantity: 0,
       lowStockThreshold: 0,

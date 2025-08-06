@@ -7,17 +7,18 @@ export const insertProductSchema = createInsertSchema(product, {
     .min(1, { message: "El nombre del producto es requerido" })
     .max(100, { message: "El nombre del producto no puede exceder los 100 caracteres" }),
   description: z.string().max(100, { message: "La descripción debe ser mas corta." }).optional(),
-  price: z.number().min(1, { message: "El precio es requerido" }),
+  price: z.string(),
+  // price: z.string(),
   sku: z.string().min(1, { message: "El SKU es requerido" }).max(50, { message: "El SKU no puede exceder los 50 caracteres" }),
   quantity: z.number().min(0, { message: "La cantidad de productos no puede ser negativo" }),
   lowStockThreshold: z.number().min(0),
-  images: z.array(z.file({ message: "La imagen debe ser una URL válida" })).min(1, { message: "Se requiere al menos una imagen" }),
+  images: z.array(z.string({ message: "La imagen debe ser una URL válida" })).min(1, { message: "Se requiere al menos una imagen" }),
   categoryId: z.number({ message: "La categoría es requerida" }).min(0, { message: "La categoría es requerida" }),
   isFeatured: z.boolean(),
   isActive: z.boolean(),
   tags: z.array(z.string()).optional(),
   sortOrder: z.number().min(0),
-  shopId: z.string()
+  shopId: z.number()
 }).omit({
   updatedAt: true,
   createdAt: true,
