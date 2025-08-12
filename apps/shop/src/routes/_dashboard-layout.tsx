@@ -43,8 +43,6 @@ export const Route = createFileRoute('/_dashboard-layout')({
     const session = await authClient.getSession({}, {
       onSuccess: async (ctx) => {
 
-        console.log(ctx.data)
-
         if (!ctx.data) {
           throw redirect({
             to: "/iniciar-sesion",

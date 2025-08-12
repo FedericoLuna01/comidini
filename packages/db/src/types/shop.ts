@@ -88,8 +88,6 @@ export const insertProductCategorySchema = createInsertSchema(productCategory, {
   name: z.string()
     .min(1, { message: "El nombre de la categoría es requerida" })
     .max(50, { message: "El nombre de la categoría no puede exceder los 100 caracteres" }),
-  description: z.string().max(100, { message: "La descripción debe ser mas corta." }).optional(),
-  image: z.url({ message: "La imagen debe ser una URL válida" }).optional(),
   isActive: z.boolean().default(true),
   sortOrder: z.number().min(0).default(0),
 }).omit({

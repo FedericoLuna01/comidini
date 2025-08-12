@@ -43,7 +43,7 @@ type FormValues = z.infer<typeof formSchema>
 
 import { Stepper, StepperDescription, StepperIndicator, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from "@repo/ui/components/ui/stepper"
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { createShop } from "../../api/shop"
+import { createShop } from "../../api/shops"
 import { APIProvider, Map, type MapMouseEvent, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { useDebounceInput } from "../../hooks/use-debounce-input"
 import { AutoCompleteInput } from "../../components/auto-complete-select"

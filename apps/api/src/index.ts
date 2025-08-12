@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { authHandler } from "@repo/auth/server";
-import shopsRoutes from "./routes/shops.routes";
-import { type Session } from "@repo/auth/client"
 import { SelectShop } from "@repo/db/src/types/shop";
+import { authHandler } from "@repo/auth/server";
+import { type Session } from "@repo/auth/client"
+import shopsRoutes from "./routes/shops.routes";
+import productsRoutes from "./routes/products.routes";
 
 declare global {
   namespace Express {
@@ -45,6 +46,7 @@ apiRouter.get("/", (req, res) => {
 });
 
 apiRouter.use("/shops", shopsRoutes);
+apiRouter.use("/products", productsRoutes);
 
 app.listen(port, () => {
   console.log(`API server running at http://localhost:${port}`);

@@ -20,6 +20,8 @@ import { SelectShop } from '@repo/db/src/types/shop'
 import { ProductCategorySelect } from './product-category-select'
 import { AlertCircleIcon, Dice3Icon, ImageIcon, UploadIcon, XIcon } from 'lucide-react'
 import { useFileUpload } from '../../../../../hooks/use-file-upload'
+import { createProduct } from '../../../../../api/products'
+import { getProductCategoriesByShopId } from '../../../../../api/categories'
 
 export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
   const form = useForm<CreateProductSchema>({
@@ -31,35 +33,24 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
       sku: "",
       quantity: 0,
       lowStockThreshold: 0,
-      images: [],
+      // TODO: Agregar las imágenes realmente
+      images: ["asd"],
       isActive: true,
       tags: [],
       sortOrder: 0,
-      isFeatured: false,
+      isFeatured: false
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (product: CreateProductSchema) => {
-      // TODO: Implement product creation
-      console.log(product);
+      await createProduct(product);
     },
   })
 
   const { data: productCategories, isLoading } = useQuery({
     queryKey: ['productCategories', shop?.id],
-    queryFn: async (): Promise<SelectProductCategory[]> => {
-      if (!shop?.id) return [];
-      const response = await fetch(`http://localhost:3001/api/shops/${shop.id}/category`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'GET',
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      return response.json();
-    },
+    queryFn: () => getProductCategoriesByShopId(shop?.id),
   })
 
   async function onSubmit(values: CreateProductSchema) {
@@ -69,8 +60,10 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
       return toast.error("Error al crear el producto");
     }
 
-    mutation.isSuccess && toast.success("Producto creado exitosamente");
-    form.reset();
+    if (mutation.isSuccess) {
+      toast.success("Producto creado exitosamente");
+      form.reset();
+    }
   }
 
   const maxSizeMB = 5
@@ -98,7 +91,9 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, (errors) => {
+          console.log("Errores de validación:", errors);
+        })}
         className="space-y-6 "
       >
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 items-start'>
@@ -145,7 +140,7 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
                     type="number"
                     placeholder="0"
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => field.onChange(e.target.value)}
                     disabled={mutation.isPending}
                   />
                 </FormControl>
@@ -280,6 +275,32 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="isFeatured"
+            render={({ field }) => (
+              <FormItem
+                className='flex items-start p-4 border rounded-md'
+              >
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={mutation.isPending}
+                  />
+                </FormControl>
+                <div className='grid gap-2'>
+                  <FormLabel>Destacado</FormLabel>
+                  <FormDescription>
+                    Indica si el producto debe ser destacado en la tienda.
+                  </FormDescription>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="flex flex-col gap-2 col-start-1">
             {/* Drop area */}
             <div

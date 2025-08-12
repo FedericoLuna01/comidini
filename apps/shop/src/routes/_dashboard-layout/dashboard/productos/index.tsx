@@ -1,6 +1,10 @@
 import { Heading, HeadingDescription, HeadingSeparator, HeadingTitle, HeadingButton } from '@repo/ui/components/ui/heading'
+import { DataTable } from "@repo/ui/components/ui/data-table"
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { PackagePlusIcon } from 'lucide-react'
+import { PackagePlusIcon, Router } from 'lucide-react'
+import { allProductsQueryOptions } from '../../../../api/products'
+import { columns } from './-components/columns'
 
 export const Route = createFileRoute('/_dashboard-layout/dashboard/productos/')(
   {
@@ -9,6 +13,16 @@ export const Route = createFileRoute('/_dashboard-layout/dashboard/productos/')(
 )
 
 function RouteComponent() {
+  const { shop } = Route.useRouteContext()
+
+  if (!shop) {
+    return null
+  }
+
+  const { isPending, error, data } = useQuery(allProductsQueryOptions(shop.id))
+
+  console.log(data)
+
   return (
     <div>
       <Heading>
@@ -29,7 +43,13 @@ function RouteComponent() {
         </HeadingButton>
         <HeadingSeparator />
       </Heading>
-      {/* TODO: Agregar tabla de productos */}
+      <DataTable
+        columns={columns}
+        data={data || []}
+        isLoading={isPending}
+        searchFor='product.name'
+        searchForPlaceholder='Buscar por nombre de producto...'
+      />
     </div>
   )
 }

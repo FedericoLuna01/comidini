@@ -32,34 +32,38 @@ export const createProductSchema = insertProductSchema.omit({
 export type InsertProductSchema = z.infer<typeof insertProductSchema>;
 export type CreateProductSchema = z.infer<typeof createProductSchema>;
 
-export const insertProductVariantSchema = createInsertSchema(productVariant, {
-  name: z.string()
-    .min(1, { message: "El nombre de la variante es requerido" })
-    .max(50, { message: "El nombre de la variante no puede exceder los 50 caracteres" }),
-  extraPrice: z.number().min(0, { message: "El precio adicional no puede ser negativo" }).optional(),
-  sku: z.string().min(1, { message: "El SKU es requerido" }).max(50, { message: "El SKU no puede exceder los 50 caracteres" }),
-  quantity: z.number().min(0, { message: "La cantidad no puede ser negativa" }).default(0),
-  isActive: z.boolean().default(true),
-  sortOrder: z.number().min(0).default(0),
-}).omit({
-  updatedAt: true,
-  createdAt: true,
-})
+const SelectProduct = createSelectSchema(product)
 
-export const insertProductAddonSchema = createInsertSchema(productAddon, {
-  name: z.string()
-    .min(1, { message: "El nombre del complemento es requerido" })
-    .max(50, { message: "El nombre del complemento no puede exceder los 50 caracteres" }),
-  description: z.string().max(200, { message: "La descripción debe ser más corta." }).optional(),
-  price: z.number().min(0, { message: "El precio no puede ser negativo" }),
-  isRequired: z.boolean().default(false),
-  maxQuantity: z.number().min(1, { message: "La cantidad máxima debe ser mayor a 0" }).default(1),
-  isActive: z.boolean().default(true),
-  sortOrder: z.number().min(0).default(0),
-}).omit({
-  updatedAt: true,
-  createdAt: true,
-})
+export type SelectProduct = z.infer<typeof SelectProduct>;
+
+// export const insertProductVariantSchema = createInsertSchema(productVariant, {
+//   name: z.string()
+//     .min(1, { message: "El nombre de la variante es requerido" })
+//     .max(50, { message: "El nombre de la variante no puede exceder los 50 caracteres" }),
+//   extraPrice: z.number().min(0, { message: "El precio adicional no puede ser negativo" }).optional(),
+//   sku: z.string().min(1, { message: "El SKU es requerido" }).max(50, { message: "El SKU no puede exceder los 50 caracteres" }),
+//   quantity: z.number().min(0, { message: "La cantidad no puede ser negativa" }).default(0),
+//   isActive: z.boolean().default(true),
+//   sortOrder: z.number().min(0).default(0),
+// }).omit({
+//   updatedAt: true,
+//   createdAt: true,
+// })
+
+// export const insertProductAddonSchema = createInsertSchema(productAddon, {
+//   name: z.string()
+//     .min(1, { message: "El nombre del complemento es requerido" })
+//     .max(50, { message: "El nombre del complemento no puede exceder los 50 caracteres" }),
+//   description: z.string().max(200, { message: "La descripción debe ser más corta." }).optional(),
+//   price: z.number().min(0, { message: "El precio no puede ser negativo" }),
+//   isRequired: z.boolean().default(false),
+//   maxQuantity: z.number().min(1, { message: "La cantidad máxima debe ser mayor a 0" }).default(1),
+//   isActive: z.boolean().default(true),
+//   sortOrder: z.number().min(0).default(0),
+// }).omit({
+//   updatedAt: true,
+//   createdAt: true,
+// })
 
 export const insertProductCategorySchema = createInsertSchema(productCategory, {
   name: z.string()
@@ -83,3 +87,8 @@ export type CreateProductCategorySchema = z.infer<typeof createProductCategorySc
 const SelectProductCategory = createSelectSchema(productCategory)
 
 export type SelectProductCategory = z.infer<typeof SelectProductCategory>;
+
+export type SelectProductWithCategory = {
+  product: SelectProduct;
+  category: SelectProductCategory;
+}

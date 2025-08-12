@@ -27,7 +27,7 @@ router.get("/status", requireShopUser, async (req: Request, res: Response): Prom
   }
 });
 
-router.post("/create", requireShopUser, async (req: Request, res: Response): Promise<void> => {
+router.post("/", requireShopUser, async (req: Request, res: Response): Promise<void> => {
   try {
     const session = req.session;
 
