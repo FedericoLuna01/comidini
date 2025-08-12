@@ -9,7 +9,6 @@
     "dist/**"
   ],
   "scripts": {
-    "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "generate": "drizzle-kit generate",
     "migrate": "tsx src/migrate.ts",
@@ -24,12 +23,10 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^20.8.4",
     "@types/pg": "^8.15.4",
     "drizzle-kit": "^0.31.1",
-    "eslint": "^9.29.0",
     "tsx": "^3.14.0",
     "typescript": "^5.2.2"
   }
