@@ -1,7 +1,7 @@
 import { CreateShop, CreateShopHours } from "@repo/db/src/types/shop";
 
 export async function createShop(data: CreateShop) {
-  await fetch("http://localhost:3001/api/shops/create", {
+  const response = await fetch("http://localhost:3001/api/shops", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -9,6 +9,8 @@ export async function createShop(data: CreateShop) {
     credentials: "include",
     body: JSON.stringify(data),
   })
+
+  return response.json()
 }
 
 export async function getShopHours() {

@@ -1,7 +1,7 @@
 import { Input } from "@repo/ui/components/ui/input"
 import { Popover, PopoverAnchor, PopoverContent } from "@repo/ui/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@repo/ui/components/ui/command"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Command as CommandPrimitive } from "cmdk"
 import { Skeleton } from "@repo/ui/components/ui/skeleton"
 
@@ -21,10 +21,9 @@ const AutoCompleteInput = ({
   onSelect,
   suggestions,
   isLoading,
-  emptyMessage = "No hay resultados.",
-  placeholder = "Ingresa una dirección...",
 }: AutoCompleteInputProps) => {
   const [isOpen, setIsOpen] = useState(false)
+  // TODO: pulir este componente para que no se rompa el foco al abrir el popover
 
   return (
     <div>
@@ -43,7 +42,7 @@ const AutoCompleteInput = ({
               asChild
             >
               <Input
-                placeholder={placeholder}
+                placeholder="Buscar dirección..."
                 value={value}
                 onChange={(e) => {
                   onChange(e.target.value)
@@ -55,36 +54,50 @@ const AutoCompleteInput = ({
           </PopoverAnchor>
           <PopoverContent
             asChild
-            onOpenAutoFocus={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
             className="w-[var(--radix-popper-anchor-width)] p-0"
           >
             <CommandList>
-              {isLoading && (
+              {(value && isLoading) && (
                 <CommandPrimitive.Loading>
-                  <div className="p-1">
+                  <div className="p-1 space-y-1">
+                    <Skeleton className="h-6 w-full" />
                     <Skeleton className="h-6 w-full" />
                   </div>
                 </CommandPrimitive.Loading>
               )}
-              {suggestions.length > 0 && !isLoading ? (
-                <CommandGroup>
-                  {suggestions.map((suggestion, index) => (
-                    <CommandItem
-                      key={index}
-                      onSelect={() => {
-                        onSelect(suggestion)
-                        setIsOpen(false)
-                      }}
-                      onMouseDown={(e) => e.preventDefault()}
-                    >
-                      {suggestion.placePrediction?.text.text}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              ) : null}
-              {!isLoading && suggestions.length === 0 ? (
-                <CommandEmpty>{emptyMessage}</CommandEmpty>
-              ) : null}
+              {
+                (value && suggestions.length > 0 && !isLoading)
+                  ? (
+                    <CommandGroup>
+                      {suggestions.map((suggestion, index) => (
+                        <CommandItem
+                          key={index}
+                          onSelect={() => {
+                            onSelect(suggestion)
+                            setIsOpen(false)
+                          }}
+                          onMouseDown={(e) => e.preventDefault()}
+                        >
+                          {suggestion.placePrediction?.text.text}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )
+                  : null
+              }
+              {
+                (value && !isLoading) && suggestions.length === 0
+                  ? (
+                    <CommandEmpty>
+                      No se encontraron resultados.
+                    </CommandEmpty>
+                  )
+                  : null
+              }
             </CommandList>
           </PopoverContent>
         </Command>

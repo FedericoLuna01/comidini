@@ -24,12 +24,16 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   isLoading?: boolean
+  searchFor: string
+  searchForPlaceholder?: string
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading = false,
+  searchFor,
+  searchForPlaceholder
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     []
@@ -51,10 +55,10 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center mb-4">
         <Input
-          placeholder="Buscar por email..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          placeholder={searchForPlaceholder}
+          value={(table.getColumn(searchFor)?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn(searchFor)?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

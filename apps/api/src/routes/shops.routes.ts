@@ -1,9 +1,11 @@
 import { Router, Request, Response } from "express";
-import { createManyShopHours, createShop, getShopByUserId, getShopHoursByShopId, updateShopHours } from "@repo/db/src/services/shops";
+import { z } from "zod/v4";
 import { requireShopUser } from "../middlewares/requireShopUser";
 import { CreateShopHours, createShopHoursSchema, createShopSchema } from "@repo/db/src/types/shop";
 import { requireShop } from "../middlewares/requireShop";
-import { z } from "zod/v4";
+import { createManyShopHours, createShop, getShopByUserId, getShopHoursByShopId, updateShopHours } from "@repo/db/src/services/shops";
+import { createProductCategory, getProductCategoriesByShopId } from "@repo/db/src/services/category";
+import { createProductCategorySchema } from "@repo/db/src/types/product";
 
 const router: Router = Router();
 
@@ -18,14 +20,14 @@ router.get("/status", requireShopUser, async (req: Request, res: Response): Prom
 
     const shop = await getShopByUserId(session.user.id);
 
-    res.json(shop);
+    res.json({ shop });
   } catch (error) {
     console.error("Error in /status route:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
-router.post("/create", requireShopUser, async (req: Request, res: Response): Promise<void> => {
+router.post("/", requireShopUser, async (req: Request, res: Response): Promise<void> => {
   try {
     const session = req.session;
 
@@ -130,6 +132,51 @@ router.put("/hours", requireShopUser, requireShop, async (req: Request, res: Res
     res.json(updatedHours);
   } catch (error) {
     console.error("Error updating shop hours:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+router.get("/:shopId/category", requireShopUser, requireShop, async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.shop) {
+      res.status(404).json({ error: "Tienda no encontrada" });
+      return;
+    }
+
+    const categories = await getProductCategoriesByShopId(req.shop.id);
+
+    res.json(categories);
+  } catch (error) {
+    console.error("Error in /:shopId/category route:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+router.post("/:shopId/category", requireShopUser, requireShop, async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.shop) {
+      res.status(404).json({ error: "Tienda no encontrada" });
+      return;
+    }
+
+    const productCategory = req.body;
+
+    // Aquí deberías validar los datos de la categoría según tu esquema
+    const validatedFields = createProductCategorySchema.safeParse(productCategory);
+    if (!validatedFields.success) {
+      res.status(400).json({ error: "Datos de categoría inválidos", details: validatedFields.error });
+      return;
+    }
+
+    // Implementa la lógica para crear la categoría aquí
+    const createdCategory = await createProductCategory({
+      ...validatedFields.data,
+      shopId: Number(req.shop.id)
+    });
+
+    res.status(201).json({ message: "Categoría creada exitosamente", category: createdCategory });
+  } catch (error) {
+    console.error("Error creating category:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });

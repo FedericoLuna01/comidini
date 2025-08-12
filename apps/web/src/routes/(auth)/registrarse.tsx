@@ -1,14 +1,14 @@
+
 import { authClient } from "@repo/auth/client";
 import { Button } from "@repo/ui/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 import { Input } from "@repo/ui/components/ui/input";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/ui/form";
-import { Link } from "@tanstack/react-router";
 import { GoogleIcon } from "@repo/ui/components/icons/index";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";

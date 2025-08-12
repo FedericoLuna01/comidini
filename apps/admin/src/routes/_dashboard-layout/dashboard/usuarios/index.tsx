@@ -38,6 +38,8 @@ function RouteComponent() {
         columns={columns}
         data={data?.data?.users || []}
         isLoading={isPending}
+        searchFor='email'
+        searchForPlaceholder='Buscar por email...'
       />
     </div>
   )

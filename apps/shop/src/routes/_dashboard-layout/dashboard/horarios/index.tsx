@@ -10,7 +10,7 @@ import { Button } from "@repo/ui/components/ui/button"
 import { Switch } from "@repo/ui/components/ui/switch"
 import { ClockIcon } from "lucide-react"
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { getShopHours, updateShopHours } from '../../../../api/shop'
+import { getShopHours, updateShopHours } from '../../../../api/shops'
 import { useEffect } from 'react'
 import { toast } from '@repo/ui/components/ui/sonner'
 

@@ -1,9 +1,11 @@
 {
   "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
   "cSpell.words": [
+    "cmdk",
     "comidini",
     "configuracion",
     "italian",
+    "Podés",
     "postgres",
     "postgresql",
     "sesion",

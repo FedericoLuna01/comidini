@@ -2,6 +2,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { authClient } from '@repo/auth/client'
 import { ClockIcon, Home, PackageOpenIcon, Settings, UtensilsIcon } from 'lucide-react'
 import { SidebarLayout } from '@repo/ui/components/sidebar-layout'
+import { SelectShop } from '@repo/db/src/types/shop'
 
 const shopItems = [
   {
@@ -36,13 +37,11 @@ export const Route = createFileRoute('/_dashboard-layout')({
 
     const queryClient = context.queryClient
 
-    let shop;
+    let shop: SelectShop | undefined;
 
     // Check if the user is authenticated
     const session = await authClient.getSession({}, {
       onSuccess: async (ctx) => {
-
-        console.log(ctx.data)
 
         if (!ctx.data) {
           throw redirect({
@@ -68,7 +67,7 @@ export const Route = createFileRoute('/_dashboard-layout')({
             return response.json()
           },
         })
-        shop = data;
+        shop = data.shop;
 
         if (!shop) {
           throw redirect({
