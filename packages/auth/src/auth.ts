@@ -41,7 +41,11 @@ export const auth = betterAuth({
     }
   },
   emailAndPassword: {
-    enabled: true
+    enabled: true,
+    //        EMAILJS O RESEND
+    // forgotPasswordCallback: async (url, user) => {
+    //   console.log(`Password reset URL for ${user.email}: ${url}`);
+    // },
   },
   socialProviders: {
     google: {

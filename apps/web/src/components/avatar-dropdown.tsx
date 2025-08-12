@@ -48,7 +48,7 @@ const AvatarDropdown = () => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/perfil" className="flex items-center gap-2">
             <UserIcon />
             Perfil
           </Link>

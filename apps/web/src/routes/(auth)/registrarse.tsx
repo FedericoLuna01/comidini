@@ -1,48 +1,56 @@
-import { authClient } from '@repo/auth/client'
-import { Button } from '@repo/ui/components/ui/button'
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/ui/card'
-import { Input } from '@repo/ui/components/ui/input'
-import { createFileRoute } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import z from 'zod'
-import { toast } from '@repo/ui/components/ui/sonner'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@repo/ui/components/ui/form';
-import { Link } from '@tanstack/react-router';
-import { GoogleIcon } from '@repo/ui/components/icons/index'
 
-export const Route = createFileRoute('/(auth)/registrarse')({
+import { authClient } from "@repo/auth/client";
+import { Button } from "@repo/ui/components/ui/button";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import { Input } from "@repo/ui/components/ui/input";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import z from "zod";
+import { toast } from "@repo/ui/components/ui/sonner";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/ui/form";
+import { GoogleIcon } from "@repo/ui/components/icons/index";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+
+export const Route = createFileRoute("/(auth)/registrarse")({
   component: RegisterPage,
-})
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "El nombre debe tener al menos 2 caracteres",
-  }),
-  email: z.string().email({
-    message: "No es un correo electrónico válido",
-  }),
-  password: z.string().min(6, {
-    message: "La contraseña debe tener al menos 6 caracteres",
-  }).max(100, {
-    message: "La contraseña no puede tener más de 100 caracteres",
-  }),
 });
 
+const formSchema = z
+  .object({
+    name: z.string().min(2, {
+      message: "El nombre debe tener al menos 2 caracteres",
+    }),
+    email: z.string().email({
+      message: "No es un correo electrónico válido",
+    }),
+    password: z
+      .string()
+      .min(6, {
+        message: "La contraseña debe tener al menos 6 caracteres",
+      })
+      .max(100, {
+        message: "La contraseña no puede tener más de 100 caracteres",
+      }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  });
+
 function RegisterPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -50,8 +58,8 @@ function RegisterPage() {
     await authClient.signIn.social({
       provider: "google",
       callbackURL: "http://localhost:5174/",
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     const { name, email, password } = values;
@@ -62,11 +70,11 @@ function RegisterPage() {
       image: "",
     });
 
-    if (error && error.code === 'USER_ALREADY_EXISTS') {
+    if (error && error.code === "USER_ALREADY_EXISTS") {
       form.setError("email", {
         type: "manual",
         message: "Ya existe una cuenta con este correo electrónico",
-      })
+      });
       return;
     }
 
@@ -81,15 +89,11 @@ function RegisterPage() {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center'>
-      <Card className='w-full max-w-md'>
+    <div className="min-h-screen flex items-center justify-center">
+      <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>
-            Registrarse
-          </CardTitle>
-          <CardDescription>
-            Ingresa tus datos para crear una cuenta
-          </CardDescription>
+          <CardTitle>Registrarse</CardTitle>
+          <CardDescription>Ingresa tus datos para crear una cuenta</CardDescription>
           <CardAction>
             <Button variant="link" asChild>
               <Link to="/iniciar-sesion">Iniciar sesión</Link>
@@ -98,10 +102,7 @@ function RegisterPage() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-6"
-            >
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="name"
@@ -135,22 +136,52 @@ function RegisterPage() {
                   <FormItem>
                     <FormLabel>Contraseña</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <div className="relative">
+                        <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className='mt-6 flex flex-col gap-4'>
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Repetir contraseña</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="mt-6 flex flex-col gap-4">
                 <Button type="submit" className="w-full">
                   Registrarse
                 </Button>
-                <Button
-                  type='button'
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleLoginWithGoogle}
-                >
+                <Button type="button" variant="outline" className="w-full" onClick={handleLoginWithGoogle}>
                   <GoogleIcon />
                   Ingresar con Google
                 </Button>
@@ -160,5 +191,5 @@ function RegisterPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
