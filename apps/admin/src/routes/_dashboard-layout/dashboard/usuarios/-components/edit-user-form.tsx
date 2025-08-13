@@ -103,24 +103,22 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ user }) => {
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 
-	if (!user) return null;
-
 	const form = useForm<z.infer<typeof editUserFormSchema>>({
 		resolver: zodResolver(editUserFormSchema),
 		defaultValues: {
-			name: user.name,
-			email: user.email,
-			role: user.role as "user" | "admin" | "shop",
+			name: user?.name,
+			email: user?.email,
+			role: user?.role as "user" | "admin" | "shop",
 		},
 	});
 
 	const updateUserMutation = useMutation({
 		mutationFn: (userData: z.infer<typeof editUserFormSchema>) =>
-			updateUser(user.id, userData),
+			updateUser(user?.id || "", userData),
 		onSuccess: () => {
 			toast.success("Usuario actualizado exitosamente");
 			queryClient.invalidateQueries({ queryKey: ["get-all-users"] });
-			queryClient.invalidateQueries({ queryKey: ["get-user", user.id] });
+			queryClient.invalidateQueries({ queryKey: ["get-user", user?.id] });
 			navigate({ to: "/dashboard/usuarios" });
 		},
 		onError: (error) => {
