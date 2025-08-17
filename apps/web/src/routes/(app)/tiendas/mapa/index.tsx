@@ -5,21 +5,47 @@ import { Logo } from "@repo/ui/components/ui/logo";
 import { cn } from "@repo/ui/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-	AdvancedMarker,
 	APIProvider,
 	Map as GoogleMap,
+	useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 import { SlidersHorizontalIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import useSupercluster from "use-supercluster";
 import { exampleShops } from "..";
+import { ClusteredMarkers } from "./-components/clustered-marker";
 
 export const Route = createFileRoute("/(app)/tiendas/mapa/")({
 	component: RouteComponent,
 });
 
 function RouteComponent() {
+	const [zoom, setZoom] = useState(13);
+	const [bounds, setBounds] = useState<google.maps.LatLngBoundsLiteral>();
 	const [showFilters, setShowFilters] = useState(false);
 	const defaultCenter = { lat: -32.9526405, lng: -60.6776039 }; // Centro de Rosario
+
+	const points = exampleShops.map((shop) => ({
+		type: "Feature" as const,
+		properties: {
+			cluster: false,
+			clusterId: shop.id,
+			category: shop.category,
+		},
+		geometry: {
+			type: "Point" as const,
+			coordinates: [shop.lng, shop.lat],
+		},
+	}));
+
+	const { clusters } = useSupercluster({
+		points,
+		bounds,
+		zoom,
+		options: { radius: 10 },
+	});
+
+	console.log(clusters);
 
 	return (
 		<div className="">
@@ -29,8 +55,8 @@ function RouteComponent() {
 			</header>
 			{/* TODO: Arreglar esto (se ve bien pero hay que hacerlo sin magic number) */}
 			<div className="flex h-[calc(100vh-73px)]">
-				<aside className="max-w-[500px] overflow-y-auto">
-					<div className="border-b sticky top-0 bg-background">
+				<aside className="max-w-[500px] overflow-hidden flex flex-col border-r">
+					<div className="border-b">
 						<div className="px-6 py-4 flex flex-col gap-2">
 							<Input type="text" placeholder="Buscar restaurante..." />
 							<Button
@@ -61,7 +87,7 @@ function RouteComponent() {
 							</div>
 						</div>
 					</div>
-					<div className="p-4">
+					<div className="p-4 overflow-y-auto h-full">
 						{exampleShops.map((shop) => (
 							<div
 								key={shop.id}
@@ -80,10 +106,10 @@ function RouteComponent() {
 						))}
 					</div>
 				</aside>
-				{/* <main className="flex-1 bg-cyan-400 h-full">
+				<main className="flex-1 h-full flex items-center justify-center">
 					<APIProvider
 						apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-						// libraries={["places", "marker"]}
+						libraries={["core"]}
 						language="es"
 					>
 						<GoogleMap
@@ -91,13 +117,22 @@ function RouteComponent() {
 							mapId="314bbedb82bc2f8947b9d13c"
 							defaultCenter={defaultCenter}
 							defaultZoom={13}
+							onZoomChanged={(event) => {
+								setZoom(event.detail.zoom);
+							}}
 							minZoom={13}
 							gestureHandling={"greedy"}
 							clickableIcons={false}
 							disableDefaultUI={true}
-						></GoogleMap>
+							onBoundsChanged={(event) => {
+								setBounds(event.detail.bounds);
+							}}
+							defaultBounds={bounds}
+						>
+							<ClusteredMarkers shops={exampleShops} />
+						</GoogleMap>
 					</APIProvider>
-				</main> */}
+				</main>
 			</div>
 		</div>
 	);

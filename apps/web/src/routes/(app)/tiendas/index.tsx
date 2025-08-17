@@ -36,6 +36,8 @@ export const exampleShops = [
 		image:
 			"https://images.unsplash.com/photo-1716237389072-354bcb7ab6d0?q=80&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=400&h=300&fit=crop",
 		category: "restaurant",
+		lat: -32.94682,
+		lng: -60.63932,
 	},
 	{
 		id: 2,
@@ -49,6 +51,8 @@ export const exampleShops = [
 		image:
 			"https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=300&fit=crop",
 		category: "cafe",
+		lat: -32.95123,
+		lng: -60.66645,
 	},
 	{
 		id: 3,
@@ -61,6 +65,8 @@ export const exampleShops = [
 		image:
 			"https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop",
 		category: "ice-cream",
+		lat: -32.95874,
+		lng: -60.65012,
 	},
 	{
 		id: 4,
@@ -74,6 +80,40 @@ export const exampleShops = [
 		image:
 			"https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?q=80&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dw=400&h=300",
 		category: "restaurant",
+		lat: -32.94458,
+		lng: -60.64123,
+	},
+	{
+		id: 5,
+		name: "Restaurante La Esquina",
+		type: "Restaurante",
+		description:
+			"Cocina fusión con platos innovadores y una carta de vinos seleccionada.",
+		address: "Calle Florida 789, CABA",
+		phone: "+54 11 4567-8901",
+		hours: "Mar-Dom 12:00-23:00",
+		image:
+			"https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?q=80&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dw=400&h=300",
+		category: "restaurant",
+		// -32.948644, -60.647544
+		lat: -32.948644,
+		lng: -60.647544,
+	},
+	{
+		id: 6,
+		name: "Restaurante La Esquina",
+		type: "Restaurante",
+		description:
+			"Cocina fusión con platos innovadores y una carta de vinos seleccionada.",
+		address: "Calle Florida 789, CABA",
+		phone: "+54 11 4567-8901",
+		hours: "Mar-Dom 12:00-23:00",
+		image:
+			"https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?q=80&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dw=400&h=300",
+		category: "restaurant",
+		// -32.944104, -60.643407
+		lat: -32.944104,
+		lng: -60.643407,
 	},
 ];
 
