@@ -39,7 +39,7 @@ export function useMapViewport({ padding = 0 }: MapViewportOptions = {}) {
 		return () => listener.remove();
 	}, [map, padding]);
 
-	return { bbox, zoom };
+	return { bbox, zoom, setBbox, setZoom };
 }
 
 function degreesPerPixel(zoomLevel: number) {

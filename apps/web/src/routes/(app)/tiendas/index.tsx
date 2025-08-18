@@ -9,10 +9,15 @@ import {
 } from "@repo/ui/components/ui/card";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+	Beef,
 	Clock,
+	Coffee,
 	Filter,
+	IceCream,
+	Leaf,
 	MapPin,
 	Phone,
+	Pizza,
 	Plus,
 	Search,
 	Store,
@@ -21,6 +26,60 @@ import {
 export const Route = createFileRoute("/(app)/tiendas/")({
 	component: RouteComponent,
 });
+
+// Mapa de iconos por categoría
+export const categoryIconMap = {
+	restaurant: Beef,
+	cafe: Coffee,
+	"ice-cream": IceCream,
+	veggie: Leaf,
+	pizza: Pizza,
+} as const;
+
+// Mapa de colores por categoría
+export const categoryColorMap = {
+	restaurant: {
+		bg: "bg-orange-200",
+		text: "text-orange-900",
+		border: "border-orange-300",
+	},
+	cafe: {
+		bg: "bg-amber-200",
+		text: "text-amber-900",
+		border: "border-amber-300",
+	},
+	"ice-cream": {
+		bg: "bg-blue-200",
+		text: "text-blue-900",
+		border: "border-blue-300",
+	},
+	veggie: {
+		bg: "bg-green-200",
+		text: "text-green-900",
+		border: "border-green-300",
+	},
+	pizza: {
+		bg: "bg-red-200",
+		text: "text-red-900",
+		border: "border-red-300",
+	},
+} as const;
+
+// Función helper para obtener el icono de una categoría
+export const getCategoryIcon = (category: string) => {
+	return categoryIconMap[category as keyof typeof categoryIconMap] || Store;
+};
+
+// Función helper para obtener los colores de una categoría
+export const getCategoryColors = (category: string) => {
+	return (
+		categoryColorMap[category as keyof typeof categoryColorMap] || {
+			bg: "bg-gray-200",
+			text: "text-gray-900",
+			border: "border-gray-300",
+		}
+	);
+};
 
 // Datos de ejemplo de tiendas
 export const exampleShops = [
@@ -35,7 +94,7 @@ export const exampleShops = [
 		hours: "Lun-Dom 18:00-24:00",
 		image:
 			"https://images.unsplash.com/photo-1716237389072-354bcb7ab6d0?q=80&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=400&h=300&fit=crop",
-		category: "restaurant",
+		category: "pizza",
 		lat: -32.94682,
 		lng: -60.63932,
 	},
@@ -94,7 +153,7 @@ export const exampleShops = [
 		hours: "Mar-Dom 12:00-23:00",
 		image:
 			"https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?q=80&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dw=400&h=300",
-		category: "restaurant",
+		category: "veggie",
 		// -32.948644, -60.647544
 		lat: -32.948644,
 		lng: -60.647544,
@@ -110,7 +169,7 @@ export const exampleShops = [
 		hours: "Mar-Dom 12:00-23:00",
 		image:
 			"https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?q=80&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dw=400&h=300",
-		category: "restaurant",
+		category: "cafe",
 		// -32.944104, -60.643407
 		lat: -32.944104,
 		lng: -60.643407,
@@ -183,53 +242,60 @@ function RouteComponent() {
 
 			{/* Lista de tiendas */}
 			<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{exampleShops.map((shop) => (
-					<Card
-						key={shop.id}
-						className="overflow-hidden hover:shadow-lg transition-shadow"
-					>
-						<div className="aspect-video relative">
-							<img
-								src={shop.image}
-								alt={shop.name}
-								className="w-full h-full object-cover"
-							/>
-							<Badge className="absolute top-2 left-2 bg-white/90 text-gray-800">
-								{shop.type}
-							</Badge>
-						</div>
-						<CardHeader className="pb-2">
-							<div className="flex items-start justify-between">
-								<CardTitle className="text-lg">{shop.name}</CardTitle>
+				{exampleShops.map((shop) => {
+					const CategoryIcon = getCategoryIcon(shop.category);
+					return (
+						<Card
+							key={shop.id}
+							className="overflow-hidden hover:shadow-lg transition-shadow"
+						>
+							<div className="aspect-video relative">
+								<img
+									src={shop.image}
+									alt={shop.name}
+									className="w-full h-full object-cover"
+								/>
+								<Badge className="absolute top-2 left-2 bg-white/90 text-gray-800 flex items-center gap-1">
+									<CategoryIcon className="w-3 h-3" />
+									{shop.type}
+								</Badge>
 							</div>
-							<CardDescription className="text-sm">
-								{shop.description}
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-3">
-							<div className="flex items-center gap-2 text-sm text-muted-foreground">
-								<MapPin className="w-4 h-4" />
-								<span className="truncate">{shop.address}</span>
-							</div>
-							<div className="flex items-center gap-2 text-sm text-muted-foreground">
-								<Clock className="w-4 h-4" />
-								<span>{shop.hours}</span>
-							</div>
-							<div className="flex items-center gap-2 text-sm text-muted-foreground">
-								<Phone className="w-4 h-4" />
-								<span>{shop.phone}</span>
-							</div>
-							<div className="flex gap-2 pt-2">
-								<Button size="sm" className="flex-1">
-									Ver Detalles
-								</Button>
-								<Button size="sm" variant="outline">
+							<CardHeader className="pb-2">
+								<div className="flex items-start justify-between">
+									<CardTitle className="text-lg flex items-center gap-2">
+										<CategoryIcon className="w-5 h-5 text-muted-foreground" />
+										{shop.name}
+									</CardTitle>
+								</div>
+								<CardDescription className="text-sm">
+									{shop.description}
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-3">
+								<div className="flex items-center gap-2 text-sm text-muted-foreground">
 									<MapPin className="w-4 h-4" />
-								</Button>
-							</div>
-						</CardContent>
-					</Card>
-				))}
+									<span className="truncate">{shop.address}</span>
+								</div>
+								<div className="flex items-center gap-2 text-sm text-muted-foreground">
+									<Clock className="w-4 h-4" />
+									<span>{shop.hours}</span>
+								</div>
+								<div className="flex items-center gap-2 text-sm text-muted-foreground">
+									<Phone className="w-4 h-4" />
+									<span>{shop.phone}</span>
+								</div>
+								<div className="flex gap-2 pt-2">
+									<Button size="sm" className="flex-1">
+										Ver Detalles
+									</Button>
+									<Button size="sm" variant="outline">
+										<MapPin className="w-4 h-4" />
+									</Button>
+								</div>
+							</CardContent>
+						</Card>
+					);
+				})}
 			</div>
 
 			{/* Estado vacío cuando no hay resultados */}

@@ -1,6 +1,8 @@
 {
 	"tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
 	"cSpell.words": [
+		"bbox",
+		"Bbox",
 		"cmdk",
 		"comidini",
 		"configuracion",
