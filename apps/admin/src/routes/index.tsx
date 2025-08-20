@@ -1,20 +1,20 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { authClient } from '@repo/auth/client'
-import { AccessDenied } from '@repo/ui/components/access-denied'
+import { authClient } from "@repo/auth/client";
+import { AccessDenied } from "@repo/ui/components/access-denied";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/')({
-  component: RouteComponent,
-})
+export const Route = createFileRoute("/")({
+	component: RouteComponent,
+});
 
 function RouteComponent() {
-  const { data, isPending } = authClient.useSession()
+	const { data, isPending } = authClient.useSession();
 
-  return (
-    <AccessDenied
-      session={data}
-      isPending={isPending}
-      appName="App Admin"
-      role="admin"
-    />
-  )
+	return (
+		<AccessDenied
+			session={data}
+			isPending={isPending}
+			appName="App Admin"
+			role="admin"
+		/>
+	);
 }
