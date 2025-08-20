@@ -4,7 +4,6 @@ import { getCategoryColors, getCategoryIcon } from "../..";
 import type { Cluster } from "..";
 
 export const ShopMarker = ({ shop }: { shop: Cluster }) => {
-	console.log(shop);
 	const CategoryIcon = getCategoryIcon(shop.properties.data?.category || "");
 	const colors = getCategoryColors(shop.properties.data?.category || "");
 	return (

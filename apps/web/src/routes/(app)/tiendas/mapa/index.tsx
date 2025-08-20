@@ -4,47 +4,19 @@ import { Input } from "@repo/ui/components/ui/input";
 import { Logo } from "@repo/ui/components/ui/logo";
 import { cn } from "@repo/ui/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
-import { APIProvider, Map as GoogleMap } from "@vis.gl/react-google-maps";
+import { APIProvider } from "@vis.gl/react-google-maps";
 import { SlidersHorizontalIcon } from "lucide-react";
 import { useState } from "react";
 import type Supercluster from "supercluster";
-import useSupercluster from "use-supercluster";
-import { useMapViewport } from "../../../../hooks/use-map-viewport";
 import { exampleShops } from "..";
-import { ClusteredMarkers } from "./-components/clustered-marker";
+import { MapComponent } from "./-components/map-component";
 
 export const Route = createFileRoute("/(app)/tiendas/mapa/")({
 	component: RouteComponent,
 });
 
 function RouteComponent() {
-	const { bbox, zoom, setZoom } = useMapViewport();
 	const [showFilters, setShowFilters] = useState(false);
-	const defaultCenter = { lat: -32.9526405, lng: -60.6776039 }; // Centro de Rosario
-
-	const points = exampleShops.map((shop) => ({
-		type: "Feature" as const,
-		properties: {
-			cluster: false,
-			clusterId: shop.id,
-			category: shop.category,
-			data: {
-				...shop,
-			},
-		},
-		geometry: {
-			type: "Point" as const,
-			coordinates: [shop.lng, shop.lat],
-		},
-	}));
-
-	const { clusters, supercluster } = useSupercluster({
-		points,
-		// @ts-ignore
-		bounds: bbox,
-		zoom,
-		options: { radius: 75 },
-	});
 
 	return (
 		<div className="">
@@ -108,30 +80,9 @@ function RouteComponent() {
 				<main className="flex-1 h-full flex items-center justify-center">
 					<APIProvider
 						apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-						libraries={["core"]}
 						language="es"
 					>
-						<GoogleMap
-							className="w-full h-full"
-							mapId="314bbedb82bc2f8947b9d13c"
-							defaultCenter={defaultCenter}
-							defaultZoom={13}
-							minZoom={13}
-							gestureHandling={"greedy"}
-							clickableIcons={false}
-							disableDefaultUI={true}
-							onCameraChanged={(event) => {
-								setZoom(event.detail.zoom);
-								// setBbox(event.detail.bounds);
-							}}
-						>
-							<ClusteredMarkers
-								clusters={clusters}
-								// TODO: Arreglar este tipado
-								// @ts-ignore
-								superCluster={supercluster}
-							/>
-						</GoogleMap>
+						<MapComponent />
 					</APIProvider>
 				</main>
 			</div>

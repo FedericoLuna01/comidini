@@ -8,16 +8,17 @@ import { ShopMarker } from "./shop-marker";
 export const ClusteredMarkers = ({
 	clusters,
 	superCluster,
+	handleClusterClick,
 }: {
 	clusters: Cluster[];
 	superCluster: Supercluster<Cluster> | null;
+	handleClusterClick: (clusterId: number) => void;
 }) => {
 	return (
 		<div>
 			{clusters.map((cluster) => {
 				if (cluster.properties.cluster) {
 					const leaves = superCluster?.getLeaves(Number(cluster.id));
-					console.log(leaves);
 					return (
 						<AdvancedMarker
 							key={cluster.id}
@@ -25,6 +26,7 @@ export const ClusteredMarkers = ({
 								lat: cluster.geometry.coordinates[1],
 								lng: cluster.geometry.coordinates[0],
 							}}
+							onClick={() => handleClusterClick(Number(cluster.id))}
 						>
 							<div className="bg-white p-1 h-10 flex items-center justify-center rounded-full relative border shadow-md">
 								{leaves?.map((leaf, index) => {
