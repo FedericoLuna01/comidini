@@ -1,33 +1,33 @@
 {
-  "servers": {
-    "tanstack query": {
-      "url": "https://context7.com/tanstack/query/llms.txt",
-      "type": "http"
-    },
-    "tanstack router": {
-      "url": "https://context7.com/tanstack/router/llms.txt",
-      "type": "http"
-    },
-    "better auth": {
-      "url": "https://www.better-auth.com/llms.txt",
-      "type": "http"
-    },
-    "drizzle": {
-      "url": "https://context7.com/drizzle-team/drizzle-orm-docs/llms.txt",
-      "type": "http"
-    },
-    "turborepo": {
-      "url": "https://context7.com/vercel/turborepo/llms.txt",
-      "type": "http"
-    },
-    "tailwindcss": {
-      "url": "https://context7.com/tailwindlabs/tailwindcss.com/llms.txt",
-      "type": "http"
-    },
-    "zod": {
-      "url": "https://context7.com/colinhacks/zod/llms.txt",
-      "type": "http"
-    }
-  },
-  "inputs": []
+	"servers": {
+		"tanstack query": {
+			"url": "https://context7.com/tanstack/query/llms.txt",
+			"type": "http"
+		},
+		"tanstack router": {
+			"url": "https://context7.com/tanstack/router/llms.txt",
+			"type": "http"
+		},
+		"better auth": {
+			"url": "https://www.better-auth.com/llms.txt",
+			"type": "http"
+		},
+		"drizzle": {
+			"url": "https://context7.com/drizzle-team/drizzle-orm-docs/llms.txt",
+			"type": "http"
+		},
+		"turborepo": {
+			"url": "https://context7.com/vercel/turborepo/llms.txt",
+			"type": "http"
+		},
+		"tailwindcss": {
+			"url": "https://context7.com/tailwindlabs/tailwindcss.com/llms.txt",
+			"type": "http"
+		},
+		"zod": {
+			"url": "https://context7.com/colinhacks/zod/llms.txt",
+			"type": "http"
+		}
+	},
+	"inputs": []
 }
