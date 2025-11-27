@@ -1,4 +1,4 @@
-export { ImageService } from "./services/image-service";
+export { uploadImage, deleteImage, getDefaultOptionsForType } from "./services/image-service";
 export { r2Client, r2Config, validateR2Config } from "./config/r2";
 export type {
   ImageUploadResult,
@@ -6,4 +6,4 @@ export type {
   ImageMetadata,
   ImageType,
   UploadedImage,
-} from "./types/image"; 
+} from "./types/image";
