@@ -5,6 +5,9 @@ import cors from "cors";
 import express from "express";
 import productsRoutes from "./routes/products.routes";
 import shopsRoutes from "./routes/shops.routes";
+import uploadRoutes from "./routes/upload.routes";
+import { type Session } from "@repo/auth/client"
+import { SelectShop } from "@repo/db/src/types/shop";
 
 declare global {
 	namespace Express {
@@ -48,6 +51,7 @@ apiRouter.get("/", (req, res) => {
 });
 
 apiRouter.use("/shops", shopsRoutes);
+apiRouter.use("/upload", uploadRoutes);
 apiRouter.use("/products", productsRoutes);
 
 app.listen(port, () => {
