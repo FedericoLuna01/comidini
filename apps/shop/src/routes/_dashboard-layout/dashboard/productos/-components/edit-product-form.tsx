@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	type CreateProductSchema,
 	createProductSchema,
+	type SelectProduct,
 } from "@repo/db/src/types/product";
 import type { SelectShop } from "@repo/db/src/types/shop";
 import { Button } from "@repo/ui/components/ui/button";
@@ -18,38 +19,60 @@ import {
 import { Input } from "@repo/ui/components/ui/input";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { Spinner } from "@repo/ui/components/ui/spinner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { Dice3Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { getProductCategoriesByShopId } from "../../../../../api/categories";
-import { createProduct } from "../../../../../api/products";
+import { updateProduct } from "../../../../../api/products";
 import {
 	ImageUploadField,
 	type UploadedImageData,
 } from "../../../../../components/image-upload-field";
 import { ProductCategorySelect } from "./product-category-select";
 
-export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
+interface EditProductFormProps {
+	shop: SelectShop | undefined;
+	product: SelectProduct;
+}
+
+export const EditProductForm = ({ shop, product }: EditProductFormProps) => {
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+
 	const form = useForm<CreateProductSchema>({
 		resolver: zodResolver(createProductSchema),
 		defaultValues: {
-			name: "",
-			description: "",
-			price: "",
-			sku: "",
-			quantity: 0,
-			lowStockThreshold: 0,
-			images: [],
-			isActive: true,
-			tags: [],
-			sortOrder: 0,
-			isFeatured: false,
+			name: product.name,
+			description: product.description ?? "",
+			price: product.price,
+			sku: product.sku ?? "",
+			quantity: product.quantity ?? 0,
+			lowStockThreshold: product.lowStockThreshold ?? 0,
+			images: product.images ?? [],
+			isActive: product.isActive ?? true,
+			tags: product.tags ?? [],
+			sortOrder: product.sortOrder ?? 0,
+			isFeatured: product.isFeatured ?? false,
+			categoryId: product.categoryId ?? undefined,
 		},
 	});
 
 	const mutation = useMutation({
-		mutationFn: async (product: CreateProductSchema) => {
-			await createProduct(product);
+		mutationFn: async (productData: CreateProductSchema) => {
+			return await updateProduct(product.id, productData);
+		},
+		onSuccess: () => {
+			toast.success("Producto actualizado exitosamente");
+			queryClient.invalidateQueries({
+				queryKey: ["get-all-products", shop?.id],
+			});
+			queryClient.invalidateQueries({ queryKey: ["get-product", product.id] });
+			navigate({ to: "/dashboard/productos" });
+		},
+		onError: (error) => {
+			toast.error("Error al actualizar el producto");
+			console.error("Error updating product:", error);
 		},
 	});
 
@@ -60,15 +83,6 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
 
 	async function onSubmit(values: CreateProductSchema) {
 		mutation.mutate(values);
-
-		if (mutation.isError) {
-			return toast.error("Error al crear el producto");
-		}
-
-		if (mutation.isSuccess) {
-			toast.success("Producto creado exitosamente");
-			form.reset();
-		}
 	}
 
 	const handleImagesChange = (images: UploadedImageData[]) => {
@@ -78,6 +92,18 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
 			{ shouldValidate: true },
 		);
 	};
+
+	const handleCancel = () => {
+		navigate({ to: "/dashboard/productos" });
+	};
+
+	// Preparar las imágenes iniciales para el componente ImageUploadField
+	const initialImages: UploadedImageData[] = (product.images ?? []).map(
+		(url) => ({
+			url,
+			key: url,
+		}),
+	);
 
 	return (
 		<Form {...form}>
@@ -315,6 +341,7 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
 									<ImageUploadField
 										type="product-image"
 										onImagesChange={handleImagesChange}
+										initialImages={initialImages}
 										multiple={true}
 										maxFiles={6}
 										maxSizeMB={5}
@@ -329,20 +356,30 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
 						)}
 					/>
 
-					<Button
-						type="submit"
-						className="col-span-1 col-start-1"
-						disabled={mutation.isPending}
-					>
-						{mutation.isPending ? (
-							<>
-								<Spinner />
-								Creando producto...
-							</>
-						) : (
-							"Crear Producto"
-						)}
-					</Button>
+					<div className="col-span-1 col-start-1 flex gap-4">
+						<Button
+							type="submit"
+							className="flex-1"
+							disabled={mutation.isPending}
+						>
+							{mutation.isPending ? (
+								<>
+									<Spinner />
+									Actualizando producto...
+								</>
+							) : (
+								"Actualizar Producto"
+							)}
+						</Button>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={handleCancel}
+							disabled={mutation.isPending}
+						>
+							Cancelar
+						</Button>
+					</div>
 				</div>
 			</form>
 		</Form>

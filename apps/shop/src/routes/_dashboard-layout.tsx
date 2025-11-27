@@ -1,109 +1,116 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { authClient } from '@repo/auth/client'
-import { ClockIcon, Home, PackageOpenIcon, Settings, UtensilsIcon } from 'lucide-react'
-import { SidebarLayout } from '@repo/ui/components/sidebar-layout'
-import { SelectShop } from '@repo/db/src/types/shop'
+import { authClient } from "@repo/auth/client";
+import type { SelectShop } from "@repo/db/src/types/shop";
+import { SidebarLayout } from "@repo/ui/components/sidebar-layout";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import {
+	ClockIcon,
+	Home,
+	PackageOpenIcon,
+	Settings,
+	UtensilsIcon,
+} from "lucide-react";
 
 const shopItems = [
-  {
-    title: "Inicio",
-    to: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Productos",
-    to: "/dashboard/productos",
-    icon: PackageOpenIcon,
-  },
-  {
-    title: "Pedidos",
-    to: "/dashboard/pedidos",
-    icon: UtensilsIcon,
-  },
-  {
-    title: "Configuración",
-    to: "/dashboard/configuracion",
-    icon: Settings,
-  },
-  {
-    title: "Horarios",
-    to: "/dashboard/horarios",
-    icon: ClockIcon,
-  },
-]
+	{
+		title: "Inicio",
+		to: "/dashboard",
+		icon: Home,
+	},
+	{
+		title: "Productos",
+		to: "/dashboard/productos",
+		icon: PackageOpenIcon,
+	},
+	{
+		title: "Pedidos",
+		to: "/dashboard/pedidos",
+		icon: UtensilsIcon,
+	},
+	{
+		title: "Horarios",
+		to: "/dashboard/horarios",
+		icon: ClockIcon,
+	},
+	{
+		title: "Configuración",
+		to: "/dashboard/configuracion",
+		icon: Settings,
+	},
+];
 
-export const Route = createFileRoute('/_dashboard-layout')({
-  beforeLoad: async ({ context }) => {
+export const Route = createFileRoute("/_dashboard-layout")({
+	beforeLoad: async ({ context }) => {
+		const queryClient = context.queryClient;
 
-    const queryClient = context.queryClient
+		let shop: SelectShop | undefined;
 
-    let shop: SelectShop | undefined;
+		// Check if the user is authenticated
+		const session = await authClient.getSession(
+			{},
+			{
+				onSuccess: async (ctx) => {
+					if (!ctx.data) {
+						throw redirect({
+							to: "/iniciar-sesion",
+						});
+					}
 
-    // Check if the user is authenticated
-    const session = await authClient.getSession({}, {
-      onSuccess: async (ctx) => {
+					if (ctx.data.user.role !== "shop") {
+						throw redirect({
+							to: "/",
+						});
+					}
 
-        if (!ctx.data) {
-          throw redirect({
-            to: "/iniciar-sesion",
-          })
-        }
+					const data = await queryClient.fetchQuery({
+						queryKey: ["dashboard"],
+						queryFn: async () => {
+							const response = await fetch(
+								"http://localhost:3001/api/shops/status",
+								{
+									credentials: "include",
+								},
+							);
+							if (!response.ok) {
+								throw new Error("Failed to fetch dashboard data");
+							}
+							return response.json();
+						},
+					});
+					shop = data.shop;
 
-        if (ctx.data.user.role !== 'shop') {
-          throw redirect({
-            to: "/",
-          })
-        }
+					if (!shop) {
+						throw redirect({
+							to: "/primeros-pasos",
+						});
+					}
+				},
+			},
+		);
 
-        const data = await queryClient.fetchQuery({
-          queryKey: ['dashboard'],
-          queryFn: async () => {
-            const response = await fetch('http://localhost:3001/api/shops/status', {
-              credentials: 'include',
-            })
-            if (!response.ok) {
-              throw new Error('Failed to fetch dashboard data')
-            }
-            return response.json()
-          },
-        })
-        shop = data.shop;
+		if (!session.data) {
+			throw redirect({
+				to: "/iniciar-sesion",
+			});
+		}
 
-        if (!shop) {
-          throw redirect({
-            to: "/primeros-pasos",
-          })
-        }
+		if (session.data.user.role !== "shop") {
+			throw redirect({
+				to: "/",
+			});
+		}
 
-      }
-    })
-
-    if (!session.data) {
-      throw redirect({
-        to: "/iniciar-sesion",
-      })
-    }
-
-    if (session.data.user.role !== 'shop') {
-      throw redirect({
-        to: "/",
-      })
-    }
-
-    return { session, shop }
-  },
-  component: RouteComponent,
-  errorComponent: () => <div>Error loading dashboard</div>,
-})
+		return { session, shop };
+	},
+	component: RouteComponent,
+	errorComponent: () => <div>Error loading dashboard</div>,
+});
 
 function RouteComponent() {
-  const { session, shop } = Route.useRouteContext()
+	const { session, shop } = Route.useRouteContext();
 
-  if (!session.data) {
-    return null // O manejar el caso de usuario no autenticado
-  }
+	if (!session.data) {
+		return null; // O manejar el caso de usuario no autenticado
+	}
 
-  return (
-    <SidebarLayout items={shopItems} user={session.data.user} />
-  )
+	return <SidebarLayout items={shopItems} user={session.data.user} />;
 }
