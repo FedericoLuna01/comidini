@@ -10,7 +10,8 @@
 		"db:migrate": "pnpm --filter @repo/db migrate",
 		"db:generate": "pnpm --filter @repo/db generate",
 		"db:studio": "pnpm --filter @repo/db studio",
-		"db:start": "docker compose up db"
+		"db:start": "docker compose up db",
+		"db:view": "pnpm --filter @repo/db view"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.4",

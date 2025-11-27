@@ -5,11 +5,11 @@
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
 	"scripts": {
-		"lint": "eslint src/",
 		"typecheck": "tsc --noEmit",
 		"generate": "drizzle-kit generate",
 		"migrate": "tsx src/migrate.ts",
-		"studio": "drizzle-kit studio"
+		"studio": "drizzle-kit studio",
+		"view": "concurrently \"pnpm drizzle-kit studio\" \"pnpm dlx drizzle-lab visualizer\" \"sleep 1 && pnpm dlx drizzle-view\""
 	},
 	"dependencies": {
 		"dotenv": "^16.5.0",
@@ -20,12 +20,11 @@
 		"zod": "^3.25.67"
 	},
 	"devDependencies": {
-		"@repo/eslint-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "^20.8.4",
 		"@types/pg": "^8.15.4",
+		"concurrently": "^9.2.1",
 		"drizzle-kit": "^0.31.1",
-		"eslint": "^9.29.0",
 		"tsx": "^3.14.0",
 		"typescript": "^5.2.2"
 	}
