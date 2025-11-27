@@ -1,13 +1,55 @@
 {
-  "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
-  "cSpell.words": [
-    "comidini",
-    "configuracion",
-    "italian",
-    "postgres",
-    "postgresql",
-    "sesion",
-    "unban",
-    "Urquiza"
-  ]
+	"tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
+	"cSpell.words": [
+		"bbox",
+		"Bbox",
+		"cmdk",
+		"comidini",
+		"configuracion",
+		"contrasena",
+		"italian",
+		"Podés",
+		"postgres",
+		"postgresql",
+		"sesion",
+		"supercluster",
+		"Supercluster",
+		"tipado",
+		"ultracite",
+		"unban",
+		"Urquiza"
+	],
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"editor.defaultFormatter": "biomejs.biome",
+	"editor.formatOnSave": true,
+	"editor.formatOnPaste": true,
+	// "emmet.showExpandedAbbreviation": "",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.biome": "explicit",
+		"source.organizeImports.biome": "explicit"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.formatOnSave": true
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.formatOnSave": true
+	},
+	"[css]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.formatOnSave": true
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.formatOnSave": true
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.formatOnSave": true
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.formatOnSave": true
+	}
 }

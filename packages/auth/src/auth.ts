@@ -1,9 +1,10 @@
-import dotenv from "dotenv";
+import { db } from "@repo/db/src";
+import { schema } from "@repo/db/src/schema";
+import { sendResetPassword } from "@repo/email/send/send-reset-password";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin as adminPlugin } from "better-auth/plugins";
-import { db } from "@repo/db/src"
-import { schema } from "@repo/db/src/schema"
+import dotenv from "dotenv";
 import { ac, admin, shop, user } from "./permissions";
 
 // Cargar variables de entorno desde el archivo .env en la raíz del proyecto
@@ -11,19 +12,19 @@ dotenv.config({ path: "../../../.env" });
 
 // Validar que las variables de entorno requeridas estén definidas
 if (!process.env.BETTER_AUTH_SECRET) {
-  throw new Error("BETTER_AUTH_SECRET environment variable is required");
+	throw new Error("BETTER_AUTH_SECRET environment variable is required");
 }
 
 if (!process.env.ADMIN_BETTER_AUTH_URL) {
-  throw new Error("ADMIN_BETTER_AUTH_URL environment variable is required");
+	throw new Error("ADMIN_BETTER_AUTH_URL environment variable is required");
 }
 
 if (!process.env.WEB_BETTER_AUTH_URL) {
-  throw new Error("WEB_BETTER_AUTH_URL environment variable is required");
+	throw new Error("WEB_BETTER_AUTH_URL environment variable is required");
 }
 
 if (!process.env.SHOP_BETTER_AUTH_URL) {
-  throw new Error("SHOP_BETTER_AUTH_URL environment variable is required");
+	throw new Error("SHOP_BETTER_AUTH_URL environment variable is required");
 }
 
 export const auth = betterAuth({

@@ -7,7 +7,7 @@ import { Input } from "@repo/ui/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/ui/form";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { authClient } from "@repo/auth/client.js";
-import { getRouteApi, Link, useSearch } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { GoogleIcon } from "./icons/index.js";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert.js";
