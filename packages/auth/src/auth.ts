@@ -28,60 +28,60 @@ if (!process.env.SHOP_BETTER_AUTH_URL) {
 }
 
 export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: "pg",
-    schema,
-  }),
-  onAPIError: {
-    errorURL: `${process.env.WEB_BETTER_AUTH_URL}/iniciar-sesion`,
-  },
-  // session: {
-  //   cookieCache: {
-  //     enabled: true,
-  //     maxAge: 5 * 60 // Cache duration in seconds
-  //   }
-  // },
-  emailAndPassword: {
-    enabled: true,
-    //        EMAILJS O RESEND
-    // forgotPasswordCallback: async (url, user) => {
-    //   console.log(`Password reset URL for ${user.email}: ${url}`);
-    // },
-  },
-  socialProviders: {
-    google: {
-      prompt: "select_account",
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }
-  },
-  plugins: [
-    adminPlugin({
-      ac,
-      roles: {
-        admin,
-        user,
-        shop
-      },
-      bannedUserMessage: "Tu cuenta ha sido suspendida. Si crees que esto es un error, contacta al administrador.",
-    })
-  ],
-  secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL,
-  trustedOrigins: [
-    process.env.ADMIN_BETTER_AUTH_URL,
-    process.env.WEB_BETTER_AUTH_URL,
-    process.env.SHOP_BETTER_AUTH_URL,
-  ],
-  user: {
-    modelName: "user",
-    additionalFields: {
-      role: {
-        type: "string",
-        defaultValue: "user",
-        returned: true,
-        input: false,
-      },
-    },
-  },
+	database: drizzleAdapter(db, {
+		provider: "pg",
+		schema,
+	}),
+	onAPIError: {
+		errorURL: `${process.env.WEB_BETTER_AUTH_URL}/iniciar-sesion`,
+	},
+	session: {
+		cookieCache: {
+			enabled: true,
+			maxAge: 5 * 60, // Cache duration in seconds
+		},
+	},
+	emailAndPassword: {
+		enabled: true,
+		sendResetPassword: async ({ user, url, token }) => {
+			await sendResetPassword({ email: user.email, url, firstName: user.name });
+		},
+	},
+	socialProviders: {
+		google: {
+			prompt: "select_account",
+			clientId: process.env.GOOGLE_CLIENT_ID!,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+		},
+	},
+	plugins: [
+		adminPlugin({
+			ac,
+			roles: {
+				admin,
+				user,
+				shop,
+			},
+			bannedUserMessage:
+				"Tu cuenta ha sido suspendida. Si crees que esto es un error, contacta al administrador.",
+		}),
+	],
+	secret: process.env.BETTER_AUTH_SECRET,
+	baseURL: process.env.BETTER_AUTH_URL,
+	trustedOrigins: [
+		process.env.ADMIN_BETTER_AUTH_URL,
+		process.env.WEB_BETTER_AUTH_URL,
+		process.env.SHOP_BETTER_AUTH_URL,
+	],
+	user: {
+		modelName: "user",
+		additionalFields: {
+			role: {
+				type: "string",
+				defaultValue: "user",
+				returned: true,
+				input: false,
+			},
+		},
+	},
 });
