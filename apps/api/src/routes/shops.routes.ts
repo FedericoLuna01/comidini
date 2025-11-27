@@ -5,6 +5,7 @@ import {
 import {
 	createManyShopHours,
 	createShop,
+	getAllShops,
 	getShopByUserId,
 	getShopHoursByShopId,
 	updateShopHours,
@@ -21,6 +22,16 @@ import { requireShop } from "../middlewares/requireShop";
 import { requireShopUser } from "../middlewares/requireShopUser";
 
 const router: Router = Router();
+
+router.get("/", async (_req: Request, res: Response): Promise<void> => {
+	try {
+		const shops = await getAllShops();
+		res.json(shops);
+	} catch (error) {
+		console.error("Error in /all route:", error);
+		res.status(500).json({ error: "Error interno del servidor" });
+	}
+});
 
 router.get(
 	"/status",
