@@ -8,6 +8,7 @@ import {
 	getAllShops,
 	getShopByUserId,
 	getShopHoursByShopId,
+	updateShop,
 	updateShopHours,
 } from "@repo/db/src/services/shops";
 import { createProductCategorySchema } from "@repo/db/src/types/product";
@@ -15,6 +16,7 @@ import {
 	type CreateShopHours,
 	createShopHoursSchema,
 	createShopSchema,
+	updateShopSchema,
 } from "@repo/db/src/types/shop";
 import { type Request, type Response, Router } from "express";
 import { z } from "zod/v4";
@@ -116,6 +118,48 @@ router.post(
 			res.status(201).json({ message: "Tienda creada exitosamente" });
 		} catch (error) {
 			console.error("Error al crear tienda:", error);
+			res.status(500).json({ error: "Error interno del servidor" });
+		}
+	},
+);
+
+router.put(
+	"/:shopId",
+	requireShopUser,
+	requireShop,
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			if (!req.shop) {
+				res.status(404).json({ error: "Tienda no encontrada" });
+				return;
+			}
+
+			const shopData = req.body;
+
+			const validatedFields = updateShopSchema.safeParse(shopData);
+
+			if (!validatedFields.success) {
+				console.error("Validation errors:", validatedFields.error);
+				res.status(400).json({
+					error: "Datos de tienda inválidos",
+					details: validatedFields.error,
+				});
+				return;
+			}
+
+			const updatedShop = await updateShop(req.shop.id, validatedFields.data);
+
+			if (!updatedShop) {
+				res.status(500).json({ error: "Error al actualizar la tienda" });
+				return;
+			}
+
+			res.json({
+				message: "Tienda actualizada exitosamente",
+				shop: updatedShop,
+			});
+		} catch (error) {
+			console.error("Error al actualizar tienda:", error);
 			res.status(500).json({ error: "Error interno del servidor" });
 		}
 	},

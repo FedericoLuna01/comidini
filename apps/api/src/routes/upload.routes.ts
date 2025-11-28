@@ -29,7 +29,7 @@ const upload = multer({
 
 // Schema for upload request
 const uploadSchema = z.object({
-	type: z.enum(["user-avatar", "shop-logo", "product-image"]),
+	type: z.enum(["user-avatar", "shop-logo", "product-image", "shop-banner"]),
 	entityId: z.string().optional(),
 	oldImage: z.string().optional(),
 });
@@ -125,6 +125,28 @@ router.post(
 							const key = getKeyFromUrl(oldImage);
 							if (key) {
 								console.log(`Deleting old product image: ${key}`);
+								await deleteImage(key).catch(console.error);
+							}
+						}
+					}
+				} else if (type === "shop-banner" && entityId) {
+					const shopId = parseInt(entityId);
+					if (!Number.isNaN(shopId)) {
+						const [currentShop] = await db
+							.select({ banner: shop.banner, userId: shop.userId })
+							.from(shop)
+							.where(eq(shop.id, shopId))
+							.limit(1);
+
+						// Verify ownership
+						if (
+							currentShop &&
+							currentShop.userId === req.session?.user?.id &&
+							currentShop.banner
+						) {
+							const key = getKeyFromUrl(currentShop.banner);
+							if (key) {
+								console.log(`Deleting old shop banner: ${key}`);
 								await deleteImage(key).catch(console.error);
 							}
 						}

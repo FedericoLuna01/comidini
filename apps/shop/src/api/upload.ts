@@ -16,7 +16,11 @@ export const uploadResponseSchema = z.object({
 
 export type UploadResponse = z.infer<typeof uploadResponseSchema>;
 
-export type ImageType = "user-avatar" | "shop-logo" | "product-image";
+export type ImageType =
+	| "user-avatar"
+	| "shop-logo"
+	| "shop-banner"
+	| "product-image";
 
 // Upload image function
 export const uploadImage = async (
