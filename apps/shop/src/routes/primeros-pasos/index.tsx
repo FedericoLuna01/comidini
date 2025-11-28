@@ -1,5 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type CreateShop, createShopSchema } from "@repo/db/src/types/shop";
+import {
+	type MapLocation,
+	MapWithAutocomplete,
+} from "@repo/ui/components/map-with-autocomplete";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import {
@@ -30,14 +34,8 @@ import {
 } from "@repo/ui/components/ui/stepper";
 import { Switch } from "@repo/ui/components/ui/switch";
 import { Textarea } from "@repo/ui/components/ui/textarea";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-	AdvancedMarker,
-	APIProvider,
-	Map as GoogleMap,
-	type MapMouseEvent,
-} from "@vis.gl/react-google-maps";
 import {
 	Calendar,
 	CheckCircle,
@@ -57,8 +55,6 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
 import { createShop } from "../../api/shops";
-import { AutoCompleteInput } from "../../components/auto-complete-select";
-import { useDebounceInput } from "../../hooks/use-debounce-input";
 
 const businessHoursSchema = z.object({
 	dayOfWeek: z.number().min(0).max(6),
@@ -121,43 +117,8 @@ const STEPS = [
 	},
 ];
 
-const fetchPlaceSuggestions = async (
-	address: string,
-): Promise<google.maps.places.AutocompleteSuggestion[]> => {
-	if (!address) return [];
-	if (!window.google?.maps?.places) {
-		throw new Error("Google Maps Places no está disponible");
-	}
-
-	const request: google.maps.places.AutocompleteRequest = {
-		input: address,
-		language: "es",
-		region: "AR",
-		locationRestriction: new google.maps.LatLngBounds(
-			new google.maps.LatLng(-33.04, -60.74),
-			new google.maps.LatLng(-32.9, -60.6),
-		),
-	};
-
-	try {
-		console.log("FETCHING SUGGESTIONS");
-		const response =
-			await window.google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(
-				request,
-			);
-		return response.suggestions;
-	} catch (error) {
-		console.error("Error al buscar sugerencias:", error);
-		return [];
-	}
-};
-
 function RouteComponent() {
 	const [currentStep, setCurrentStep] = useState(2);
-	const [markerPosition, setMarkerPosition] =
-		useState<google.maps.LatLngLiteral | null>(null);
-	const defaultCenter = { lat: -32.9526405, lng: -60.6776039 }; // Centro de Rosario
-	const [mapCenter, setMapCenter] = useState(defaultCenter);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -182,21 +143,6 @@ function RouteComponent() {
 			})),
 		},
 	});
-
-	const addressValue = form.watch("address");
-	const debouncedAddress = useDebounceInput(addressValue, 650);
-
-	const { data: suggestions = [], isLoading } = useQuery({
-		queryKey: ["placeSuggestions", debouncedAddress],
-		queryFn: () => fetchPlaceSuggestions(debouncedAddress),
-		enabled: !!debouncedAddress,
-		staleTime: 1000 * 60 * 5, // 5 minutos
-	});
-
-	const onMapClick = (event: MapMouseEvent) => {
-		// TODO: terminar la lógica para manejar el clic en el mapa
-		console.log(event);
-	};
 
 	const mutation = useMutation({
 		mutationFn: async (data: CreateShop) => {
@@ -422,78 +368,41 @@ function RouteComponent() {
 							{/* Step 2: Ubicación */}
 							{currentStep === 2 && (
 								<div className="space-y-4">
-									<FormField
-										control={form.control}
-										name="address"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="flex items-center gap-2">
-													<MapPin className="w-4 h-4" />
-													Dirección *
-												</FormLabel>
-												<FormControl>
-													<AutoCompleteInput
-														isLoading={isLoading}
-														suggestions={suggestions}
-														onChange={(value) => field.onChange(value)}
-														onSelect={async (suggestion) => {
-															field.onChange(
-																suggestion.placePrediction?.text.text || "",
-															);
-															const place =
-																suggestion.placePrediction?.toPlace();
-															await place?.fetchFields({
-																fields: ["location"],
-															});
-															if (place?.location) {
-																const newPosition = {
-																	lat: place.location.lat(),
-																	lng: place.location.lng(),
-																};
-																console.log(newPosition);
-																form.setValue(
-																	"latitude",
-																	newPosition.lat.toString(),
-																);
-																form.setValue(
-																	"longitude",
-																	newPosition.lng.toString(),
-																);
-																setMarkerPosition(newPosition);
-																setMapCenter(newPosition);
-															}
-														}}
-														value={field.value}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
+									<MapWithAutocomplete
+										initialAddress={form.getValues("address")}
+										initialLat={
+											form.getValues("latitude")
+												? parseFloat(form.getValues("latitude") ?? "")
+												: undefined
+										}
+										initialLng={
+											form.getValues("longitude")
+												? parseFloat(form.getValues("longitude") ?? "")
+												: undefined
+										}
+										onLocationChange={(location: MapLocation) => {
+											form.setValue("address", location.address, {
+												shouldValidate: true,
+											});
+											form.setValue("latitude", location.lat.toString(), {
+												shouldValidate: true,
+											});
+											form.setValue("longitude", location.lng.toString(), {
+												shouldValidate: true,
+											});
+										}}
+										googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+										googleMapsMapId="314bbedb82bc2f8947b9d13c"
+										addressLabel="Dirección *"
+										placeholder="Buscar dirección..."
+										mapHeight="16rem"
+										locationRestriction={{
+											south: -33.04,
+											west: -60.74,
+											north: -32.9,
+											east: -60.6,
+										}}
 									/>
-									<div className="rounded-lg overflow-hidden">
-										<APIProvider
-											apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-											libraries={["places", "marker"]}
-											language="es"
-										>
-											<GoogleMap
-												className="w-full h-64 rounded-lg"
-												mapId="314bbedb82bc2f8947b9d13c"
-												center={mapCenter}
-												onCameraChanged={(e) => setMapCenter(e.detail.center)}
-												defaultZoom={13}
-												minZoom={13}
-												gestureHandling={"greedy"}
-												disableDefaultUI={true}
-												clickableIcons={false}
-												onClick={(e) => onMapClick(e)}
-											>
-												{markerPosition && (
-													<AdvancedMarker position={markerPosition} />
-												)}
-											</GoogleMap>
-										</APIProvider>
-									</div>
 								</div>
 							)}
 

@@ -6,6 +6,7 @@ import type {
 	CreateShopHours,
 	InsertShop,
 	InsertShopHours,
+	UpdateShop,
 } from "../types/shop";
 
 export const getAllShops = async () => {
@@ -41,10 +42,33 @@ export const getShopByUserId = async (userId: string) => {
 	return shopData;
 };
 
+export const getShopById = async (shopId: number) => {
+	const [shopData] = await db
+		.select()
+		.from(shop)
+		.where(eq(shop.id, shopId))
+		.limit(1);
+
+	return shopData;
+};
+
 export const createShop = async (shopData: InsertShop) => {
 	const [createdShop] = await db.insert(shop).values(shopData).returning();
 
 	return createdShop;
+};
+
+export const updateShop = async (shopId: number, shopData: UpdateShop) => {
+	const [updatedShop] = await db
+		.update(shop)
+		.set({
+			...shopData,
+			updatedAt: new Date(),
+		})
+		.where(eq(shop.id, shopId))
+		.returning();
+
+	return updatedShop;
 };
 
 export const createManyShopHours = async (

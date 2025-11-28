@@ -1,7 +1,13 @@
-import type { CreateShop, CreateShopHours } from "@repo/db/src/types/shop";
+import type {
+	CreateShop,
+	CreateShopHours,
+	UpdateShop,
+} from "@repo/db/src/types/shop";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function createShop(data: CreateShop) {
-	const response = await fetch("http://localhost:3001/api/shops", {
+	const response = await fetch(`${API_URL}/shops`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -13,8 +19,25 @@ export async function createShop(data: CreateShop) {
 	return response.json();
 }
 
+export async function updateShop(data: UpdateShop, shopId: number) {
+	const response = await fetch(`${API_URL}/shops/${shopId}`, {
+		method: "PUT",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		credentials: "include",
+		body: JSON.stringify(data),
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to update shop");
+	}
+
+	return response.json();
+}
+
 export async function getShopHours() {
-	const response = await fetch("http://localhost:3001/api/shops/hours", {
+	const response = await fetch(`${API_URL}/shops/hours`, {
 		method: "GET",
 		credentials: "include",
 	});
@@ -23,7 +46,7 @@ export async function getShopHours() {
 }
 
 export async function updateShopHours(hoursData: CreateShopHours[]) {
-	const response = await fetch(`http://localhost:3001/api/shops/hours`, {
+	const response = await fetch(`${API_URL}/shops/hours`, {
 		method: "PUT",
 		headers: {
 			"Content-Type": "application/json",
