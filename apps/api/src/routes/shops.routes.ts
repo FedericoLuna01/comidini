@@ -30,7 +30,7 @@ router.get("/", async (_req: Request, res: Response): Promise<void> => {
 		const shops = await getAllShops();
 		res.json(shops);
 	} catch (error) {
-		console.error("Error in /all route:", error);
+		console.error("Error shops route:", error);
 		res.status(500).json({ error: "Error interno del servidor" });
 	}
 });

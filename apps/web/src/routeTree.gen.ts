@@ -17,6 +17,7 @@ import { Route as authIniciarSesionRouteImport } from './routes/(auth)/iniciar-s
 import { Route as appRegistrarNegocioRouteImport } from './routes/(app)/registrar-negocio'
 import { Route as appTiendasIndexRouteImport } from './routes/(app)/tiendas/index'
 import { Route as appPerfilIndexRouteImport } from './routes/(app)/perfil/index'
+import { Route as appTiendasShopIdRouteImport } from './routes/(app)/tiendas/$shopId'
 import { Route as appPerfilEditarRouteImport } from './routes/(app)/perfil/editar'
 import { Route as appTiendasMapaIndexRouteImport } from './routes/(app)/tiendas/mapa/index'
 
@@ -61,6 +62,11 @@ const appPerfilIndexRoute = appPerfilIndexRouteImport.update({
   path: '/perfil/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appTiendasShopIdRoute = appTiendasShopIdRouteImport.update({
+  id: '/(app)/tiendas/$shopId',
+  path: '/tiendas/$shopId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const appPerfilEditarRoute = appPerfilEditarRouteImport.update({
   id: '/(app)/perfil/editar',
   path: '/perfil/editar',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/': typeof landingPageIndexRoute
   '/perfil/editar': typeof appPerfilEditarRoute
+  '/tiendas/$shopId': typeof appTiendasShopIdRoute
   '/perfil': typeof appPerfilIndexRoute
   '/tiendas': typeof appTiendasIndexRoute
   '/tiendas/mapa': typeof appTiendasMapaIndexRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/': typeof landingPageIndexRoute
   '/perfil/editar': typeof appPerfilEditarRoute
+  '/tiendas/$shopId': typeof appTiendasShopIdRoute
   '/perfil': typeof appPerfilIndexRoute
   '/tiendas': typeof appTiendasIndexRoute
   '/tiendas/mapa': typeof appTiendasMapaIndexRoute
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/(auth)/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/(landing-page)/': typeof landingPageIndexRoute
   '/(app)/perfil/editar': typeof appPerfilEditarRoute
+  '/(app)/tiendas/$shopId': typeof appTiendasShopIdRoute
   '/(app)/perfil/': typeof appPerfilIndexRoute
   '/(app)/tiendas/': typeof appTiendasIndexRoute
   '/(app)/tiendas/mapa/': typeof appTiendasMapaIndexRoute
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/restablecer-contrasena'
     | '/'
     | '/perfil/editar'
+    | '/tiendas/$shopId'
     | '/perfil'
     | '/tiendas'
     | '/tiendas/mapa'
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/restablecer-contrasena'
     | '/'
     | '/perfil/editar'
+    | '/tiendas/$shopId'
     | '/perfil'
     | '/tiendas'
     | '/tiendas/mapa'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/(auth)/restablecer-contrasena'
     | '/(landing-page)/'
     | '/(app)/perfil/editar'
+    | '/(app)/tiendas/$shopId'
     | '/(app)/perfil/'
     | '/(app)/tiendas/'
     | '/(app)/tiendas/mapa/'
@@ -156,6 +168,7 @@ export interface RootRouteChildren {
   authRestablecerContrasenaRoute: typeof authRestablecerContrasenaRoute
   landingPageIndexRoute: typeof landingPageIndexRoute
   appPerfilEditarRoute: typeof appPerfilEditarRoute
+  appTiendasShopIdRoute: typeof appTiendasShopIdRoute
   appPerfilIndexRoute: typeof appPerfilIndexRoute
   appTiendasIndexRoute: typeof appTiendasIndexRoute
   appTiendasMapaIndexRoute: typeof appTiendasMapaIndexRoute
@@ -219,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appPerfilIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/tiendas/$shopId': {
+      id: '/(app)/tiendas/$shopId'
+      path: '/tiendas/$shopId'
+      fullPath: '/tiendas/$shopId'
+      preLoaderRoute: typeof appTiendasShopIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/perfil/editar': {
       id: '/(app)/perfil/editar'
       path: '/perfil/editar'
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   authRestablecerContrasenaRoute: authRestablecerContrasenaRoute,
   landingPageIndexRoute: landingPageIndexRoute,
   appPerfilEditarRoute: appPerfilEditarRoute,
+  appTiendasShopIdRoute: appTiendasShopIdRoute,
   appPerfilIndexRoute: appPerfilIndexRoute,
   appTiendasIndexRoute: appTiendasIndexRoute,
   appTiendasMapaIndexRoute: appTiendasMapaIndexRoute,

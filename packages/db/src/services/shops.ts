@@ -19,10 +19,13 @@ export const getAllShops = async () => {
 			email: shop.email,
 			address: shop.address,
 			logo: shop.logo,
+			banner: shop.banner,
 			acceptsDelivery: shop.acceptsDelivery,
 			acceptsPickup: shop.acceptsPickup,
 			createdAt: shop.createdAt,
 			userId: shop.userId,
+			latitude: shop.latitude,
+			longitude: shop.longitude,
 			userName: user.name,
 			userEmail: user.email,
 		})

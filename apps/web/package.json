@@ -13,6 +13,8 @@
 		"@repo/auth": "workspace:*",
 		"@repo/db": "workspace:*",
 		"@repo/ui": "workspace:*",
+		"@tanstack/react-query": "^5.81.2",
+		"@tanstack/react-query-devtools": "^5.81.2",
 		"@tanstack/react-router": "^1.121.27",
 		"@tanstack/react-router-devtools": "^1.121.27",
 		"@vis.gl/react-google-maps": "^1.5.4",

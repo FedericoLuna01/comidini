@@ -1,17 +1,18 @@
+import type { SelectShop } from "@repo/db/src/types/shop";
 import { cn } from "@repo/ui/lib/utils";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
+import type Supercluster from "supercluster";
 import { getCategoryColors, getCategoryIcon } from "../..";
-import type { Cluster } from "..";
 
 export const ShopMarker = ({ shop }: { shop: Cluster }) => {
-	const CategoryIcon = getCategoryIcon(shop.properties.data?.category || "");
-	const colors = getCategoryColors(shop.properties.data?.category || "");
+	const CategoryIcon = getCategoryIcon(shop.properties.category || "");
+	const colors = getCategoryColors(shop.properties.category || "");
 	return (
 		<AdvancedMarker
 			key={shop.id}
 			position={{
-				lat: shop.properties.data?.lat!,
-				lng: shop.properties.data?.lng!,
+				lat: Number(shop.properties.data?.latitude!),
+				lng: Number(shop.properties.data?.longitude!),
 			}}
 		>
 			<div className="bg-white p-1 h-10 flex items-center justify-center rounded-full relative border shadow-md">
@@ -23,3 +24,13 @@ export const ShopMarker = ({ shop }: { shop: Cluster }) => {
 		</AdvancedMarker>
 	);
 };
+
+export type Cluster = Supercluster.PointFeature<{
+	cluster: boolean;
+	clusterId?: number;
+	category?: string;
+	data?: SelectShop;
+	// Cluster properties from supercluster
+	point_count?: number;
+	abbreviated?: boolean;
+}>;

@@ -192,6 +192,15 @@ export const getDefaultOptionsForType = (
 					quality: 90,
 				},
 			};
+		case "shop-banner":
+			return {
+				maxSize: 10 * 1024 * 1024, // 10MB
+				resize: {
+					width: 1200,
+					height: 300,
+					quality: 90,
+				},
+			};
 		case "product-image":
 			return {
 				maxSize: 5 * 1024 * 1024, // 5MB
