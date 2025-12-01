@@ -48,12 +48,7 @@ router.post("/", requireShopUser, requireShop, async (req, res) => {
 	res.status(201).json(product);
 });
 
-router.get("/shop/:shopId", requireShopUser, requireShop, async (req, res) => {
-	if (!req.shop) {
-		res.status(400).json({ error: "Shop not found" });
-		return;
-	}
-
+router.get("/shop/:shopId", async (req, res) => {
 	const products = await getAllProductsByShopId(Number(req.params.shopId));
 	res.status(200).json(products);
 });

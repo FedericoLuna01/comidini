@@ -6,6 +6,7 @@ import {
 	createManyShopHours,
 	createShop,
 	getAllShops,
+	getShopById,
 	getShopByUserId,
 	getShopHoursByShopId,
 	updateShop,
@@ -29,6 +30,23 @@ router.get("/", async (_req: Request, res: Response): Promise<void> => {
 	try {
 		const shops = await getAllShops();
 		res.json(shops);
+	} catch (error) {
+		console.error("Error shops route:", error);
+		res.status(500).json({ error: "Error interno del servidor" });
+	}
+});
+
+router.get("/:shopId", async (req: Request, res: Response): Promise<void> => {
+	try {
+		const shopId = Number(req.params.shopId);
+		const shop = await getShopById(shopId);
+
+		if (!shop) {
+			res.status(404).json({ error: "Tienda no encontrada" });
+			return;
+		}
+
+		res.json(shop);
 	} catch (error) {
 		console.error("Error shops route:", error);
 		res.status(500).json({ error: "Error interno del servidor" });

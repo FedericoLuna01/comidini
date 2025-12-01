@@ -2,14 +2,16 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Logo } from "@repo/ui/components/ui/logo";
+import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import { cn } from "@repo/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { SlidersHorizontalIcon } from "lucide-react";
+import { ExternalLinkIcon, SlidersHorizontalIcon } from "lucide-react";
 import { useState } from "react";
 import { allShopsQueryOptions } from "../../../../api/shops";
 import { MapComponent } from "./-components/map-component";
+import { useShopStore } from "./-store/shop-store";
 
 export const Route = createFileRoute("/(app)/tiendas/mapa/")({
 	component: RouteComponent,
@@ -17,10 +19,11 @@ export const Route = createFileRoute("/(app)/tiendas/mapa/")({
 
 function RouteComponent() {
 	const [showFilters, setShowFilters] = useState(false);
+	const { selectedShopId, toggleSelectedShop } = useShopStore();
 
-	const { data, isPending } = useQuery(allShopsQueryOptions);
+	const { data: shops, isPending } = useQuery(allShopsQueryOptions);
 
-	console.log(data);
+	console.log(shops);
 
 	return (
 		<div className="">
@@ -30,7 +33,7 @@ function RouteComponent() {
 			</header>
 			{/* TODO: Arreglar esto (se ve bien pero hay que hacerlo sin magic number) */}
 			<div className="flex h-[calc(100vh-73px)]">
-				<aside className="max-w-[500px] overflow-hidden flex flex-col border-r">
+				<aside className="w-[500px] overflow-hidden flex flex-col border-r">
 					<div className="border-b">
 						<div className="px-6 py-4 flex flex-col gap-2">
 							<Input type="text" placeholder="Buscar restaurante..." />
@@ -62,23 +65,82 @@ function RouteComponent() {
 							</div>
 						</div>
 					</div>
-					<div className="p-4 overflow-y-auto h-full">
-						{data?.map((shop) => (
-							<div
-								key={shop.id}
-								className="flex gap-4 p-2 rounded-md hover:bg-secondary/50"
-							>
-								<img
-									src={shop.logo || "https://via.placeholder.com/150"}
-									alt={shop.name}
-									className="w-48 h-48 object-cover rounded-md"
-								/>
-								<div>
-									<h3>{shop.name}</h3>
-									<p>{shop.description}</p>
+					<div className="p-4 overflow-y-auto h-full flex flex-col gap-4">
+						{isPending &&
+							new Array(4).fill(0).map((_, index) => (
+								<div key={index} className="flex flex-row gap-4">
+									<Skeleton className="size-36 aspect-square" />
+									<div className="flex flex-col w-full">
+										<Skeleton className="h-6 w-3/4 mb-2" />
+										<Skeleton className="h-4 w-1/2 mb-2" />
+										<Skeleton className="h-4 w-full mb-2" />
+										<Skeleton className="h-4 w-5/6 mb-2" />
+									</div>
 								</div>
-							</div>
-						))}
+							))}
+						{!isPending && shops?.length === 0 && (
+							<p>No hay tiendas disponibles.</p>
+						)}
+						{!isPending &&
+							shops?.map((shop) => (
+								<button
+									type="button"
+									key={shop.id}
+									className={cn(
+										"flex gap-4 p-2 rounded-md hover:bg-secondary/50 items-start text-left cursor-pointer transition-colors",
+										selectedShopId === shop.id && "bg-secondary ",
+									)}
+									onClick={() =>
+										toggleSelectedShop(shop.id, {
+											lat: Number(shop.latitude) + 0.01, // Adjust latitude to move the focus slightly upwards
+											lng: Number(shop.longitude),
+										})
+									}
+								>
+									<div className="relative aspect-square size-36">
+										<img
+											src={shop.logo || "https://via.placeholder.com/150"}
+											alt={shop.name}
+											className="w-full h-full object-cover rounded-md"
+										/>
+									</div>
+									<div className="flex flex-col gap-2">
+										<div className="flex flex-col">
+											<div className="flex flex-row items-center">
+												<h3 className="text-lg leading-5 font-semibold">
+													{shop.name}
+												</h3>
+												<Button
+													asChild
+													size="icon"
+													variant="outline"
+													className="ml-auto"
+												>
+													<Link
+														to="/tiendas/$shopId"
+														params={{ shopId: shop.id.toString() }}
+													>
+														<ExternalLinkIcon className="size-4" />
+													</Link>
+												</Button>
+											</div>
+											<p className="text-muted-foreground text-sm">Categoría</p>
+										</div>
+										<p className="text-muted-foreground text-sm">
+											{shop.address}
+										</p>
+										<p className="text-sm">
+											<span className="text-red-500">Cerrado</span> • Abre en
+											1hs
+										</p>
+										{shop.acceptsDelivery && (
+											<Badge className="bg-emerald-300/20 text-emerald-600">
+												Delivery
+											</Badge>
+										)}
+									</div>
+								</button>
+							))}
 					</div>
 				</aside>
 				<main className="flex-1 h-full flex items-center justify-center">
@@ -86,7 +148,7 @@ function RouteComponent() {
 						apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
 						language="es"
 					>
-						<MapComponent shops={data} />
+						<MapComponent shops={shops} />
 					</APIProvider>
 				</main>
 			</div>
