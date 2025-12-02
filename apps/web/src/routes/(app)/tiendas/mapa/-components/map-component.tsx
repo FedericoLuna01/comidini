@@ -1,27 +1,38 @@
+import type { SelectShop } from "@repo/db/src/types/shop";
 import { Map as GoogleMap, useMap } from "@vis.gl/react-google-maps";
+import { useEffect } from "react";
 import useSupercluster from "use-supercluster";
 import { useMapViewport } from "../../../../../hooks/use-map-viewport";
-import { exampleShops } from "../..";
 import { ClusteredMarkers } from "../-components/clustered-marker";
+import { useShopStore } from "../-store/shop-store";
 
-export function MapComponent() {
+export function MapComponent({ shops }: { shops: SelectShop[] | undefined }) {
 	const map = useMap();
 	const { bbox, zoom, setZoom } = useMapViewport();
 	const defaultCenter = { lat: -32.9526405, lng: -60.6776039 }; // Centro de Rosario
+	const { selectedShopPosition } = useShopStore();
 
-	const points = exampleShops.map((shop) => ({
+	// Mover el mapa cuando se selecciona una tienda
+	useEffect(() => {
+		if (map && selectedShopPosition) {
+			map.panTo(selectedShopPosition);
+		}
+	}, [map, selectedShopPosition]);
+
+	const points = (shops || []).map((shop) => ({
 		type: "Feature" as const,
 		properties: {
 			cluster: false,
 			clusterId: shop.id,
-			category: shop.category,
+			// TODO: Cambiar "Categoria" por la categoría real de la tienda
+			category: "Categoria",
 			data: {
 				...shop,
 			},
 		},
 		geometry: {
 			type: "Point" as const,
-			coordinates: [shop.lng, shop.lat],
+			coordinates: [Number(shop.longitude), Number(shop.latitude)],
 		},
 	}));
 

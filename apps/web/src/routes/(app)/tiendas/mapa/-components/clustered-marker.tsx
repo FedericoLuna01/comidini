@@ -2,8 +2,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import type Supercluster from "supercluster";
 import { getCategoryColors, getCategoryIcon } from "../../index";
-import type { Cluster } from "..";
-import { ShopMarker } from "./shop-marker";
+import { type Cluster, ShopMarker } from "./shop-marker";
 
 export const ClusteredMarkers = ({
 	clusters,

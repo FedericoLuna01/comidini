@@ -13,17 +13,21 @@
 		"@repo/auth": "workspace:*",
 		"@repo/db": "workspace:*",
 		"@repo/ui": "workspace:*",
+		"@tanstack/react-query": "^5.81.2",
+		"@tanstack/react-query-devtools": "^5.81.2",
 		"@tanstack/react-router": "^1.121.27",
 		"@tanstack/react-router-devtools": "^1.121.27",
 		"@vis.gl/react-google-maps": "^1.5.4",
 		"date-fns": "^4.1.0",
 		"lucide-react": "^0.475.0",
+		"motion": "^12.23.24",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
 		"react-hook-form": "7.58.1",
 		"supercluster": "^8.0.1",
 		"use-supercluster": "^1.2.0",
-		"zod": "^3.25.67"
+		"zod": "^3.25.67",
+		"zustand": "^5.0.9"
 	},
 	"devDependencies": {
 		"@repo/typescript-config": "workspace:*",
