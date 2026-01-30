@@ -1,8 +1,28 @@
+import { Button } from "@repo/ui/components/ui/button";
+import { cn } from "@repo/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+	AdvancedMarker,
+	APIProvider,
+	Map as GoogleMap,
+} from "@vis.gl/react-google-maps";
 import { ClockIcon, ShoppingBagIcon, TruckIcon } from "lucide-react";
+import { useState } from "react";
 import { allProductsByShopIdQueryOptions } from "../../../api/products";
 import { shopByIdQueryOptions } from "../../../api/shops";
+import { AddToCartDialog } from "../../../components/add-to-cart-dialog";
+import { ShopCartColumn } from "../../../components/shop-cart-column";
+import { getCategoryColors, getCategoryIcon } from "./index";
+
+interface ProductForCart {
+	id: number;
+	shopId: number;
+	name: string;
+	description: string | null;
+	price: string;
+	images: string[] | null;
+}
 
 export const Route = createFileRoute("/(app)/tiendas/$shopId")({
 	component: RouteComponent,
@@ -10,6 +30,11 @@ export const Route = createFileRoute("/(app)/tiendas/$shopId")({
 
 function RouteComponent() {
 	const params = Route.useParams();
+	const [selectedProduct, setSelectedProduct] = useState<ProductForCart | null>(
+		null,
+	);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+
 	const { data: shop, isPending } = useQuery(
 		shopByIdQueryOptions(Number(params.shopId)),
 	);
@@ -31,209 +56,310 @@ function RouteComponent() {
 	const categories = products?.map((product) => product.product_category.name);
 	const uniqueCategories = Array.from(new Set(categories));
 
+	const handleAddToCart = (product: {
+		id: number;
+		name: string;
+		description: string | null;
+		price: string;
+		images: string[] | null;
+	}) => {
+		setSelectedProduct({
+			id: product.id,
+			shopId: shop.id,
+			name: product.name,
+			description: product.description,
+			price: product.price,
+			images: product.images,
+		});
+		setIsDialogOpen(true);
+	};
+
+	const CategoryIcon = getCategoryIcon("restaurant");
+	const colors = getCategoryColors("restaurant");
+
 	return (
-		<section>
-			<div className="relative w-full h-96 md:h-[500px] overflow-hidden bg-muted">
-				<div className="absolute inset-0">
-					<img
-						src={shop?.banner || "https://via.placeholder.com/1200x400"}
-						alt={shop?.name || "Restaurant Hero"}
-						className="w-full h-full object-cover"
-					/>
-					<div className="absolute inset-0 bg-black/20"></div>
-				</div>
-				<div className="absolute inset-0 bg-gradient-to-t from-black to-transparent pt-12 pb-8 px-4 md:px-8 flex justify-center">
-					<div className="container mx-auto flex flex-col md:flex-row items-center gap-4">
-						<div className="flex flex-col w-full">
-							<img
-								src={shop?.logo || "https://via.placeholder.com/100x100"}
-								alt={shop?.name || "Shop Logo"}
-								className="size-64 rounded-3xl border-4 border-white object-cover mx-auto mb-8"
-							/>
-							<h1 className="text-4xl md:text-5xl font-bold text-white mb-2 text-balance">
-								{shop.name}
-							</h1>
-							<div className="text-gray-200 text-lg flex flex-row gap-2 items-center">
-								<p>Categoría</p>
-								<span>•</span>
-								<p>{shop.description}</p>
-								<span>•</span>
-								<p>{shop.address}</p>
-							</div>
-						</div>
+		<>
+			<section>
+				<div className="relative w-full h-96 md:h-[500px] overflow-hidden bg-muted">
+					<div className="absolute inset-0">
+						<img
+							src={shop?.banner || "https://via.placeholder.com/1200x400"}
+							alt={shop?.name || "Restaurant Hero"}
+							className="w-full h-full object-cover"
+						/>
+						<div className="absolute inset-0 bg-black/20"></div>
 					</div>
-				</div>
-			</div>
-			<div className="bg-primary/5 px-4 md:px-8 py-6 border-b border-border">
-				<div className="container mx-auto">
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-						{/* Horarios */}
-						<div className="flex gap-4 items-start">
-							<ClockIcon size={24} className="text-primary flex-shrink-0" />
-							<div>
-								<h3 className="font-semibold text-foreground mb-2">Horarios</h3>
-								<div className="text-sm text-muted-foreground space-y-1">
-									<p>
-										<span className="text-foreground font-medium">
-											Lunes - Viernes:
-										</span>{" "}
-										11:00 AM - 11:00 PM
-									</p>
-									<p>
-										<span className="text-foreground font-medium">Sábado:</span>{" "}
-										12:00 PM - 12:00 AM
-									</p>
-									<p>
-										<span className="text-foreground font-medium">
-											Domingo:
-										</span>{" "}
-										12:00 PM - 10:00 PM
-									</p>
-								</div>
-							</div>
-						</div>
-
-						{/* Delivery */}
-						<div className="flex gap-4 items-start">
-							<TruckIcon size={24} className="text-primary flex-shrink-0" />
-							<div>
-								<h3 className="font-semibold text-foreground mb-2">Delivery</h3>
-								<div className="text-sm text-muted-foreground space-y-1">
-									<p>
-										<span className="text-green-600 font-medium">
-											✓ Disponible
-										</span>
-									</p>
-									<p>
-										<span className="text-foreground font-medium">Costo:</span>{" "}
-										Desde $5,000
-									</p>
-									<p>
-										<span className="text-foreground font-medium">Tiempo:</span>{" "}
-										30-45 minutos
-									</p>
-								</div>
-							</div>
-						</div>
-
-						{/* Retiro en Local */}
-						<div className="flex gap-4 items-start">
-							<ShoppingBagIcon
-								size={24}
-								className="text-primary flex-shrink-0"
-							/>
-							<div>
-								<h3 className="font-semibold text-foreground mb-2">
-									Retiro en Local
-								</h3>
-								<div className="text-sm text-muted-foreground space-y-1">
-									<p>
-										<span className="text-green-600 font-medium">
-											✓ Disponible
-										</span>
-									</p>
-									<p>
-										<span className="text-foreground font-medium">Tiempo:</span>{" "}
-										15-20 minutos
-									</p>
-									<p>
-										<span className="text-foreground font-medium">Lugar:</span>{" "}
-										Mostrador principal
-									</p>
+					<div className="absolute inset-0 bg-gradient-to-t from-black to-transparent pt-12 pb-8 px-4 md:px-8 flex justify-center">
+						<div className="container mx-auto flex flex-col md:flex-row items-center gap-4">
+							<div className="flex flex-col w-full">
+								<img
+									src={shop?.logo || "https://via.placeholder.com/100x100"}
+									alt={shop?.name || "Shop Logo"}
+									className="size-64 rounded-3xl border-4 border-white object-cover mx-auto mb-8"
+								/>
+								<h1 className="text-4xl md:text-5xl font-bold text-white mb-2 text-balance">
+									{shop.name}
+								</h1>
+								<div className="text-gray-200 text-lg flex flex-row gap-2 items-center">
+									<p>Categoría</p>
+									<span>•</span>
+									<p>{shop.description}</p>
+									<span>•</span>
+									<p>{shop.address}</p>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-			<div className="container mx-auto grid grid-cols-[300px_1fr]">
-				{/* Sidebar de categorías */}
-				<aside className="border-r border-l sticky top-0 h-[100vh]">
-					{uniqueCategories?.map((category) => (
-						<button
-							key={category}
-							type="button"
-							onClick={() => {
-								const element = document.getElementById(
-									`category-${category.replace(/\s+/g, "-")}`,
-								);
-								element?.scrollIntoView({ behavior: "smooth" });
-							}}
-							className="w-full text-left p-4 hover:bg-primary/5 transition-colors border-l-4 border-transparent hover:border-primary"
+				<div className="bg-primary/5 px-4 md:px-8 py-6 border-b border-border">
+					<div className="container mx-auto">
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+							{/* Horarios */}
+							<div className="flex gap-4 items-start">
+								<ClockIcon size={24} className="text-primary flex-shrink-0" />
+								<div>
+									<h3 className="font-semibold text-foreground mb-2">
+										Horarios
+									</h3>
+									<div className="text-sm text-muted-foreground space-y-1">
+										<p>
+											<span className="text-foreground font-medium">
+												Lunes - Viernes:
+											</span>{" "}
+											11:00 AM - 11:00 PM
+										</p>
+										<p>
+											<span className="text-foreground font-medium">
+												Sábado:
+											</span>{" "}
+											12:00 PM - 12:00 AM
+										</p>
+										<p>
+											<span className="text-foreground font-medium">
+												Domingo:
+											</span>{" "}
+											12:00 PM - 10:00 PM
+										</p>
+									</div>
+								</div>
+							</div>
+
+							{/* Delivery */}
+							<div className="flex gap-4 items-start">
+								<TruckIcon size={24} className="text-primary flex-shrink-0" />
+								<div>
+									<h3 className="font-semibold text-foreground mb-2">
+										Delivery
+									</h3>
+									<div className="text-sm text-muted-foreground space-y-1">
+										<p>
+											<span className="text-green-600 font-medium">
+												✓ Disponible
+											</span>
+										</p>
+										<p>
+											<span className="text-foreground font-medium">
+												Costo:
+											</span>{" "}
+											Desde $5,000
+										</p>
+										<p>
+											<span className="text-foreground font-medium">
+												Tiempo:
+											</span>{" "}
+											30-45 minutos
+										</p>
+									</div>
+								</div>
+							</div>
+
+							{/* Retiro en Local */}
+							<div className="flex gap-4 items-start">
+								<ShoppingBagIcon
+									size={24}
+									className="text-primary flex-shrink-0"
+								/>
+								<div>
+									<h3 className="font-semibold text-foreground mb-2">
+										Retiro en Local
+									</h3>
+									<div className="text-sm text-muted-foreground space-y-1">
+										<p>
+											<span className="text-green-600 font-medium">
+												✓ Disponible
+											</span>
+										</p>
+										<p>
+											<span className="text-foreground font-medium">
+												Tiempo:
+											</span>{" "}
+											15-20 minutos
+										</p>
+										<p>
+											<span className="text-foreground font-medium">
+												Lugar:
+											</span>{" "}
+											Mostrador principal
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<section className="container mx-auto py-8">
+					<h2 className="text-2xl font-bold mb-4">Ubicación</h2>
+					<div className="w-full h-[400px] rounded-lg overflow-hidden border border-border shadow-sm">
+						<APIProvider
+							apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+							language="es"
 						>
-							<h2 className="text-base font-medium text-foreground">
-								{category}
-							</h2>
-						</button>
-					))}
-				</aside>
-
-				{/* Grid de productos por categoría */}
-				<div className="p-6">
-					{uniqueCategories?.map((category) => {
-						const categoryProducts = products?.filter(
-							(p) => p.product_category.name === category,
-						);
-						return (
-							<div
-								key={category}
-								id={`category-${category.replace(/\s+/g, "-")}`}
-								className="mb-10"
+							<GoogleMap
+								defaultCenter={{
+									lat: Number(shop.latitude),
+									lng: Number(shop.longitude),
+								}}
+								defaultZoom={15}
+								mapId="314bbedb82bc2f8947b9d13c"
+								gestureHandling={"cooperative"}
 							>
-								<h2 className="text-2xl font-bold mb-6 text-foreground">
+								<AdvancedMarker
+									position={{
+										lat: Number(shop.latitude),
+										lng: Number(shop.longitude),
+									}}
+								>
+									<div
+										className={cn(
+											"p-2 rounded-full border-2 shadow-lg",
+											colors.bg,
+											colors.border,
+										)}
+									>
+										<CategoryIcon className={cn("w-6 h-6", colors.text)} />
+									</div>
+								</AdvancedMarker>
+							</GoogleMap>
+						</APIProvider>
+					</div>
+				</section>
+				<div className="px-8 grid grid-cols-[300px_1fr_350px] gap-4 border-t border-border">
+					{/* Sidebar de categorías */}
+					<aside className="border-r border-l sticky top-[4.5rem] h-[100vh]">
+						{uniqueCategories?.map((category) => (
+							<button
+								key={category}
+								type="button"
+								onClick={() => {
+									const element = document.getElementById(
+										`category-${category.replace(/\s+/g, "-")}`,
+									);
+									if (element) {
+										const yOffset = -100;
+										const y =
+											element.getBoundingClientRect().top +
+											window.pageYOffset +
+											yOffset;
+										window.scrollTo({ top: y, behavior: "smooth" });
+									}
+								}}
+								className="w-full text-left p-4 hover:bg-primary/5 transition-colors border-l-4 border-transparent hover:border-primary"
+							>
+								<h2 className="text-base font-medium text-foreground">
 									{category}
 								</h2>
-								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-									{categoryProducts?.map(({ product }) => (
-										<div
-											key={product.id}
-											className="bg-card rounded-lg border border-border overflow-hidden hover:shadow-lg transition-shadow"
-										>
-											{/* Imagen del producto */}
-											<div className="relative aspect-square bg-muted">
-												<img
-													src={
-														product.images?.[0] ||
-														"https://via.placeholder.com/200x200"
-													}
-													alt={product.name}
-													className="w-full h-full object-cover"
-												/>
-												{!product.isActive && (
-													<div className="absolute bottom-2 right-2">
-														<span className="bg-destructive text-destructive-foreground text-xs font-medium px-2 py-1 rounded">
-															No disponible
-														</span>
-													</div>
-												)}
-											</div>
+							</button>
+						))}
+					</aside>
 
-											{/* Contenido */}
-											<div className="p-4">
-												<h3 className="font-semibold text-foreground line-clamp-2 mb-1">
-													{product.name}
-												</h3>
-												{product.description && (
-													<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-														{product.description}
-													</p>
-												)}
-												<p className="text-lg font-bold text-foreground">
-													${" "}
-													{Number(product.price).toLocaleString("es-AR", {
-														minimumFractionDigits: 2,
-													})}
-												</p>
+					{/* Grid de productos por categoría */}
+					<div className="p-6">
+						{uniqueCategories?.map((category) => {
+							const categoryProducts = products?.filter(
+								(p) => p.product_category.name === category,
+							);
+							return (
+								<div
+									key={category}
+									id={`category-${category.replace(/\s+/g, "-")}`}
+									className="mb-10"
+								>
+									<h2 className="text-2xl font-bold mb-6 text-foreground">
+										{category}
+									</h2>
+									<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+										{categoryProducts?.map(({ product }) => (
+											<div
+												key={product.id}
+												className="bg-card rounded-lg border border-border overflow-hidden hover:shadow-lg transition-shadow"
+											>
+												{/* Imagen del producto */}
+												<div className="relative aspect-square bg-muted">
+													<img
+														src={
+															product.images?.[0] ||
+															"https://via.placeholder.com/200x200"
+														}
+														alt={product.name}
+														className="w-full h-full object-cover"
+													/>
+													{!product.isActive && (
+														<div className="absolute bottom-2 right-2">
+															<span className="bg-destructive text-destructive-foreground text-xs font-medium px-2 py-1 rounded">
+																No disponible
+															</span>
+														</div>
+													)}
+												</div>
+
+												{/* Contenido */}
+												<div className="p-4">
+													<h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+														{product.name}
+													</h3>
+													{product.description && (
+														<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+															{product.description}
+														</p>
+													)}
+													<div className="flex items-center justify-between">
+														<p className="text-lg font-bold text-foreground">
+															${" "}
+															{Number(product.price).toLocaleString("es-AR", {
+																minimumFractionDigits: 2,
+															})}
+														</p>
+														<Button
+															size="sm"
+															onClick={() => handleAddToCart(product)}
+															disabled={!product.isActive}
+														>
+															Agregar
+														</Button>
+													</div>
+												</div>
 											</div>
-										</div>
-									))}
+										))}
+									</div>
 								</div>
-							</div>
-						);
-					})}
-				</div>
-			</div>
-			<div className="container mx-auto">Ubicación</div>
-		</section>
+							);
+						})}
+					</div>
+
+					{/* Columna del carrito */}
+					<aside className="py-6 ">
+						<ShopCartColumn shopId={shop.id} />
+					</aside>
+				</div>{" "}
+			</section>{" "}
+			{/* Dialog para agregar al carrito */}
+			{selectedProduct && (
+				<AddToCartDialog
+					product={selectedProduct}
+					open={isDialogOpen}
+					onOpenChange={setIsDialogOpen}
+				/>
+			)}
+		</>
 	);
 }

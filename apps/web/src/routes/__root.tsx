@@ -10,7 +10,7 @@ export const Route = createRootRoute({
 		return (
 			<>
 				<Outlet />
-				<Toaster position="top-center" richColors />
+				<Toaster position="bottom-right" richColors />
 				<TanStackRouterDevtools />
 				<ReactQueryDevtools initialIsOpen={false} />
 			</>

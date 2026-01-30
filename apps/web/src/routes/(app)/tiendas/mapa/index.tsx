@@ -1,7 +1,6 @@
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
-import { Logo } from "@repo/ui/components/ui/logo";
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import { cn } from "@repo/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -27,10 +26,6 @@ function RouteComponent() {
 
 	return (
 		<div className="">
-			<header className="flex items-center justify-between p-4 border-b px-8">
-				<Logo />
-				Avatar
-			</header>
 			{/* TODO: Arreglar esto (se ve bien pero hay que hacerlo sin magic number) */}
 			<div className="flex h-[calc(100vh-73px)]">
 				<aside className="w-[500px] overflow-hidden flex flex-col border-r">
