@@ -1,3 +1,4 @@
+import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import {
 	Card,
@@ -6,6 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@repo/ui/components/ui/card";
+import { cn } from "@repo/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
@@ -21,7 +23,12 @@ import {
 	Search,
 	Store,
 } from "lucide-react";
-import { allShopsQueryOptions } from "../../../api/shops";
+import {
+	allShopsHoursQueryOptions,
+	allShopsQueryOptions,
+	getShopHoursFromAll,
+	isShopOpenNow,
+} from "../../../api/shops";
 import CardShopSkeleton from "../../../components/card-shop-skeleton";
 
 export const Route = createFileRoute("/(app)/tiendas/")({
@@ -84,6 +91,8 @@ export const getCategoryColors = (category: string) => {
 
 function RouteComponent() {
 	const { data, isPending } = useQuery(allShopsQueryOptions);
+	const { data: allHours } = useQuery(allShopsHoursQueryOptions);
+
 	return (
 		<div className="container mx-auto p-6 max-w-7xl">
 			{/* Header */}
@@ -143,6 +152,12 @@ function RouteComponent() {
 			<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
 				{data ? (
 					data.map((shop) => {
+						const shopHours = allHours
+							? getShopHoursFromAll(allHours, shop.id)
+							: [];
+						const isOpen =
+							shopHours.length > 0 ? isShopOpenNow(shopHours) : false;
+
 						return (
 							<Link
 								to={`/tiendas/$shopId`}
@@ -162,6 +177,17 @@ function RouteComponent() {
 											alt={shop.name}
 											className="w-full h-full object-cover"
 										/>
+										<Badge
+											variant={isOpen ? "default" : "secondary"}
+											className={cn(
+												"absolute top-2 right-2",
+												isOpen
+													? "bg-green-500 hover:bg-green-600"
+													: "bg-red-500 hover:bg-red-600 text-white",
+											)}
+										>
+											{isOpen ? "Abierto" : "Cerrado"}
+										</Badge>
 									</div>
 									<CardHeader className="pb-2">
 										<div className="flex items-start justify-between">

@@ -1,3 +1,4 @@
+import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { cn } from "@repo/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +11,13 @@ import {
 import { ClockIcon, ShoppingBagIcon, TruckIcon } from "lucide-react";
 import { useState } from "react";
 import { allProductsByShopIdQueryOptions } from "../../../api/products";
-import { shopByIdQueryOptions } from "../../../api/shops";
+import {
+	getNextOpenTime,
+	groupConsecutiveDays,
+	isShopOpenNow,
+	shopByIdQueryOptions,
+	shopHoursQueryOptions,
+} from "../../../api/shops";
 import { AddToCartDialog } from "../../../components/add-to-cart-dialog";
 import { ShopCartColumn } from "../../../components/shop-cart-column";
 import { getCategoryColors, getCategoryIcon } from "./index";
@@ -42,6 +49,14 @@ function RouteComponent() {
 	const { data: products, isPending: productsPending } = useQuery(
 		allProductsByShopIdQueryOptions(Number(params.shopId)),
 	);
+
+	const { data: hours } = useQuery(
+		shopHoursQueryOptions(Number(params.shopId)),
+	);
+
+	const isOpen = hours ? isShopOpenNow(hours) : false;
+	const nextOpen = hours && !isOpen ? getNextOpenTime(hours) : null;
+	const groupedHours = hours ? groupConsecutiveDays(hours) : [];
 
 	if (isPending || productsPending) {
 		return <div>Loading...</div>;
@@ -100,6 +115,23 @@ function RouteComponent() {
 								<h1 className="text-4xl md:text-5xl font-bold text-white mb-2 text-balance">
 									{shop.name}
 								</h1>
+								<div className="flex items-center gap-2 mb-2">
+									<Badge
+										variant={isOpen ? "default" : "secondary"}
+										className={cn(
+											isOpen
+												? "bg-green-500 hover:bg-green-600"
+												: "bg-red-500 hover:bg-red-600 text-white",
+										)}
+									>
+										{isOpen ? "Abierto" : "Cerrado"}
+									</Badge>
+									{!isOpen && nextOpen && (
+										<span className="text-gray-200 text-sm">
+											Abre {nextOpen.day} a las {nextOpen.time}
+										</span>
+									)}
+								</div>
 								<div className="text-gray-200 text-lg flex flex-row gap-2 items-center">
 									<p>Categoría</p>
 									<span>•</span>
@@ -122,24 +154,32 @@ function RouteComponent() {
 										Horarios
 									</h3>
 									<div className="text-sm text-muted-foreground space-y-1">
-										<p>
-											<span className="text-foreground font-medium">
-												Lunes - Viernes:
-											</span>{" "}
-											11:00 AM - 11:00 PM
-										</p>
-										<p>
-											<span className="text-foreground font-medium">
-												Sábado:
-											</span>{" "}
-											12:00 PM - 12:00 AM
-										</p>
-										<p>
-											<span className="text-foreground font-medium">
-												Domingo:
-											</span>{" "}
-											12:00 PM - 10:00 PM
-										</p>
+										{groupedHours.length > 0 ? (
+											groupedHours.map((group, idx) => (
+												<div key={idx} className="flex gap-2">
+													<span className="text-foreground font-medium min-w-32">
+														{group.dayRange}:
+													</span>
+													{group.isClosed ? (
+														<span className="text-muted-foreground">
+															Cerrado
+														</span>
+													) : (
+														<div className="flex flex-col">
+															{group.timeSlots.map((slot, slotIdx) => (
+																<span key={slotIdx}>
+																	{slot.openTime} - {slot.closeTime}
+																</span>
+															))}
+														</div>
+													)}
+												</div>
+											))
+										) : (
+											<p className="text-muted-foreground">
+												Horarios no disponibles
+											</p>
+										)}
 									</div>
 								</div>
 							</div>

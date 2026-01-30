@@ -46,9 +46,11 @@ import {
 	Mail,
 	MapPin,
 	Phone,
+	Plus,
 	Settings,
 	ShoppingBag,
 	Store,
+	Trash2,
 	Truck,
 } from "lucide-react";
 import React, { useState } from "react";
@@ -56,11 +58,15 @@ import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
 import { createShop } from "../../api/shops";
 
-const businessHoursSchema = z.object({
-	dayOfWeek: z.number().min(0).max(6),
+const timeSlotSchema = z.object({
 	openTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
 	closeTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+});
+
+const businessHoursSchema = z.object({
+	dayOfWeek: z.number().min(0).max(6),
 	isClosed: z.boolean(),
+	timeSlots: z.array(timeSlotSchema),
 });
 
 const formSchema = createShopSchema.extend({
@@ -137,12 +143,50 @@ function RouteComponent() {
 			tags: [],
 			businessHours: DAYS_OF_WEEK.map((_, index) => ({
 				dayOfWeek: index,
-				openTime: "09:00",
-				closeTime: "18:00",
-				isClosed: false,
+				isClosed: index === 0, // Domingo cerrado por defecto
+				timeSlots: [{ openTime: "09:00", closeTime: "18:00" }],
 			})),
 		},
 	});
+
+	// Función para convertir los horarios del formulario al formato del API
+	const convertBusinessHoursForApi = (
+		hours: FormValues["businessHours"],
+	): Array<{
+		dayOfWeek: number;
+		openTime: string;
+		closeTime: string;
+		isClosed: boolean;
+	}> => {
+		const result: Array<{
+			dayOfWeek: number;
+			openTime: string;
+			closeTime: string;
+			isClosed: boolean;
+		}> = [];
+
+		for (const day of hours) {
+			if (day.isClosed) {
+				result.push({
+					dayOfWeek: day.dayOfWeek,
+					openTime: "00:00",
+					closeTime: "00:00",
+					isClosed: true,
+				});
+			} else {
+				for (const slot of day.timeSlots) {
+					result.push({
+						dayOfWeek: day.dayOfWeek,
+						openTime: slot.openTime,
+						closeTime: slot.closeTime,
+						isClosed: false,
+					});
+				}
+			}
+		}
+
+		return result;
+	};
 
 	const mutation = useMutation({
 		mutationFn: async (data: CreateShop) => {
@@ -193,9 +237,31 @@ function RouteComponent() {
 		}
 	};
 
-	const onSubmit = async (data: CreateShop) => {
-		console.log(data);
-		mutation.mutate(data);
+	const onSubmit = async (data: FormValues) => {
+		const apiData = {
+			...data,
+			businessHours: convertBusinessHoursForApi(data.businessHours),
+		};
+		console.log(apiData);
+		mutation.mutate(apiData as unknown as CreateShop);
+	};
+
+	const addTimeSlot = (dayIndex: number) => {
+		const currentHours = form.getValues(`businessHours.${dayIndex}`);
+		form.setValue(`businessHours.${dayIndex}.timeSlots`, [
+			...currentHours.timeSlots,
+			{ openTime: "14:00", closeTime: "22:00" },
+		]);
+	};
+
+	const removeTimeSlot = (dayIndex: number, slotIndex: number) => {
+		const currentHours = form.getValues(`businessHours.${dayIndex}`);
+		if (currentHours.timeSlots.length > 1) {
+			form.setValue(
+				`businessHours.${dayIndex}.timeSlots`,
+				currentHours.timeSlots.filter((_, i) => i !== slotIndex),
+			);
+		}
 	};
 
 	return (
@@ -575,77 +641,115 @@ function RouteComponent() {
 										</h3>
 										<p className="text-sm text-gray-600 mb-6">
 											Define los horarios en que tu tienda estará disponible
-											para recibir pedidos
+											para recibir pedidos. Puedes agregar múltiples turnos por
+											día.
 										</p>
 									</div>
-									{/* TODO: Agregar posibilidad de 2 turnos */}
 									<div className="space-y-4">
-										{DAYS_OF_WEEK.map((day, index) => (
-											<div
-												key={index}
-												className="flex items-center gap-4 p-4 border rounded-lg"
-											>
-												<div className="w-20 text-sm font-medium">{day}</div>
+										{DAYS_OF_WEEK.map((day, dayIndex) => {
+											const isClosed = form.watch(
+												`businessHours.${dayIndex}.isClosed`,
+											);
+											const timeSlots =
+												form.watch(`businessHours.${dayIndex}.timeSlots`) || [];
 
-												<FormField
-													control={form.control}
-													name={`businessHours.${index}.isClosed`}
-													render={({ field }) => (
-														<FormItem className="flex items-center space-x-2">
-															<FormControl>
-																<Switch
-																	checked={!field.value}
-																	onCheckedChange={(checked) =>
-																		field.onChange(!checked)
-																	}
-																/>
-															</FormControl>
-															<FormLabel className="text-sm">
-																{field.value ? "Cerrado" : "Abierto"}
-															</FormLabel>
-														</FormItem>
-													)}
-												/>
-
-												{!form.watch(`businessHours.${index}.isClosed`) && (
-													<>
+											return (
+												<div
+													key={dayIndex}
+													className="p-4 border rounded-lg space-y-3"
+												>
+													<div className="flex items-center gap-4">
 														<FormField
 															control={form.control}
-															name={`businessHours.${index}.openTime`}
+															name={`businessHours.${dayIndex}.isClosed`}
 															render={({ field }) => (
-																<FormItem>
+																<FormItem className="flex items-center space-x-2">
 																	<FormControl>
-																		<Input
-																			type="time"
-																			className="w-32"
-																			{...field}
+																		<Switch
+																			checked={!field.value}
+																			onCheckedChange={(checked) =>
+																				field.onChange(!checked)
+																			}
 																		/>
 																	</FormControl>
 																</FormItem>
 															)}
 														/>
+														<div className="w-24 text-sm font-medium">
+															{day}
+														</div>
 
-														<span className="text-sm text-gray-500">a</span>
-
-														<FormField
-															control={form.control}
-															name={`businessHours.${index}.closeTime`}
-															render={({ field }) => (
-																<FormItem>
-																	<FormControl>
-																		<Input
-																			type="time"
-																			className="w-32"
-																			{...field}
+														{!isClosed && (
+															<div className="flex-1 space-y-2">
+																{timeSlots.map((_, slotIndex) => (
+																	<div
+																		key={slotIndex}
+																		className="flex items-center gap-2"
+																	>
+																		<FormField
+																			control={form.control}
+																			name={`businessHours.${dayIndex}.timeSlots.${slotIndex}.openTime`}
+																			render={({ field }) => (
+																				<FormItem>
+																					<FormControl>
+																						<Input
+																							type="time"
+																							className="w-32"
+																							{...field}
+																						/>
+																					</FormControl>
+																				</FormItem>
+																			)}
 																		/>
-																	</FormControl>
-																</FormItem>
-															)}
-														/>
-													</>
-												)}
-											</div>
-										))}
+																		<span className="text-sm text-gray-500">
+																			-
+																		</span>
+																		<FormField
+																			control={form.control}
+																			name={`businessHours.${dayIndex}.timeSlots.${slotIndex}.closeTime`}
+																			render={({ field }) => (
+																				<FormItem>
+																					<FormControl>
+																						<Input
+																							type="time"
+																							className="w-32"
+																							{...field}
+																						/>
+																					</FormControl>
+																				</FormItem>
+																			)}
+																		/>
+																		{slotIndex === 0 ? (
+																			<Button
+																				type="button"
+																				variant="ghost"
+																				size="icon"
+																				onClick={() => addTimeSlot(dayIndex)}
+																				title="Agregar turno"
+																			>
+																				<Plus className="w-4 h-4" />
+																			</Button>
+																		) : (
+																			<Button
+																				type="button"
+																				variant="ghost"
+																				size="icon"
+																				onClick={() =>
+																					removeTimeSlot(dayIndex, slotIndex)
+																				}
+																				title="Eliminar turno"
+																			>
+																				<Trash2 className="w-4 h-4" />
+																			</Button>
+																		)}
+																	</div>
+																))}
+															</div>
+														)}
+													</div>
+												</div>
+											);
+										})}
 									</div>
 								</div>
 							)}

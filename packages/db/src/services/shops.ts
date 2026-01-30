@@ -94,6 +94,12 @@ export const getShopHoursByShopId = async (shopId: number) => {
 	return hoursData;
 };
 
+export const getAllShopsHours = async () => {
+	const hoursData = await db.select().from(shopHours);
+
+	return hoursData;
+};
+
 export const updateShopHours = async (
 	shopId: number,
 	newHoursData: CreateShopHours[],
