@@ -6,6 +6,7 @@ import {
 	createManyShopHours,
 	createShop,
 	getAllShops,
+	getAllShopsHours,
 	getShopById,
 	getShopByUserId,
 	getShopHoursByShopId,
@@ -36,6 +37,20 @@ router.get("/", async (_req: Request, res: Response): Promise<void> => {
 		res.status(500).json({ error: "Error interno del servidor" });
 	}
 });
+
+// Endpoint público para obtener todos los horarios de todas las tiendas
+router.get(
+	"/all-hours",
+	async (_req: Request, res: Response): Promise<void> => {
+		try {
+			const hours = await getAllShopsHours();
+			res.json(hours);
+		} catch (error) {
+			console.error("Error in /all-hours route:", error);
+			res.status(500).json({ error: "Error interno del servidor" });
+		}
+	},
+);
 
 router.get(
 	"/status",
@@ -223,6 +238,28 @@ router.get("/:shopId", async (req: Request, res: Response): Promise<void> => {
 		res.status(500).json({ error: "Error interno del servidor" });
 	}
 });
+
+// Endpoint público para obtener horarios de una tienda por ID
+router.get(
+	"/:shopId/hours",
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			const shopId = Number(req.params.shopId);
+
+			if (Number.isNaN(shopId)) {
+				res.status(400).json({ error: "ID de tienda inválido" });
+				return;
+			}
+
+			const hours = await getShopHoursByShopId(shopId);
+
+			res.json(hours || []);
+		} catch (error) {
+			console.error("Error in /:shopId/hours route:", error);
+			res.status(500).json({ error: "Error interno del servidor" });
+		}
+	},
+);
 
 router.put(
 	"/:shopId",
