@@ -1,6 +1,8 @@
 import { account, session, user, verification } from "./auth-schema";
-import { cart, cartItem, cartItemAddon } from "./cart-schema";
+import { cart, cartItem, cartItemAddon, cartItemModifier } from "./cart-schema";
 import {
+	modifierGroup,
+	modifierOption,
 	product,
 	productAddon,
 	productCategory,
@@ -12,6 +14,7 @@ import {
 	order,
 	orderItem,
 	orderItemAddon,
+	orderItemModifier,
 	orderStatusHistory,
 	shop,
 	shopCategory,
@@ -32,12 +35,16 @@ export const schema = {
 	productAddon,
 	productCategory,
 	productVariant,
+	modifierGroup,
+	modifierOption,
 	cart,
 	cartItem,
 	cartItemAddon,
+	cartItemModifier,
 	order,
 	orderItem,
 	orderItemAddon,
+	orderItemModifier,
 	orderStatusHistory,
 	coupon,
 	couponUsage,

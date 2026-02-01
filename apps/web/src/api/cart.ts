@@ -1,5 +1,6 @@
 import type {
 	AddToCartSchema,
+	AddToCartWithModifiersSchema,
 	UpdateCartItemSchema,
 } from "@repo/db/src/types/cart";
 import type { UseMutationOptions } from "@tanstack/react-query";
@@ -84,6 +85,30 @@ export interface CartItemWithDetails {
 			sortOrder: number;
 			createdAt: Date;
 			updatedAt: Date;
+		} | null;
+	}>;
+	modifiers: Array<{
+		cartItemModifier: {
+			id: number;
+			cartItemId: number;
+			modifierOptionId: number;
+			quantity: number;
+			createdAt: Date;
+		};
+		option: {
+			id: number;
+			groupId: number;
+			name: string;
+			priceAdjustment: string;
+			isDefault: boolean;
+			isActive: boolean;
+			sortOrder: number;
+		} | null;
+		group: {
+			id: number;
+			productId: number;
+			name: string;
+			description: string | null;
 		} | null;
 	}>;
 }
@@ -183,15 +208,21 @@ export const cartByShopQueryOptions = (shopId: number) =>
 
 // ===== MUTATION FUNCTIONS =====
 
+// Legacy interface for backward compatibility
 interface AddToCartPayload extends AddToCartSchema {
 	shopId: number;
 }
 
+// New interface that supports modifiers
+interface AddToCartWithModifiersPayload extends AddToCartWithModifiersSchema {
+	shopId: number;
+}
+
 /**
- * Agrega un item al carrito
+ * Agrega un item al carrito (supports both legacy addons and new modifiers)
  */
 const addToCart = async (
-	payload: AddToCartPayload,
+	payload: AddToCartPayload | AddToCartWithModifiersPayload,
 ): Promise<{ success: boolean; itemId: number; message: string }> => {
 	const sessionId = getOrCreateSessionId();
 
@@ -213,13 +244,48 @@ const addToCart = async (
 	return response.json();
 };
 
+/**
+ * Agrega un item al carrito con modificadores (nuevo sistema)
+ */
+const addToCartWithModifiers = async (
+	payload: AddToCartWithModifiersPayload,
+): Promise<{ success: boolean; itemId: number; message: string }> => {
+	const sessionId = getOrCreateSessionId();
+
+	const response = await fetch(`${API_URL}/cart/items/with-modifiers`, {
+		method: "POST",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+			"x-session-id": sessionId,
+		},
+		body: JSON.stringify(payload),
+	});
+
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || "Error al agregar al carrito");
+	}
+
+	return response.json();
+};
+
 export const addToCartMutationOptions = (): UseMutationOptions<
 	{ success: boolean; itemId: number; message: string },
 	Error,
-	AddToCartPayload
+	AddToCartPayload | AddToCartWithModifiersPayload
 > => ({
 	mutationKey: ["add-to-cart"],
 	mutationFn: addToCart,
+});
+
+export const addToCartWithModifiersMutationOptions = (): UseMutationOptions<
+	{ success: boolean; itemId: number; message: string },
+	Error,
+	AddToCartWithModifiersPayload
+> => ({
+	mutationKey: ["add-to-cart-with-modifiers"],
+	mutationFn: addToCartWithModifiers,
 });
 
 /**

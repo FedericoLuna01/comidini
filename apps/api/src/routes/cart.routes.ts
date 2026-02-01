@@ -1,15 +1,21 @@
 import {
 	addItemToCart,
+	addItemToCartWithModifiers,
 	clearAllCarts,
 	getAllCartsWithItems,
 	getCartWithItems,
+	getCartWithItemsAndModifiers,
 	getOrCreateCart,
 	mergeGuestCart,
 	removeCartItem,
 	updateCartItem,
 } from "@repo/db/src/services/cart";
 import { getShopById } from "@repo/db/src/services/shops";
-import { addToCartSchema, updateCartItemSchema } from "@repo/db/src/types/cart";
+import {
+	addToCartSchema,
+	addToCartWithModifiersSchema,
+	updateCartItemSchema,
+} from "@repo/db/src/types/cart";
 import { Router } from "express";
 
 const router: Router = Router();
@@ -30,7 +36,37 @@ router.get("/", async (req, res) => {
 			return;
 		}
 
-		const cartData = await getCartWithItems({ userId, sessionId });
+		const cartData = await getCartWithItemsAndModifiers({ userId, sessionId });
+
+		if (!cartData) {
+			res.status(200).json({ cart: null, items: [] });
+			return;
+		}
+
+		res.status(200).json(cartData);
+	} catch (error) {
+		console.error("Error al obtener carrito:", error);
+		res.status(500).json({ error: "Error al obtener el carrito" });
+	}
+});
+
+/**
+ * GET /api/cart/with-modifiers
+ * Obtiene el carrito actual con items incluyendo modificadores (nuevo sistema)
+ */
+router.get("/with-modifiers", async (req, res) => {
+	try {
+		const userId = req.session?.user?.id;
+		const sessionId = req.headers["x-session-id"] as string;
+
+		if (!userId && !sessionId) {
+			res.status(400).json({
+				error: "Se requiere autenticación o session ID",
+			});
+			return;
+		}
+
+		const cartData = await getCartWithItemsAndModifiers({ userId, sessionId });
 
 		if (!cartData) {
 			res.status(200).json({ cart: null, items: [] });
@@ -135,6 +171,72 @@ router.post("/items", async (req, res) => {
 
 		// Agregar item al carrito
 		const itemId = await addItemToCart(cart.id, validatedFields.data);
+
+		res.status(201).json({
+			success: true,
+			itemId,
+			message: "Producto agregado al carrito",
+		});
+	} catch (error) {
+		console.error("Error al agregar al carrito:", error);
+		const errorMessage =
+			error instanceof Error ? error.message : "Error al agregar al carrito";
+		res.status(500).json({ error: errorMessage });
+	}
+});
+
+/**
+ * POST /api/cart/items/with-modifiers
+ * Agrega un item al carrito con modificadores (nuevo sistema)
+ */
+router.post("/items/with-modifiers", async (req, res) => {
+	try {
+		const userId = req.session?.user?.id;
+		const sessionId = req.headers["x-session-id"] as string;
+
+		if (!userId && !sessionId) {
+			res.status(400).json({
+				error: "Se requiere autenticación o session ID",
+			});
+			return;
+		}
+
+		const body = req.body;
+		const validatedFields = addToCartWithModifiersSchema.safeParse(body);
+
+		if (!validatedFields.success) {
+			console.error("Errores de validación:", validatedFields.error);
+			res.status(400).json({
+				error: "Datos inválidos",
+				details: validatedFields.error,
+			});
+			return;
+		}
+
+		const { shopId } = req.body;
+
+		if (!shopId) {
+			res.status(400).json({ error: "shopId es requerido" });
+			return;
+		}
+
+		// Obtener o crear carrito
+		const cart = await getOrCreateCart({
+			userId,
+			sessionId,
+			shopId: Number(shopId),
+		});
+
+		if (!cart) {
+			res.status(500).json({ error: "No se pudo obtener o crear el carrito" });
+			return;
+		}
+
+		// Agregar item al carrito con modificadores
+		const itemId = await addItemToCartWithModifiers(
+			cart.id,
+			validatedFields.data,
+		);
 
 		res.status(201).json({
 			success: true,

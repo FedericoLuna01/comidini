@@ -6,10 +6,17 @@ import {
 	HeadingTitle,
 } from "@repo/ui/components/ui/heading";
 import { Spinner } from "@repo/ui/components/ui/spinner";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@repo/ui/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, Package, Settings2 } from "lucide-react";
 import { productByIdQueryOptions } from "../../../../../api/products";
+import { ModifierGroupsManager } from "../../../../../components/modifier-groups-manager";
 import { EditProductForm } from "../-components/edit-product-form";
 
 export const Route = createFileRoute(
@@ -66,7 +73,25 @@ function RouteComponent() {
 				</HeadingButton>
 				<HeadingSeparator />
 			</Heading>
-			<EditProductForm shop={shop} product={productData.product} />
+
+			<Tabs defaultValue="general" className="w-full">
+				<TabsList className="grid w-full grid-cols-2 max-w-md">
+					<TabsTrigger value="general" className="flex items-center gap-2">
+						<Package className="h-4 w-4" />
+						Información General
+					</TabsTrigger>
+					<TabsTrigger value="modifiers" className="flex items-center gap-2">
+						<Settings2 className="h-4 w-4" />
+						Modificadores
+					</TabsTrigger>
+				</TabsList>
+				<TabsContent value="general" className="mt-6">
+					<EditProductForm shop={shop} product={productData.product} />
+				</TabsContent>
+				<TabsContent value="modifiers" className="mt-6">
+					<ModifierGroupsManager productId={Number(productId)} />
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 }

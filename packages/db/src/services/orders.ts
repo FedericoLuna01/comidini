@@ -1,7 +1,13 @@
 import { desc, eq } from "drizzle-orm";
 import { db } from "../config";
-import { cartItem, cartItemAddon } from "../schema/cart-schema";
 import {
+	cartItem,
+	cartItemAddon,
+	cartItemModifier,
+} from "../schema/cart-schema";
+import {
+	modifierGroup,
+	modifierOption,
 	product,
 	productAddon,
 	productVariant,
@@ -10,6 +16,7 @@ import {
 	order,
 	orderItem,
 	orderItemAddon,
+	orderItemModifier,
 	orderStatusHistory,
 } from "../schema/shop-schema";
 import type { Order } from "../types/shop";
@@ -89,6 +96,15 @@ export const createOrderFromCart = async (params: {
 			unitPrice: number;
 			totalPrice: number;
 		}>;
+		modifiers: Array<{
+			modifierGroupId: number;
+			modifierGroupName: string;
+			modifierOptionId: number;
+			modifierOptionName: string;
+			quantity: number;
+			unitPrice: number;
+			totalPrice: number;
+		}>;
 	}> = [];
 
 	for (const item of cartItems) {
@@ -133,9 +149,53 @@ export const createOrderFromCart = async (params: {
 			});
 		}
 
+		// Obtener modifiers del item
+		const modifiers = await db
+			.select({
+				cartItemModifier,
+				option: modifierOption,
+				group: modifierGroup,
+			})
+			.from(cartItemModifier)
+			.leftJoin(
+				modifierOption,
+				eq(cartItemModifier.modifierOptionId, modifierOption.id),
+			)
+			.leftJoin(modifierGroup, eq(modifierOption.groupId, modifierGroup.id))
+			.where(eq(cartItemModifier.cartItemId, item.cartItem.id));
+
+		let modifiersPrice = 0;
+		const modifiersData: Array<{
+			modifierGroupId: number;
+			modifierGroupName: string;
+			modifierOptionId: number;
+			modifierOptionName: string;
+			quantity: number;
+			unitPrice: number;
+			totalPrice: number;
+		}> = [];
+
+		for (const modItem of modifiers) {
+			if (!modItem.option || !modItem.group) continue;
+			const modUnitPrice = Number.parseFloat(modItem.option.priceAdjustment);
+			const modTotalPrice = modUnitPrice * modItem.cartItemModifier.quantity;
+			modifiersPrice += modTotalPrice;
+
+			modifiersData.push({
+				modifierGroupId: modItem.group.id,
+				modifierGroupName: modItem.group.name,
+				modifierOptionId: modItem.option.id,
+				modifierOptionName: modItem.option.name,
+				quantity: modItem.cartItemModifier.quantity,
+				unitPrice: modUnitPrice,
+				totalPrice: modTotalPrice,
+			});
+		}
+
 		const unitPrice = basePrice + variantPrice;
+		const extrasPrice = addonsPrice + modifiersPrice;
 		const itemTotalPrice =
-			(unitPrice + addonsPrice / item.cartItem.quantity) *
+			(unitPrice + extrasPrice / item.cartItem.quantity) *
 			item.cartItem.quantity;
 		subtotal += itemTotalPrice;
 
@@ -151,6 +211,7 @@ export const createOrderFromCart = async (params: {
 			totalPrice: itemTotalPrice,
 			notes: item.cartItem.notes,
 			addons: addonsData,
+			modifiers: modifiersData,
 		});
 	}
 
@@ -199,17 +260,35 @@ export const createOrderFromCart = async (params: {
 			})
 			.returning();
 
-		if (createdItem && itemData.addons.length > 0) {
+		if (createdItem) {
 			// Crear add-ons del item
-			for (const addon of itemData.addons) {
-				await db.insert(orderItemAddon).values({
-					orderItemId: createdItem.id,
-					addonId: addon.addonId,
-					addonName: addon.addonName,
-					quantity: addon.quantity,
-					unitPrice: addon.unitPrice.toFixed(2),
-					totalPrice: addon.totalPrice.toFixed(2),
-				});
+			if (itemData.addons.length > 0) {
+				for (const addon of itemData.addons) {
+					await db.insert(orderItemAddon).values({
+						orderItemId: createdItem.id,
+						addonId: addon.addonId,
+						addonName: addon.addonName,
+						quantity: addon.quantity,
+						unitPrice: addon.unitPrice.toFixed(2),
+						totalPrice: addon.totalPrice.toFixed(2),
+					});
+				}
+			}
+
+			// Crear modifiers del item
+			if (itemData.modifiers.length > 0) {
+				for (const mod of itemData.modifiers) {
+					await db.insert(orderItemModifier).values({
+						orderItemId: createdItem.id,
+						modifierGroupId: mod.modifierGroupId,
+						groupName: mod.modifierGroupName,
+						modifierOptionId: mod.modifierOptionId,
+						optionName: mod.modifierOptionName,
+						quantity: mod.quantity,
+						unitPrice: mod.unitPrice.toFixed(2),
+						totalPrice: mod.totalPrice.toFixed(2),
+					});
+				}
 			}
 		}
 	}
@@ -273,9 +352,15 @@ export const getOrderById = async (orderId: number) => {
 				.from(orderItemAddon)
 				.where(eq(orderItemAddon.orderItemId, item.orderItem.id));
 
+			const modifiers = await db
+				.select()
+				.from(orderItemModifier)
+				.where(eq(orderItemModifier.orderItemId, item.orderItem.id));
+
 			return {
 				...item,
 				addons,
+				modifiers,
 			};
 		}),
 	);

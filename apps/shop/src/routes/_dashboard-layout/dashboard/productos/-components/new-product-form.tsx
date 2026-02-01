@@ -4,6 +4,7 @@ import {
 	createProductSchema,
 } from "@repo/db/src/types/product";
 import type { SelectShop } from "@repo/db/src/types/shop";
+import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
 import { Button } from "@repo/ui/components/ui/button";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import {
@@ -19,7 +20,8 @@ import { Input } from "@repo/ui/components/ui/input";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { Spinner } from "@repo/ui/components/ui/spinner";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Dice3Icon } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Dice3Icon, InfoIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { getProductCategoriesByShopId } from "../../../../../api/categories";
 import { createProduct } from "../../../../../api/products";
@@ -30,6 +32,7 @@ import {
 import { ProductCategorySelect } from "./product-category-select";
 
 export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
+	const navigate = useNavigate();
 	const form = useForm<CreateProductSchema>({
 		resolver: zodResolver(createProductSchema),
 		defaultValues: {
@@ -49,7 +52,22 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
 
 	const mutation = useMutation({
 		mutationFn: async (product: CreateProductSchema) => {
-			await createProduct(product);
+			const result = await createProduct(product);
+			return result;
+		},
+		onSuccess: (data) => {
+			toast.success("Producto creado exitosamente");
+			form.reset();
+			// Redirigir a la página de edición para agregar modificadores
+			if (data?.id) {
+				navigate({
+					to: "/dashboard/productos/editar-producto/$productId",
+					params: { productId: String(data.id) },
+				});
+			}
+		},
+		onError: () => {
+			toast.error("Error al crear el producto");
 		},
 	});
 
@@ -60,15 +78,6 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
 
 	async function onSubmit(values: CreateProductSchema) {
 		mutation.mutate(values);
-
-		if (mutation.isError) {
-			return toast.error("Error al crear el producto");
-		}
-
-		if (mutation.isSuccess) {
-			toast.success("Producto creado exitosamente");
-			form.reset();
-		}
 	}
 
 	const handleImagesChange = (images: UploadedImageData[]) => {
@@ -81,6 +90,14 @@ export const NewProductForm = ({ shop }: { shop: SelectShop | undefined }) => {
 
 	return (
 		<Form {...form}>
+			<Alert className="mb-6">
+				<InfoIcon className="h-4 w-4" />
+				<AlertDescription>
+					Los modificadores (tamaños, opciones, extras) se pueden agregar
+					después de crear el producto. Serás redirigido a la página de edición
+					del producto una vez creado.
+				</AlertDescription>
+			</Alert>
 			<form
 				onSubmit={form.handleSubmit(onSubmit, (errors) => {
 					console.log("Errores de validación:", errors);

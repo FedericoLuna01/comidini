@@ -1,6 +1,8 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import {
+	modifierGroup,
+	modifierOption,
 	product,
 	productAddon,
 	productCategory,
@@ -121,4 +123,122 @@ export type SelectProductCategory = z.infer<typeof SelectProductCategory>;
 export type SelectProductWithCategory = {
 	product: SelectProduct;
 	product_category: SelectProductCategory;
+};
+
+// ============================================================
+// MODIFIER GROUP & OPTION SCHEMAS
+// ============================================================
+
+// Modifier Option Schema
+export const insertModifierOptionSchema = createInsertSchema(modifierOption, {
+	name: z
+		.string()
+		.min(1, { message: "El nombre de la opción es requerido" })
+		.max(100, { message: "El nombre no puede exceder los 100 caracteres" }),
+	description: z
+		.string()
+		.max(200, { message: "La descripción debe ser más corta" })
+		.optional(),
+	priceAdjustment: z.string().default("0"),
+	quantity: z.number().min(0).optional().nullable(),
+	lowStockThreshold: z.number().min(0).optional().nullable(),
+	isDefault: z.boolean().default(false),
+	isActive: z.boolean().default(true),
+	sortOrder: z.number().min(0).default(0),
+}).omit({
+	id: true,
+	groupId: true,
+	createdAt: true,
+	updatedAt: true,
+});
+
+export type InsertModifierOptionSchema = z.infer<
+	typeof insertModifierOptionSchema
+>;
+
+// Modifier Group Schema
+export const insertModifierGroupSchema = createInsertSchema(modifierGroup, {
+	name: z
+		.string()
+		.min(1, { message: "El nombre del grupo es requerido" })
+		.max(100, { message: "El nombre no puede exceder los 100 caracteres" }),
+	description: z
+		.string()
+		.max(200, { message: "La descripción debe ser más corta" })
+		.optional(),
+	minSelection: z.number().min(0).default(0),
+	maxSelection: z.number().min(1).default(1),
+	isActive: z.boolean().default(true),
+	sortOrder: z.number().min(0).default(0),
+}).omit({
+	id: true,
+	productId: true,
+	createdAt: true,
+	updatedAt: true,
+});
+
+export type InsertModifierGroupSchema = z.infer<
+	typeof insertModifierGroupSchema
+>;
+
+// Schema for modifier options that can optionally include 'id' for updates
+export const modifierOptionWithOptionalIdSchema =
+	insertModifierOptionSchema.extend({
+		id: z.number().optional(),
+	});
+
+export type ModifierOptionWithOptionalId = z.infer<
+	typeof modifierOptionWithOptionalIdSchema
+>;
+
+// Schema for creating a modifier group with its options
+export const createModifierGroupWithOptionsSchema = z.object({
+	name: z
+		.string()
+		.min(1, { message: "El nombre del grupo es requerido" })
+		.max(100, { message: "El nombre no puede exceder los 100 caracteres" }),
+	description: z.string().max(200).optional(),
+	minSelection: z.number().min(0).default(0),
+	maxSelection: z.number().min(1).default(1),
+	isActive: z.boolean().default(true),
+	sortOrder: z.number().min(0).default(0),
+	options: z.array(modifierOptionWithOptionalIdSchema).min(1, {
+		message: "Debe agregar al menos una opción al grupo",
+	}),
+});
+
+export type CreateModifierGroupWithOptionsSchema = z.infer<
+	typeof createModifierGroupWithOptionsSchema
+>;
+
+// Input type for the form (before Zod transforms/defaults)
+export type CreateModifierGroupFormInput = z.input<
+	typeof createModifierGroupWithOptionsSchema
+>;
+
+// Schema for creating a product with modifier groups
+export const createProductWithModifiersSchema = createProductSchema.extend({
+	modifierGroups: z.array(createModifierGroupWithOptionsSchema).optional(),
+});
+
+export type CreateProductWithModifiersSchema = z.infer<
+	typeof createProductWithModifiersSchema
+>;
+
+// Select schemas for modifier groups and options
+const SelectModifierGroup = createSelectSchema(modifierGroup);
+const SelectModifierOption = createSelectSchema(modifierOption);
+
+export type SelectModifierGroup = z.infer<typeof SelectModifierGroup>;
+export type SelectModifierOption = z.infer<typeof SelectModifierOption>;
+
+// Type for a modifier group with its options
+export type ModifierGroupWithOptions = SelectModifierGroup & {
+	options: SelectModifierOption[];
+};
+
+// Type for a product with all its modifier groups and options
+export type ProductWithModifiers = SelectProduct & {
+	category: SelectProductCategory | null;
+	modifierGroups: ModifierGroupWithOptions[];
 };

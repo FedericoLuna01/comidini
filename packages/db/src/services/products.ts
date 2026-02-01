@@ -1,10 +1,19 @@
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "../config";
-import { product, productCategory } from "../schema";
+import {
+	modifierGroup,
+	modifierOption,
+	product,
+	productCategory,
+} from "../schema";
 import type {
+	CreateProductWithModifiersSchema,
 	InsertProductSchema,
+	ModifierGroupWithOptions,
+	ProductWithModifiers,
 	UpdateProductSchema,
 } from "../types/product";
+import { createModifierGroupWithOptions } from "./modifiers";
 
 export const createProduct = async (newProduct: InsertProductSchema) => {
 	const [createdProduct] = await db
@@ -15,6 +24,55 @@ export const createProduct = async (newProduct: InsertProductSchema) => {
 	return createdProduct;
 };
 
+/**
+ * Create a product with its modifier groups and options
+ */
+export const createProductWithModifiers = async (
+	data: CreateProductWithModifiersSchema & { shopId: number },
+): Promise<ProductWithModifiers | null> => {
+	const { modifierGroups, ...productData } = data;
+
+	// Create the product
+	const [createdProduct] = await db
+		.insert(product)
+		.values(productData)
+		.returning();
+
+	if (!createdProduct) {
+		return null;
+	}
+
+	// Create modifier groups if provided
+	const createdGroups: ModifierGroupWithOptions[] = [];
+	if (modifierGroups && modifierGroups.length > 0) {
+		for (const groupData of modifierGroups) {
+			const group = await createModifierGroupWithOptions(
+				createdProduct.id,
+				groupData,
+			);
+			if (group) {
+				createdGroups.push(group);
+			}
+		}
+	}
+
+	// Get category if exists
+	let category = null;
+	if (createdProduct.categoryId) {
+		const [cat] = await db
+			.select()
+			.from(productCategory)
+			.where(eq(productCategory.id, createdProduct.categoryId));
+		category = cat || null;
+	}
+
+	return {
+		...createdProduct,
+		category,
+		modifierGroups: createdGroups,
+	};
+};
+
 export const getAllProductsByShopId = async (shopId: number) => {
 	const products = await db
 		.select()
@@ -23,6 +81,61 @@ export const getAllProductsByShopId = async (shopId: number) => {
 		.where(eq(product.shopId, shopId));
 
 	return products;
+};
+
+/**
+ * Get product by ID with full modifier hierarchy
+ */
+export const getProductByIdWithModifiers = async (
+	productId: number,
+): Promise<ProductWithModifiers | null> => {
+	const [foundProduct] = await db
+		.select()
+		.from(product)
+		.where(eq(product.id, productId));
+
+	if (!foundProduct) {
+		return null;
+	}
+
+	// Get category
+	let category = null;
+	if (foundProduct.categoryId) {
+		const [cat] = await db
+			.select()
+			.from(productCategory)
+			.where(eq(productCategory.id, foundProduct.categoryId));
+		category = cat || null;
+	}
+
+	// Get all modifier groups for this product
+	const groups = await db
+		.select()
+		.from(modifierGroup)
+		.where(eq(modifierGroup.productId, productId))
+		.orderBy(asc(modifierGroup.sortOrder));
+
+	// Get all options for all groups
+	const modifierGroupsWithOptions: ModifierGroupWithOptions[] = [];
+
+	for (const group of groups) {
+		const options = await db
+			.select()
+			.from(modifierOption)
+			.where(eq(modifierOption.groupId, group.id))
+			.orderBy(asc(modifierOption.sortOrder));
+
+		modifierGroupsWithOptions.push({
+			...group,
+			options,
+		});
+	}
+
+	return {
+		...foundProduct,
+		category,
+		modifierGroups: modifierGroupsWithOptions,
+	};
 };
 
 export const getProductById = async (productId: number) => {

@@ -1,5 +1,9 @@
 import type {
+	CreateModifierGroupWithOptionsSchema,
 	CreateProductSchema,
+	CreateProductWithModifiersSchema,
+	ModifierGroupWithOptions,
+	ProductWithModifiers,
 	SelectProductWithCategory,
 	UpdateProductSchema,
 } from "@repo/db/src/types/product";
@@ -16,6 +20,28 @@ export async function createProduct(data: CreateProductSchema) {
 		credentials: "include",
 		body: JSON.stringify(data),
 	});
+
+	return response.json();
+}
+
+/**
+ * Create a product with modifier groups and options
+ */
+export async function createProductWithModifiers(
+	data: CreateProductWithModifiersSchema,
+): Promise<ProductWithModifiers> {
+	const response = await fetch(`${API_URL}/products/with-modifiers`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		credentials: "include",
+		body: JSON.stringify(data),
+	});
+
+	if (!response.ok) {
+		throw new Error("Error creating product with modifiers");
+	}
 
 	return response.json();
 }
@@ -56,6 +82,30 @@ export async function getProductById(productId: number) {
 	return response.json();
 }
 
+/**
+ * Get product with full modifier hierarchy
+ */
+export async function getProductWithModifiers(
+	productId: number,
+): Promise<ProductWithModifiers> {
+	const response = await fetch(
+		`${API_URL}/products/${productId}/with-modifiers`,
+		{
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			credentials: "include",
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error("Error fetching product with modifiers");
+	}
+
+	return response.json();
+}
+
 export async function updateProduct(
 	productId: number,
 	data: UpdateProductSchema,
@@ -89,6 +139,13 @@ export const productByIdQueryOptions = (productId: number) =>
 		enabled: !!productId,
 	});
 
+export const productWithModifiersQueryOptions = (productId: number) =>
+	queryOptions<ProductWithModifiers>({
+		queryKey: ["get-product-with-modifiers", productId],
+		queryFn: () => getProductWithModifiers(productId),
+		enabled: !!productId,
+	});
+
 const deleteProductById = async (productId: number) => {
 	const response = await fetch(`${API_URL}/products/${productId}`, {
 		method: "DELETE",
@@ -109,3 +166,110 @@ export const deleteProductMutationOptions = (
 	mutationKey: ["delete-product", productId],
 	mutationFn: () => deleteProductById(productId),
 });
+
+// ============================================================
+// MODIFIER GROUP API FUNCTIONS
+// ============================================================
+
+/**
+ * Get all modifier groups for a product
+ */
+export async function getModifierGroupsByProductId(
+	productId: number,
+): Promise<ModifierGroupWithOptions[]> {
+	const response = await fetch(
+		`${API_URL}/products/${productId}/modifier-groups`,
+		{
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			credentials: "include",
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error("Error fetching modifier groups");
+	}
+
+	return response.json();
+}
+
+/**
+ * Create a modifier group for a product
+ */
+export async function createModifierGroup(
+	productId: number,
+	data: CreateModifierGroupWithOptionsSchema,
+): Promise<ModifierGroupWithOptions> {
+	const response = await fetch(
+		`${API_URL}/products/${productId}/modifier-groups`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			credentials: "include",
+			body: JSON.stringify(data),
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error("Error creating modifier group");
+	}
+
+	return response.json();
+}
+
+/**
+ * Update a modifier group
+ */
+export async function updateModifierGroup(
+	groupId: number,
+	data: Partial<CreateModifierGroupWithOptionsSchema>,
+): Promise<ModifierGroupWithOptions> {
+	const response = await fetch(
+		`${API_URL}/products/modifier-groups/${groupId}`,
+		{
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			credentials: "include",
+			body: JSON.stringify(data),
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error("Error updating modifier group");
+	}
+
+	return response.json();
+}
+
+/**
+ * Delete a modifier group
+ */
+export async function deleteModifierGroup(groupId: number): Promise<void> {
+	const response = await fetch(
+		`${API_URL}/products/modifier-groups/${groupId}`,
+		{
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			credentials: "include",
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error("Error deleting modifier group");
+	}
+}
+
+export const modifierGroupsQueryOptions = (productId: number) =>
+	queryOptions<ModifierGroupWithOptions[]>({
+		queryKey: ["get-modifier-groups", productId],
+		queryFn: () => getModifierGroupsByProductId(productId),
+		enabled: !!productId,
+	});
