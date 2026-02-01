@@ -10,7 +10,13 @@ import {
 	timestamp,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
-import { product, productAddon, productVariant } from "./product-schema";
+import {
+	modifierGroup,
+	modifierOption,
+	product,
+	productAddon,
+	productVariant,
+} from "./product-schema";
 
 export const shop = pgTable("shop", {
 	id: serial("id").primaryKey(),
@@ -268,7 +274,7 @@ export const orderItem = pgTable("order_item", {
 		.notNull(),
 });
 
-// Complementos/extras de los items de orden
+// Complementos/extras de los items de orden (DEPRECATED - Use orderItemModifier)
 export const orderItemAddon = pgTable("order_item_addon", {
 	id: serial("id").primaryKey(),
 	orderItemId: integer("order_item_id")
@@ -280,6 +286,40 @@ export const orderItemAddon = pgTable("order_item_addon", {
 
 	// Información del addon en el momento de la orden
 	addonName: text("addon_name").notNull(),
+	quantity: integer("quantity").notNull(),
+	unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+	totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+
+	createdAt: timestamp("created_at")
+		.$defaultFn(() => new Date())
+		.notNull(),
+});
+
+// ============================================================
+// NEW: Modifier selections for order items (snapshot at time of purchase)
+// ============================================================
+
+/**
+ * Selected modifiers for order items
+ * Stores snapshot of the customer's choices at time of purchase
+ */
+export const orderItemModifier = pgTable("order_item_modifier", {
+	id: serial("id").primaryKey(),
+	orderItemId: integer("order_item_id")
+		.notNull()
+		.references(() => orderItem.id, { onDelete: "cascade" }),
+	modifierOptionId: integer("modifier_option_id").references(
+		() => modifierOption.id,
+		{ onDelete: "set null" },
+	),
+	modifierGroupId: integer("modifier_group_id").references(
+		() => modifierGroup.id,
+		{ onDelete: "set null" },
+	),
+
+	// Snapshot information at time of order (for historical accuracy)
+	groupName: text("group_name").notNull(), // e.g., "Tamaño"
+	optionName: text("option_name").notNull(), // e.g., "Grande"
 	quantity: integer("quantity").notNull(),
 	unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
 	totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),

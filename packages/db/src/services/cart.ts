@@ -1,18 +1,23 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "../config";
 import {
 	cart,
 	cartItem,
 	cartItemAddon,
+	cartItemModifier,
+	modifierGroup,
+	modifierOption,
 	product,
 	productAddon,
 	productVariant,
 } from "../schema";
 import type {
 	AddToCartSchema,
+	AddToCartWithModifiersSchema,
 	InsertCart,
 	InsertCartItem,
 	InsertCartItemAddon,
+	InsertCartItemModifier,
 	UpdateCartItemSchema,
 } from "../types/cart";
 
@@ -140,8 +145,8 @@ export const getAllCartsWithItems = async (params: {
 				.leftJoin(productVariant, eq(cartItem.variantId, productVariant.id))
 				.where(eq(cartItem.cartId, userCart.id));
 
-			// Obtener add-ons de cada item
-			const itemsWithAddons = await Promise.all(
+			// Obtener add-ons y modifiers de cada item
+			const itemsWithExtras = await Promise.all(
 				items.map(async (item) => {
 					const addons = await db
 						.select({
@@ -152,16 +157,35 @@ export const getAllCartsWithItems = async (params: {
 						.leftJoin(productAddon, eq(cartItemAddon.addonId, productAddon.id))
 						.where(eq(cartItemAddon.cartItemId, item.cartItem.id));
 
+					// Get modifiers
+					const modifiers = await db
+						.select({
+							cartItemModifier,
+							option: modifierOption,
+							group: modifierGroup,
+						})
+						.from(cartItemModifier)
+						.leftJoin(
+							modifierOption,
+							eq(cartItemModifier.modifierOptionId, modifierOption.id),
+						)
+						.leftJoin(
+							modifierGroup,
+							eq(modifierOption.groupId, modifierGroup.id),
+						)
+						.where(eq(cartItemModifier.cartItemId, item.cartItem.id));
+
 					return {
 						...item,
 						addons,
+						modifiers,
 					};
 				}),
 			);
 
 			return {
 				cart: userCart,
-				items: itemsWithAddons,
+				items: itemsWithExtras,
 			};
 		}),
 	);
@@ -269,7 +293,7 @@ export const addItemToCart = async (
 		: and(
 				eq(cartItem.cartId, cartId),
 				eq(cartItem.productId, productId),
-				eq(cartItem.variantId, 0),
+				isNull(cartItem.variantId),
 			);
 
 	const [existingItem] = await db
@@ -446,4 +470,291 @@ export const mergeGuestCart = async (sessionId: string, userId: string) => {
 	await deleteCart(guestCart.id);
 
 	return userCart;
+};
+
+// ============================================================
+// NEW: Cart operations with modifier groups
+// ============================================================
+
+/**
+ * Agrega un item al carrito con modificadores (nuevo sistema)
+ */
+export const addItemToCartWithModifiers = async (
+	cartId: number,
+	itemData: AddToCartWithModifiersSchema,
+) => {
+	const { productId, quantity, notes, modifiers, addons, variantId } = itemData;
+
+	// Validar que el producto existe y está activo
+	const [productExists] = await db
+		.select()
+		.from(product)
+		.where(and(eq(product.id, productId), eq(product.isActive, true)))
+		.limit(1);
+
+	if (!productExists) {
+		throw new Error("Producto no encontrado o no disponible");
+	}
+
+	// Validar stock
+	if (productExists.quantity !== null && productExists.quantity < quantity) {
+		throw new Error("Stock insuficiente");
+	}
+
+	// Validar variante si se especificó (legacy support)
+	if (variantId) {
+		const [variantExists] = await db
+			.select()
+			.from(productVariant)
+			.where(
+				and(
+					eq(productVariant.id, variantId),
+					eq(productVariant.productId, productId),
+					eq(productVariant.isActive, true),
+				),
+			)
+			.limit(1);
+
+		if (!variantExists) {
+			throw new Error("Variante no encontrada o no disponible");
+		}
+	}
+
+	// Validar modificadores si existen
+	if (modifiers && modifiers.length > 0) {
+		for (const mod of modifiers) {
+			const [optionExists] = await db
+				.select({
+					option: modifierOption,
+					group: modifierGroup,
+				})
+				.from(modifierOption)
+				.leftJoin(modifierGroup, eq(modifierOption.groupId, modifierGroup.id))
+				.where(
+					and(
+						eq(modifierOption.id, mod.modifierOptionId),
+						eq(modifierOption.isActive, true),
+					),
+				)
+				.limit(1);
+
+			if (!optionExists?.option) {
+				throw new Error(
+					`Opción de modificador ${mod.modifierOptionId} no encontrada`,
+				);
+			}
+
+			// Verify the modifier group belongs to this product
+			if (optionExists.group?.productId !== productId) {
+				throw new Error(`Opción de modificador no corresponde a este producto`);
+			}
+		}
+	}
+
+	// Sort modifier option IDs to create a consistent "signature" for comparison
+	const modifierSignature = modifiers
+		? [...modifiers]
+				.sort((a, b) => a.modifierOptionId - b.modifierOptionId)
+				.map((m) => `${m.modifierOptionId}:${m.quantity}`)
+				.join(",")
+		: "";
+
+	// Find existing cart items for this product
+	const existingItems = await db
+		.select()
+		.from(cartItem)
+		.where(
+			and(
+				eq(cartItem.cartId, cartId),
+				eq(cartItem.productId, productId),
+				variantId
+					? eq(cartItem.variantId, variantId)
+					: isNull(cartItem.variantId),
+			),
+		);
+
+	// Check if any existing item has the same modifier signature
+	let matchingItemId: number | null = null;
+
+	for (const item of existingItems) {
+		const itemModifiers = await db
+			.select()
+			.from(cartItemModifier)
+			.where(eq(cartItemModifier.cartItemId, item.id));
+
+		const existingSignature = [...itemModifiers]
+			.sort((a, b) => a.modifierOptionId - b.modifierOptionId)
+			.map((m) => `${m.modifierOptionId}:${m.quantity}`)
+			.join(",");
+
+		if (existingSignature === modifierSignature) {
+			matchingItemId = item.id;
+			break;
+		}
+	}
+
+	let itemId: number;
+
+	if (matchingItemId) {
+		// Update quantity of existing item with same modifiers
+		const existingItem = existingItems.find((i) => i.id === matchingItemId);
+		if (!existingItem) {
+			throw new Error("Error al encontrar el item existente");
+		}
+
+		const [updated] = await db
+			.update(cartItem)
+			.set({
+				quantity: existingItem.quantity + quantity,
+				notes: notes || existingItem.notes,
+				updatedAt: new Date(),
+			})
+			.where(eq(cartItem.id, matchingItemId))
+			.returning();
+
+		if (!updated) {
+			throw new Error("Error al actualizar el item del carrito");
+		}
+
+		itemId = updated.id;
+	} else {
+		// Create new item with different modifiers
+		const newItem: InsertCartItem = {
+			cartId,
+			productId,
+			variantId: variantId || undefined,
+			quantity,
+			notes: notes || undefined,
+		};
+
+		const [created] = await db.insert(cartItem).values(newItem).returning();
+
+		if (!created) {
+			throw new Error("Error al agregar el item al carrito");
+		}
+
+		itemId = created.id;
+
+		// Add modifiers only for new items
+		if (modifiers && modifiers.length > 0) {
+			const modifierValues: InsertCartItemModifier[] = modifiers.map((mod) => ({
+				cartItemId: itemId,
+				modifierOptionId: mod.modifierOptionId,
+				quantity: mod.quantity,
+				priceAdjustment: mod.priceAdjustment,
+			}));
+
+			await db.insert(cartItemModifier).values(modifierValues);
+		}
+	}
+
+	// Agregar add-ons legacy si existen
+	if (addons && addons.length > 0) {
+		for (const addon of addons) {
+			const [addonExists] = await db
+				.select()
+				.from(productAddon)
+				.where(
+					and(
+						eq(productAddon.id, addon.addonId),
+						eq(productAddon.productId, productId),
+						eq(productAddon.isActive, true),
+					),
+				)
+				.limit(1);
+
+			if (!addonExists) {
+				throw new Error(`Complemento ${addon.addonId} no encontrado`);
+			}
+		}
+
+		const addonValues: InsertCartItemAddon[] = addons.map((addon) => ({
+			cartItemId: itemId,
+			addonId: addon.addonId,
+			quantity: addon.quantity,
+		}));
+
+		await db.insert(cartItemAddon).values(addonValues);
+	}
+
+	// Actualizar timestamp del carrito
+	await db
+		.update(cart)
+		.set({ updatedAt: new Date() })
+		.where(eq(cart.id, cartId));
+
+	return itemId;
+};
+
+/**
+ * Obtiene el carrito con items incluyendo modificadores
+ */
+export const getCartWithItemsAndModifiers = async (params: {
+	userId?: string;
+	sessionId?: string;
+}) => {
+	const { userId, sessionId } = params;
+
+	const where = userId
+		? eq(cart.userId, userId)
+		: eq(cart.sessionId, sessionId!);
+
+	const [userCart] = await db.select().from(cart).where(where).limit(1);
+
+	if (!userCart) {
+		return null;
+	}
+
+	// Obtener items del carrito con productos y variantes
+	const items = await db
+		.select({
+			cartItem,
+			product,
+			variant: productVariant,
+		})
+		.from(cartItem)
+		.leftJoin(product, eq(cartItem.productId, product.id))
+		.leftJoin(productVariant, eq(cartItem.variantId, productVariant.id))
+		.where(eq(cartItem.cartId, userCart.id));
+
+	// Obtener add-ons y modifiers de cada item
+	const itemsWithExtras = await Promise.all(
+		items.map(async (item) => {
+			// Legacy addons
+			const addons = await db
+				.select({
+					cartItemAddon,
+					addon: productAddon,
+				})
+				.from(cartItemAddon)
+				.leftJoin(productAddon, eq(cartItemAddon.addonId, productAddon.id))
+				.where(eq(cartItemAddon.cartItemId, item.cartItem.id));
+
+			// New modifiers
+			const modifiers = await db
+				.select({
+					cartItemModifier,
+					option: modifierOption,
+					group: modifierGroup,
+				})
+				.from(cartItemModifier)
+				.leftJoin(
+					modifierOption,
+					eq(cartItemModifier.modifierOptionId, modifierOption.id),
+				)
+				.leftJoin(modifierGroup, eq(modifierOption.groupId, modifierGroup.id))
+				.where(eq(cartItemModifier.cartItemId, item.cartItem.id));
+
+			return {
+				...item,
+				addons,
+				modifiers,
+			};
+		}),
+	);
+
+	return {
+		cart: userCart,
+		items: itemsWithExtras,
+	};
 };

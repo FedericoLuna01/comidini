@@ -167,9 +167,18 @@ export function ShopCartColumn({ shopId }: ShopCartColumnProps) {
 						addonItem.cartItemAddon.quantity
 				);
 			}, 0);
+			const modifiersPrice = (item.modifiers ?? []).reduce((sum, modItem) => {
+				if (!modItem.option) return sum;
+				return (
+					sum +
+					Number.parseFloat(modItem.option.priceAdjustment) *
+						modItem.cartItemModifier.quantity
+				);
+			}, 0);
 
 			subtotal +=
-				(basePrice + variantPrice + addonsPrice) * item.cartItem.quantity;
+				(basePrice + variantPrice + addonsPrice + modifiersPrice) *
+				item.cartItem.quantity;
 		}
 
 		return {
@@ -232,8 +241,19 @@ export function ShopCartColumn({ shopId }: ShopCartColumnProps) {
 											addonItem.cartItemAddon.quantity
 									);
 								}, 0);
+								const modifiersPrice = (item.modifiers ?? []).reduce(
+									(sum, modItem) => {
+										if (!modItem.option) return sum;
+										return (
+											sum +
+											Number.parseFloat(modItem.option.priceAdjustment) *
+												modItem.cartItemModifier.quantity
+										);
+									},
+									0,
+								);
 								const itemTotal =
-									(basePrice + variantPrice + addonsPrice) *
+									(basePrice + variantPrice + addonsPrice + modifiersPrice) *
 									item.cartItem.quantity;
 
 								return (
@@ -255,6 +275,14 @@ export function ShopCartColumn({ shopId }: ShopCartColumnProps) {
 											{item.variant && (
 												<p className="text-xs text-muted-foreground">
 													{item.variant.name}
+												</p>
+											)}
+											{item.modifiers && item.modifiers.length > 0 && (
+												<p className="text-xs text-muted-foreground">
+													{item.modifiers
+														.map((mod) => mod.option?.name)
+														.filter(Boolean)
+														.join(", ")}
 												</p>
 											)}
 											{item.addons.length > 0 && (

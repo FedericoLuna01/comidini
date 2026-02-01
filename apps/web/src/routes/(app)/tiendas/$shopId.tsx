@@ -18,7 +18,7 @@ import {
 	shopByIdQueryOptions,
 	shopHoursQueryOptions,
 } from "../../../api/shops";
-import { AddToCartDialog } from "../../../components/add-to-cart-dialog";
+import { ModifierDialog } from "../../../components/modifier-dialog";
 import { ShopCartColumn } from "../../../components/shop-cart-column";
 import { getCategoryColors, getCategoryIcon } from "./index";
 
@@ -40,7 +40,7 @@ function RouteComponent() {
 	const [selectedProduct, setSelectedProduct] = useState<ProductForCart | null>(
 		null,
 	);
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isModifierDialogOpen, setIsModifierDialogOpen] = useState(false);
 
 	const { data: shop, isPending } = useQuery(
 		shopByIdQueryOptions(Number(params.shopId)),
@@ -86,7 +86,7 @@ function RouteComponent() {
 			price: product.price,
 			images: product.images,
 		});
-		setIsDialogOpen(true);
+		setIsModifierDialogOpen(true);
 	};
 
 	const CategoryIcon = getCategoryIcon("restaurant");
@@ -392,12 +392,13 @@ function RouteComponent() {
 					</aside>
 				</div>{" "}
 			</section>{" "}
-			{/* Dialog para agregar al carrito */}
+			{/* Dialog para agregar al carrito con modificadores */}
 			{selectedProduct && (
-				<AddToCartDialog
-					product={selectedProduct}
-					open={isDialogOpen}
-					onOpenChange={setIsDialogOpen}
+				<ModifierDialog
+					productId={selectedProduct.id}
+					shopId={selectedProduct.shopId}
+					open={isModifierDialogOpen}
+					onOpenChange={setIsModifierDialogOpen}
 				/>
 			)}
 		</>

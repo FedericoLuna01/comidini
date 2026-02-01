@@ -68,6 +68,17 @@ export interface OrderWithItems {
 			unitPrice: string;
 			totalPrice: string;
 		}>;
+		modifiers: Array<{
+			id: number;
+			orderItemId: number;
+			modifierGroupId: number;
+			groupName: string;
+			modifierOptionId: number;
+			optionName: string;
+			quantity: number;
+			unitPrice: string;
+			totalPrice: string;
+		}>;
 	}>;
 	statusHistory: Array<{
 		id: number;

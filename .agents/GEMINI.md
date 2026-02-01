@@ -40,7 +40,7 @@ Run these from the root directory:
     *   Migrate DB: `pnpm db:migrate`
     *   Generate Migrations: `pnpm db:generate`
     *   Open Drizzle Studio: `pnpm db:studio`
-
+*   **Install a new UI component**: `pnpm ui <component>`
 ## Development Conventions
 
 *   **Async/Await:** Always prefer `async/await` over `.then()`.

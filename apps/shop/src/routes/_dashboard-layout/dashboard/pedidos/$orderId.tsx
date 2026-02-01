@@ -235,8 +235,19 @@ function RouteComponent() {
 										<h4 className="font-medium">
 											{item.orderItem.productName}
 										</h4>
+										{item.modifiers.length > 0 && (
+											<p className="text-sm text-muted-foreground">
+												{item.modifiers
+													.map(
+														(mod) =>
+															`${mod.optionName}${mod.quantity > 1 ? ` x${mod.quantity}` : ""}`,
+													)
+													.join(", ")}
+											</p>
+										)}
 										{item.addons.length > 0 && (
 											<p className="text-sm text-muted-foreground">
+												Extras:{" "}
 												{item.addons
 													.map(
 														(addon) => `${addon.addonName} x${addon.quantity}`,
