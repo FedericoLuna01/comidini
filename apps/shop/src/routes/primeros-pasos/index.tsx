@@ -50,8 +50,10 @@ import {
 	Settings,
 	ShoppingBag,
 	Store,
+	Tag,
 	Trash2,
 	Truck,
+	X,
 } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -125,6 +127,36 @@ const STEPS = [
 
 function RouteComponent() {
 	const [currentStep, setCurrentStep] = useState(2);
+	const [newTag, setNewTag] = useState("");
+
+	// Colores de tags basados en la paleta de Comidini
+	const TAG_COLORS = [
+		{ bg: "oklch(0.92 0.08 12)", text: "oklch(0.35 0.12 12)" }, // Coral claro
+		{ bg: "oklch(0.90 0.10 25)", text: "oklch(0.40 0.15 25)" }, // Naranja suave
+		{ bg: "oklch(0.88 0.12 45)", text: "oklch(0.45 0.18 45)" }, // Amarillo cálido
+		{ bg: "oklch(0.90 0.08 150)", text: "oklch(0.40 0.12 150)" }, // Verde menta
+		{ bg: "oklch(0.88 0.10 200)", text: "oklch(0.40 0.15 200)" }, // Azul cielo
+		{ bg: "oklch(0.90 0.10 280)", text: "oklch(0.45 0.15 280)" }, // Lavanda
+	];
+
+	const getTagColor = (tag: string) => {
+		// Genera un índice consistente basado en el hash del tag
+		let hash = 0;
+		for (let i = 0; i < tag.length; i++) {
+			hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+		}
+		const color = TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
+		return { backgroundColor: color.bg, color: color.text };
+	};
+
+	const DEFAULT_TAGS = [
+		"Hamburguesas",
+		"Delivery",
+		"Aceptamos Crypto",
+		"Comida Rápida",
+		"Vegano",
+		"Sin Gluten",
+	];
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -190,9 +222,17 @@ function RouteComponent() {
 
 	const mutation = useMutation({
 		mutationFn: async (data: CreateShop) => {
-			await createShop(data);
+			return await createShop(data);
 		},
-		// TODO: Agregar un onSuccess para redirigir al usuario a su tienda o dashboard
+		onSuccess: () => {
+			// TODO: Redirigir al usuario a su tienda o dashboard
+			console.log("Tienda creada exitosamente");
+			alert("¡Tienda creada exitosamente!");
+		},
+		onError: (error: Error) => {
+			console.error("Error al crear tienda:", error);
+			alert(`Error: ${error.message}`);
+		},
 	});
 
 	const isValidForm = async () => {
@@ -238,12 +278,18 @@ function RouteComponent() {
 	};
 
 	const onSubmit = async (data: FormValues) => {
-		const apiData = {
+		// Limpiar datos: remover strings vacíos que causarían error de validación
+		const cleanedData = {
 			...data,
+			email: data.email?.trim() || undefined,
+			website: data.website?.trim() || undefined,
+			phone: data.phone?.trim() || undefined,
+			description: data.description?.trim() || undefined,
 			businessHours: convertBusinessHoursForApi(data.businessHours),
 		};
-		console.log(apiData);
-		mutation.mutate(apiData as unknown as CreateShop);
+
+		console.log("Sending data:", cleanedData);
+		mutation.mutate(cleanedData as unknown as CreateShop);
 	};
 
 	const addTimeSlot = (dayIndex: number) => {
@@ -554,6 +600,130 @@ function RouteComponent() {
 												)}
 											/>
 										</div>
+									</div>
+
+									{/* Sección de Tags */}
+									<div>
+										<h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+											<Tag className="w-5 h-5" />
+											Tags de tu negocio
+										</h3>
+										<p className="text-sm text-gray-600 mb-4">
+											Agrega etiquetas que describan tu negocio para que los
+											clientes te encuentren más fácilmente
+										</p>
+
+										<FormField
+											control={form.control}
+											name="tags"
+											render={({ field }) => (
+												<FormItem>
+													<FormControl>
+														<div className="space-y-4">
+															{/* Input para agregar nuevo tag */}
+															<div className="flex gap-2">
+																<Input
+																	placeholder="Escribe un tag y presiona Enter..."
+																	value={newTag}
+																	onChange={(e) => setNewTag(e.target.value)}
+																	onKeyDown={(e) => {
+																		if (e.key === "Enter") {
+																			e.preventDefault();
+																			const trimmedTag = newTag.trim();
+																			if (
+																				trimmedTag &&
+																				!field.value?.includes(trimmedTag)
+																			) {
+																				field.onChange([
+																					...(field.value || []),
+																					trimmedTag,
+																				]);
+																				setNewTag("");
+																			}
+																		}
+																	}}
+																/>
+																<Button
+																	type="button"
+																	variant="outline"
+																	onClick={() => {
+																		const trimmedTag = newTag.trim();
+																		if (
+																			trimmedTag &&
+																			!field.value?.includes(trimmedTag)
+																		) {
+																			field.onChange([
+																				...(field.value || []),
+																				trimmedTag,
+																			]);
+																			setNewTag("");
+																		}
+																	}}
+																>
+																	<Plus className="w-4 h-4" />
+																</Button>
+															</div>
+
+															{/* Tags seleccionados */}
+															{field.value && field.value.length > 0 && (
+																<div className="flex flex-wrap gap-2">
+																	{field.value.map((tag) => (
+																		<Badge
+																			key={tag}
+																			className="px-3 py-1.5 text-sm flex items-center gap-1 border-0"
+																			style={getTagColor(tag)}
+																		>
+																			{tag}
+																			<button
+																				type="button"
+																				onClick={() => {
+																					field.onChange(
+																						field.value?.filter(
+																							(t) => t !== tag,
+																						),
+																					);
+																				}}
+																				className="ml-1 hover:opacity-70 transition-opacity"
+																			>
+																				<X className="w-3 h-3" />
+																			</button>
+																		</Badge>
+																	))}
+																</div>
+															)}
+
+															{/* Tags sugeridos */}
+															<div>
+																<p className="text-sm text-muted-foreground mb-2">
+																	Sugerencias:
+																</p>
+																<div className="flex flex-wrap gap-2">
+																	{DEFAULT_TAGS.filter(
+																		(tag) => !field.value?.includes(tag),
+																	).map((tag) => (
+																		<Badge
+																			key={tag}
+																			className="px-3 py-1.5 text-sm cursor-pointer transition-all hover:scale-105 hover:shadow-sm border-0 opacity-70 hover:opacity-100"
+																			style={getTagColor(tag)}
+																			onClick={() => {
+																				field.onChange([
+																					...(field.value || []),
+																					tag,
+																				]);
+																			}}
+																		>
+																			<Plus className="w-3 h-3 mr-1" />
+																			{tag}
+																		</Badge>
+																	))}
+																</div>
+															</div>
+														</div>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
 									</div>
 
 									{form.watch("acceptsDelivery") && (

@@ -16,7 +16,14 @@ export async function createShop(data: CreateShop) {
 		body: JSON.stringify(data),
 	});
 
-	return response.json();
+	const result = await response.json();
+
+	if (!response.ok) {
+		console.error("Error creating shop:", result);
+		throw new Error(result.error || "Error al crear la tienda");
+	}
+
+	return result;
 }
 
 export async function updateShop(data: UpdateShop, shopId: number) {
