@@ -7,6 +7,7 @@ import cartRoutes from "./routes/cart.routes";
 import ordersRoutes from "./routes/orders.routes";
 import productsRoutes from "./routes/products.routes";
 import shopsRoutes from "./routes/shops.routes";
+import ticketsRoutes from "./routes/tickets.routes";
 import uploadRoutes from "./routes/upload.routes";
 
 declare global {
@@ -55,6 +56,7 @@ apiRouter.use("/upload", uploadRoutes);
 apiRouter.use("/products", productsRoutes);
 apiRouter.use("/cart", cartRoutes);
 apiRouter.use("/orders", ordersRoutes);
+apiRouter.use("/tickets", ticketsRoutes);
 
 app.listen(port, () => {
 	console.log(`API server running at http://localhost:${port}`);
