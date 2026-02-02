@@ -8,8 +8,8 @@ import {
 	APIProvider,
 	Map as GoogleMap,
 } from "@vis.gl/react-google-maps";
-import { ClockIcon, ShoppingBagIcon, TruckIcon } from "lucide-react";
-import { useState } from "react";
+import { ClockIcon, Search, ShoppingBagIcon, TruckIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 import { allProductsByShopIdQueryOptions } from "../../../api/products";
 import {
 	getNextOpenTime,
@@ -19,7 +19,9 @@ import {
 	shopHoursQueryOptions,
 } from "../../../api/shops";
 import { ModifierDialog } from "../../../components/modifier-dialog";
+import { ShopSearchInput } from "../../../components/search/shop-search-input";
 import { ShopCartColumn } from "../../../components/shop-cart-column";
+import { useDebounce } from "../../../hooks/use-debounce";
 import { getCategoryColors, getCategoryIcon } from "./index";
 
 interface ProductForCart {
@@ -41,6 +43,8 @@ function RouteComponent() {
 		null,
 	);
 	const [isModifierDialogOpen, setIsModifierDialogOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const debouncedSearch = useDebounce(searchQuery, 200);
 
 	const { data: shop, isPending } = useQuery(
 		shopByIdQueryOptions(Number(params.shopId)),
@@ -58,6 +62,29 @@ function RouteComponent() {
 	const nextOpen = hours && !isOpen ? getNextOpenTime(hours) : null;
 	const groupedHours = hours ? groupConsecutiveDays(hours) : [];
 
+	const categories = products?.map((product) => product.product_category.name);
+	const _uniqueCategories = Array.from(new Set(categories));
+
+	// Filter products based on search query
+	const filteredProducts = useMemo(() => {
+		if (!products || !debouncedSearch.trim()) return products;
+
+		const searchLower = debouncedSearch.toLowerCase();
+		return products.filter(
+			(p) =>
+				p.product.name.toLowerCase().includes(searchLower) ||
+				p.product.description?.toLowerCase().includes(searchLower) ||
+				p.product_category.name?.toLowerCase().includes(searchLower),
+		);
+	}, [products, debouncedSearch]);
+
+	// Get categories that have filtered products
+	const filteredCategories = useMemo(() => {
+		if (!filteredProducts) return [];
+		const cats = filteredProducts.map((p) => p.product_category.name);
+		return Array.from(new Set(cats));
+	}, [filteredProducts]);
+
 	if (isPending || productsPending) {
 		return <div>Loading...</div>;
 	}
@@ -65,11 +92,6 @@ function RouteComponent() {
 	if (!shop) {
 		return <div>Tienda no encontrada</div>;
 	}
-
-	console.log(products);
-
-	const categories = products?.map((product) => product.product_category.name);
-	const uniqueCategories = Array.from(new Set(categories));
 
 	const handleAddToCart = (product: {
 		id: number;
@@ -285,37 +307,76 @@ function RouteComponent() {
 				</section>
 				<div className="px-8 grid grid-cols-[300px_1fr_350px] gap-4 border-t border-border">
 					{/* Sidebar de categorías */}
-					<aside className="border-r border-l sticky top-[4.5rem] h-[100vh]">
-						{uniqueCategories?.map((category) => (
-							<button
-								key={category}
-								type="button"
-								onClick={() => {
-									const element = document.getElementById(
-										`category-${category.replace(/\s+/g, "-")}`,
-									);
-									if (element) {
-										const yOffset = -100;
-										const y =
-											element.getBoundingClientRect().top +
-											window.pageYOffset +
-											yOffset;
-										window.scrollTo({ top: y, behavior: "smooth" });
-									}
-								}}
-								className="w-full text-left p-4 hover:bg-primary/5 transition-colors border-l-4 border-transparent hover:border-primary"
-							>
-								<h2 className="text-base font-medium text-foreground">
-									{category}
-								</h2>
-							</button>
-						))}
+					<aside className="border-r border-l sticky top-[4.5rem] h-[100vh] overflow-y-auto">
+						{/* Search input for shop */}
+						<div className="p-4 border-b border-border">
+							<ShopSearchInput
+								value={searchQuery}
+								onChange={setSearchQuery}
+								placeholder="Buscar en el menú..."
+							/>
+							{debouncedSearch && (
+								<p className="mt-2 text-xs text-muted-foreground">
+									{filteredProducts?.length || 0} producto(s) encontrado(s)
+								</p>
+							)}
+						</div>
+						{/* Categories navigation */}
+						<div className="py-2">
+							<p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+								Categorías
+							</p>
+							{filteredCategories?.map((category) => (
+								<button
+									key={category}
+									type="button"
+									onClick={() => {
+										const element = document.getElementById(
+											`category-${category.replace(/\s+/g, "-")}`,
+										);
+										if (element) {
+											const yOffset = -100;
+											const y =
+												element.getBoundingClientRect().top +
+												window.pageYOffset +
+												yOffset;
+											window.scrollTo({ top: y, behavior: "smooth" });
+										}
+									}}
+									className="w-full text-left p-4 hover:bg-primary/5 transition-colors border-l-4 border-transparent hover:border-primary"
+								>
+									<h2 className="text-base font-medium text-foreground">
+										{category}
+									</h2>
+								</button>
+							))}
+						</div>
 					</aside>
 
 					{/* Grid de productos por categoría */}
 					<div className="p-6">
-						{uniqueCategories?.map((category) => {
-							const categoryProducts = products?.filter(
+						{debouncedSearch && filteredProducts?.length === 0 && (
+							<div className="text-center py-16">
+								<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+									<Search className="h-8 w-8 text-muted-foreground" />
+								</div>
+								<h3 className="text-lg font-semibold">
+									No se encontraron productos
+								</h3>
+								<p className="mt-2 text-muted-foreground">
+									No hay productos que coincidan con "{debouncedSearch}"
+								</p>
+								<Button
+									variant="outline"
+									className="mt-4"
+									onClick={() => setSearchQuery("")}
+								>
+									Limpiar búsqueda
+								</Button>
+							</div>
+						)}
+						{filteredCategories?.map((category) => {
+							const categoryProducts = filteredProducts?.filter(
 								(p) => p.product_category.name === category,
 							);
 							return (
