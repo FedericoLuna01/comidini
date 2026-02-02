@@ -21,6 +21,7 @@ import {
 	shopCategoryRelation,
 	shopHours,
 } from "./shop-schema";
+import { ticket } from "./ticket-schema";
 
 export const schema = {
 	user,
@@ -48,9 +49,11 @@ export const schema = {
 	orderStatusHistory,
 	coupon,
 	couponUsage,
+	ticket,
 } as const;
 
 export * from "./auth-schema";
 export * from "./cart-schema";
 export * from "./product-schema";
 export * from "./shop-schema";
+export * from "./ticket-schema";

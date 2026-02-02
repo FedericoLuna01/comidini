@@ -26,6 +26,7 @@ interface DataTableProps<TData, TValue> {
 	isLoading?: boolean;
 	searchFor: string;
 	searchForPlaceholder?: string;
+	showPagination?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -34,6 +35,7 @@ export function DataTable<TData, TValue>({
 	isLoading = false,
 	searchFor,
 	searchForPlaceholder,
+	showPagination = true,
 }: DataTableProps<TData, TValue>) {
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -123,24 +125,26 @@ export function DataTable<TData, TValue>({
 					</TableBody>
 				</Table>
 			</div>
-			<div className="flex items-center justify-end space-x-2 py-4">
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() => table.previousPage()}
-					disabled={!table.getCanPreviousPage()}
-				>
-					Anterior
-				</Button>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() => table.nextPage()}
-					disabled={!table.getCanNextPage()}
-				>
-					Siguiente
-				</Button>
-			</div>
+			{showPagination && (
+				<div className="flex items-center justify-end space-x-2 py-4">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => table.previousPage()}
+						disabled={!table.getCanPreviousPage()}
+					>
+						Anterior
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => table.nextPage()}
+						disabled={!table.getCanNextPage()}
+					>
+						Siguiente
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 }
