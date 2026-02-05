@@ -68,3 +68,25 @@ export async function updateShopHours(hoursData: CreateShopHours[]) {
 
 	return response.json();
 }
+
+export interface ShopStatus {
+	shop: {
+		id: number;
+		name: string;
+		// ... otros campos
+	} | null;
+	hasShop: boolean;
+}
+
+export async function getShopStatus(): Promise<ShopStatus> {
+	const response = await fetch(`${API_URL}/shops/status`, {
+		method: "GET",
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch shop status");
+	}
+
+	return response.json();
+}

@@ -24,6 +24,13 @@ import {
 } from "@repo/ui/components/ui/form";
 import { Input } from "@repo/ui/components/ui/input";
 import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@repo/ui/components/ui/select";
+import {
 	Stepper,
 	StepperDescription,
 	StepperIndicator,
@@ -35,7 +42,7 @@ import {
 import { Switch } from "@repo/ui/components/ui/switch";
 import { Textarea } from "@repo/ui/components/ui/textarea";
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import {
 	Calendar,
 	CheckCircle,
@@ -50,15 +57,14 @@ import {
 	Settings,
 	ShoppingBag,
 	Store,
-	Tag,
 	Trash2,
 	Truck,
-	X,
 } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
-import { createShop } from "../../api/shops";
+import { createShop, getShopStatus } from "../../api/shops";
+import { TagSelector } from "../../components/tag-selector";
 
 const timeSlotSchema = z.object({
 	openTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
@@ -71,14 +77,115 @@ const businessHoursSchema = z.object({
 	timeSlots: z.array(timeSlotSchema),
 });
 
-const formSchema = createShopSchema.extend({
-	businessHours: z.array(businessHoursSchema),
-});
+// Esquema de validación con mensajes personalizados
+const formSchema = createShopSchema
+	.extend({
+		// Validaciones más estrictas para el formulario
+		name: z
+			.string()
+			.min(3, { message: "El nombre debe tener al menos 3 caracteres" })
+			.max(100, { message: "El nombre no puede exceder los 100 caracteres" })
+			.regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s\-'.]+$/, {
+				message:
+					"El nombre solo puede contener letras, números, espacios y guiones",
+			}),
+		// Descripción OBLIGATORIA
+		description: z
+			.string()
+			.min(10, { message: "La descripción debe tener al menos 10 caracteres" })
+			.max(500, {
+				message: "La descripción no puede exceder los 500 caracteres",
+			}),
+		// Teléfono OBLIGATORIO - mensajes cortos para móvil
+		phone: z
+			.string()
+			.min(1, { message: "Requerido" })
+			.min(8, { message: "Mín. 8 dígitos" })
+			.max(20, { message: "Máx. 20 dígitos" }),
+		// Email OBLIGATORIO
+		email: z
+			.string()
+			.min(1, { message: "El email es obligatorio" })
+			.email({ message: "Ingresa un email válido (ej: ejemplo@correo.com)" }),
+		// Website OPCIONAL
+		website: z
+			.string()
+			.url({ message: "Ingresa una URL válida (ej: https://www.ejemplo.com)" })
+			.optional()
+			.or(z.literal("")),
+		// Validación de ubicación
+		address: z
+			.string()
+			.min(5, { message: "La dirección debe tener al menos 5 caracteres" })
+			.max(200, {
+				message: "La dirección no puede exceder los 200 caracteres",
+			}),
+		latitude: z
+			.string()
+			.min(1, { message: "Debes seleccionar una ubicación en el mapa" }),
+		longitude: z
+			.string()
+			.min(1, { message: "Debes seleccionar una ubicación en el mapa" }),
+		businessHours: z.array(businessHoursSchema),
+	})
+	.refine(
+		(data) => {
+			// Validar que las coordenadas sean válidas si están presentes
+			if (data.latitude && data.longitude) {
+				const lat = Number.parseFloat(data.latitude);
+				const lng = Number.parseFloat(data.longitude);
+				return (
+					!Number.isNaN(lat) &&
+					!Number.isNaN(lng) &&
+					lat >= -90 &&
+					lat <= 90 &&
+					lng >= -180 &&
+					lng <= 180
+				);
+			}
+			return false;
+		},
+		{
+			message: "Selecciona una ubicación válida en el mapa",
+			path: ["address"],
+		},
+	)
+	.refine(
+		(data) => {
+			// Validar que al menos un día tenga horario activo
+			const hasAtLeastOneOpenDay = data.businessHours.some(
+				(day) => !day.isClosed && day.timeSlots.length > 0,
+			);
+			return hasAtLeastOneOpenDay;
+		},
+		{
+			message: "Debes tener al menos un día con horario de atención",
+			path: ["businessHours"],
+		},
+	);
 
 type FormValues = z.infer<typeof formSchema>;
 
 export const Route = createFileRoute("/primeros-pasos/")({
-	// TODO: add a loader to check if the user already has a shop
+	beforeLoad: async () => {
+		// Verificar si el usuario ya tiene una tienda
+		try {
+			const status = await getShopStatus();
+			if (status.hasShop) {
+				// Si ya tiene tienda, redirigir al dashboard
+				throw redirect({
+					to: "/dashboard",
+				});
+			}
+		} catch (error) {
+			// Si hay error de autenticación, dejar pasar (el dashboard lo manejará)
+			if (error instanceof Error && error.message.includes("redirect")) {
+				throw error;
+			}
+			// Si el error es de otro tipo, continuar con el onboarding
+			console.error("Error checking shop status:", error);
+		}
+	},
 	component: RouteComponent,
 });
 
@@ -91,6 +198,27 @@ const DAYS_OF_WEEK = [
 	"Viernes",
 	"Sábado",
 ];
+
+// Lista de países con prefijos telefónicos (usando SVG de flagcdn.com)
+const COUNTRY_CODES = [
+	{ code: "ar", name: "Argentina", prefix: "+54" },
+	{ code: "mx", name: "México", prefix: "+52" },
+	{ code: "es", name: "España", prefix: "+34" },
+	{ code: "us", name: "Estados Unidos", prefix: "+1" },
+	{ code: "co", name: "Colombia", prefix: "+57" },
+	{ code: "cl", name: "Chile", prefix: "+56" },
+	{ code: "pe", name: "Perú", prefix: "+51" },
+	{ code: "uy", name: "Uruguay", prefix: "+598" },
+	{ code: "py", name: "Paraguay", prefix: "+595" },
+	{ code: "bo", name: "Bolivia", prefix: "+591" },
+	{ code: "ec", name: "Ecuador", prefix: "+593" },
+	{ code: "ve", name: "Venezuela", prefix: "+58" },
+	{ code: "br", name: "Brasil", prefix: "+55" },
+];
+
+// Función para obtener la URL del SVG de la bandera
+const getFlagUrl = (countryCode: string) =>
+	`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`;
 
 const STEPS = [
 	{
@@ -126,47 +254,22 @@ const STEPS = [
 ];
 
 function RouteComponent() {
-	const [currentStep, setCurrentStep] = useState(2);
-	const [newTag, setNewTag] = useState("");
-
-	// Colores de tags basados en la paleta de Comidini
-	const TAG_COLORS = [
-		{ bg: "oklch(0.92 0.08 12)", text: "oklch(0.35 0.12 12)" }, // Coral claro
-		{ bg: "oklch(0.90 0.10 25)", text: "oklch(0.40 0.15 25)" }, // Naranja suave
-		{ bg: "oklch(0.88 0.12 45)", text: "oklch(0.45 0.18 45)" }, // Amarillo cálido
-		{ bg: "oklch(0.90 0.08 150)", text: "oklch(0.40 0.12 150)" }, // Verde menta
-		{ bg: "oklch(0.88 0.10 200)", text: "oklch(0.40 0.15 200)" }, // Azul cielo
-		{ bg: "oklch(0.90 0.10 280)", text: "oklch(0.45 0.15 280)" }, // Lavanda
-	];
-
-	const getTagColor = (tag: string) => {
-		// Genera un índice consistente basado en el hash del tag
-		let hash = 0;
-		for (let i = 0; i < tag.length; i++) {
-			hash = tag.charCodeAt(i) + ((hash << 5) - hash);
-		}
-		const color = TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
-		return { backgroundColor: color.bg, color: color.text };
-	};
-
-	const DEFAULT_TAGS = [
-		"Hamburguesas",
-		"Delivery",
-		"Aceptamos Crypto",
-		"Comida Rápida",
-		"Vegano",
-		"Sin Gluten",
-	];
+	const navigate = useNavigate();
+	const [currentStep, setCurrentStep] = useState(1);
+	const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES[0]); // Argentina por defecto
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
+		mode: "onChange", // Validar en tiempo real
 		defaultValues: {
-			name: "Nombre de mi tienda",
+			name: "",
 			description: "",
 			phone: "",
+			email: "",
+			website: "",
 			address: "",
-			latitude: "-33.0168041",
-			longitude: "-60.8760917",
+			latitude: "", // Vacío para forzar selección en mapa
+			longitude: "", // Vacío para forzar selección en mapa
 			acceptsDelivery: false,
 			acceptsPickup: false,
 			acceptsReservations: false,
@@ -225,9 +328,8 @@ function RouteComponent() {
 			return await createShop(data);
 		},
 		onSuccess: () => {
-			// TODO: Redirigir al usuario a su tienda o dashboard
-			console.log("Tienda creada exitosamente");
-			alert("¡Tienda creada exitosamente!");
+			// Redirigir al usuario al dashboard
+			navigate({ to: "/dashboard" });
 		},
 		onError: (error: Error) => {
 			console.error("Error al crear tienda:", error);
@@ -260,7 +362,7 @@ function RouteComponent() {
 			case 1:
 				return ["name", "description", "phone", "email", "website"];
 			case 2:
-				return ["address"];
+				return ["address", "latitude", "longitude"];
 			case 3:
 				return [
 					"deliveryRadius",
@@ -279,17 +381,38 @@ function RouteComponent() {
 
 	const onSubmit = async (data: FormValues) => {
 		// Limpiar datos: remover strings vacíos que causarían error de validación
-		const cleanedData = {
-			...data,
-			email: data.email?.trim() || undefined,
-			website: data.website?.trim() || undefined,
-			phone: data.phone?.trim() || undefined,
-			description: data.description?.trim() || undefined,
+		// y asegurar tipos correctos
+		const cleanedData: CreateShop & {
+			businessHours: ReturnType<typeof convertBusinessHoursForApi>;
+		} = {
+			name: data.name,
+			address: data.address,
+			acceptsDelivery: data.acceptsDelivery,
+			acceptsPickup: data.acceptsPickup,
+			acceptsReservations: data.acceptsReservations,
+			// Campos opcionales - solo incluir si tienen valor
+			...(data.email?.trim() && { email: data.email.trim() }),
+			...(data.website?.trim() && { website: data.website.trim() }),
+			...(data.phone?.trim() && {
+				phone: `${selectedCountry.prefix} ${data.phone.trim()}`,
+			}),
+			...(data.description?.trim() && { description: data.description.trim() }),
+			...(data.latitude && { latitude: data.latitude }),
+			...(data.longitude && { longitude: data.longitude }),
+			...(data.logo && { logo: data.logo }),
+			...(data.banner && { banner: data.banner }),
+			...(data.tags && data.tags.length > 0 && { tags: data.tags }),
+			// Campos de delivery - asegurar que sean strings
+			...(data.deliveryRadius !== undefined && {
+				deliveryRadius: data.deliveryRadius,
+			}),
+			...(data.minimumOrder && { minimumOrder: String(data.minimumOrder) }),
+			...(data.deliveryFee && { deliveryFee: String(data.deliveryFee) }),
+			// Horarios convertidos al formato del API
 			businessHours: convertBusinessHoursForApi(data.businessHours),
 		};
 
-		console.log("Sending data:", cleanedData);
-		mutation.mutate(cleanedData as unknown as CreateShop);
+		mutation.mutate(cleanedData as CreateShop);
 	};
 
 	const addTimeSlot = (dayIndex: number) => {
@@ -311,16 +434,16 @@ function RouteComponent() {
 	};
 
 	return (
-		<div className="container mx-auto min-h-screen flex items-center justify-center flex-col gap-y-6 py-10">
-			<div className=" text-center">
-				<h1 className="text-4xl font-bold">
+		<div className="container mx-auto min-h-screen flex items-center justify-center flex-col gap-y-4 sm:gap-y-6 py-6 sm:py-10 px-4 sm:px-6">
+			<div className="text-center">
+				<h1 className="text-2xl sm:text-4xl font-bold">
 					Primeros pasos para crear tu tienda
 				</h1>
-				<p className="text-sm text-gray-500 mt-1">
+				<p className="text-xs sm:text-sm text-gray-500 mt-1">
 					Completa los siguientes pasos para configurar tu tienda en Comidini
 				</p>
 			</div>
-			<div>
+			<div className="w-full overflow-x-auto px-2 sm:px-0">
 				<Stepper value={currentStep} onValueChange={setCurrentStep}>
 					{STEPS.map(({ id, title, description }) => (
 						<StepperItem
@@ -329,7 +452,7 @@ function RouteComponent() {
 							className="relative flex-1 flex-col!"
 						>
 							<StepperTrigger
-								className="flex-col gap-3 rounded"
+								className="flex-col gap-2 sm:gap-3 rounded"
 								onClick={async () => {
 									const isValid = await isValidForm();
 									if (!isValid) return;
@@ -337,8 +460,10 @@ function RouteComponent() {
 								}}
 							>
 								<StepperIndicator />
-								<div className="space-y-0.5 px-2">
-									<StepperTitle>{title}</StepperTitle>
+								<div className="space-y-0.5 px-1 sm:px-2">
+									<StepperTitle className="text-xs sm:text-sm">
+										{title}
+									</StepperTitle>
 									<StepperDescription className="max-sm:hidden">
 										{description}
 									</StepperDescription>
@@ -353,7 +478,7 @@ function RouteComponent() {
 			</div>
 			<Form {...form}>
 				<form
-					className="min-w-xl h-auto transition-all duration-300 ease-in-out"
+					className="w-full max-w-xl h-auto transition-all duration-300 ease-in-out"
 					onSubmit={form.handleSubmit(onSubmit)}
 				>
 					<Card className="shadow-lg">
@@ -384,12 +509,14 @@ function RouteComponent() {
 											<FormItem>
 												<FormLabel className="flex items-center gap-2">
 													<Store className="w-4 h-4" />
-													Nombre de la tienda
+													Nombre de la tienda *
 												</FormLabel>
 												<FormControl>
 													<Input placeholder="Mi Tienda Favorita" {...field} />
 												</FormControl>
-												<FormMessage />
+												<div className="min-h-[20px]">
+													<FormMessage />
+												</div>
 											</FormItem>
 										)}
 									/>
@@ -399,7 +526,7 @@ function RouteComponent() {
 										name="description"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Descripción</FormLabel>
+												<FormLabel>Descripción *</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Describe tu negocio, productos o servicios..."
@@ -409,9 +536,11 @@ function RouteComponent() {
 												</FormControl>
 												<FormDescription>
 													Una breve descripción ayudará a los clientes a conocer
-													tu negocio
+													tu negocio (mínimo 10 caracteres)
 												</FormDescription>
-												<FormMessage />
+												<div className="min-h-[20px]">
+													<FormMessage />
+												</div>
 											</FormItem>
 										)}
 									/>
@@ -424,12 +553,79 @@ function RouteComponent() {
 												<FormItem>
 													<FormLabel className="flex items-center gap-2">
 														<Phone className="w-4 h-4" />
-														Teléfono
+														Teléfono *
 													</FormLabel>
 													<FormControl>
-														<Input placeholder="+52 55 1234 5678" {...field} />
+														<div className="flex w-full items-stretch">
+															{/* Select con bandera */}
+															<Select
+																value={selectedCountry.code}
+																onValueChange={(val) =>
+																	setSelectedCountry(
+																		COUNTRY_CODES.find((c) => c.code === val) ??
+																			COUNTRY_CODES[0],
+																	)
+																}
+															>
+																<SelectTrigger className="w-14 sm:w-16 px-2 rounded-r-none border-r-0 shrink-0">
+																	<SelectValue>
+																		<span className="flex items-center justify-center">
+																			<img
+																				src={getFlagUrl(selectedCountry.code)}
+																				alt={selectedCountry.name}
+																				className="w-5 sm:w-6 h-auto rounded-sm"
+																			/>
+																		</span>
+																	</SelectValue>
+																</SelectTrigger>
+																<SelectContent>
+																	{COUNTRY_CODES.map((c) => (
+																		<SelectItem key={c.code} value={c.code}>
+																			<span className="flex items-center gap-2">
+																				<img
+																					src={getFlagUrl(c.code)}
+																					alt={c.name}
+																					className="w-5 h-auto rounded-sm"
+																				/>
+																				{c.name} ({c.prefix})
+																			</span>
+																		</SelectItem>
+																	))}
+																</SelectContent>
+															</Select>
+
+															{/* Input con prefijo de país */}
+															<div className="relative flex-1 min-w-0">
+																<span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none select-none whitespace-nowrap">
+																	{selectedCountry.prefix}
+																</span>
+																<Input
+																	{...field}
+																	inputMode="tel"
+																	pattern="[0-9\s\-()]+"
+																	maxLength={20}
+																	className="rounded-l-none"
+																	style={{
+																		paddingLeft: `${Math.max(selectedCountry.prefix.length * 0.55 + 1.2, 2.5)}rem`,
+																	}}
+																	placeholder="9 1234 5678"
+																	onInput={(
+																		e: React.FormEvent<HTMLInputElement>,
+																	) => {
+																		const target = e.target as HTMLInputElement;
+																		target.value = target.value.replace(
+																			/[^\d\s\-()]/g,
+																			"",
+																		);
+																		field.onChange(target.value);
+																	}}
+																/>
+															</div>
+														</div>
 													</FormControl>
-													<FormMessage />
+													<div className="min-h-[20px]">
+														<FormMessage />
+													</div>
 												</FormItem>
 											)}
 										/>
@@ -441,15 +637,18 @@ function RouteComponent() {
 												<FormItem>
 													<FormLabel className="flex items-center gap-2">
 														<Mail className="w-4 h-4" />
-														Email
+														Email *
 													</FormLabel>
 													<FormControl>
 														<Input
+															type="email"
 															placeholder="contacto@mitienda.com"
 															{...field}
 														/>
 													</FormControl>
-													<FormMessage />
+													<div className="min-h-[20px]">
+														<FormMessage />
+													</div>
 												</FormItem>
 											)}
 										/>
@@ -462,7 +661,7 @@ function RouteComponent() {
 											<FormItem>
 												<FormLabel className="flex items-center gap-2">
 													<Globe className="w-4 h-4" />
-													Sitio web
+													Sitio web (opcional)
 												</FormLabel>
 												<FormControl>
 													<Input
@@ -470,7 +669,12 @@ function RouteComponent() {
 														{...field}
 													/>
 												</FormControl>
-												<FormMessage />
+												<FormDescription>
+													Si tienes un sitio web, agrégalo aquí
+												</FormDescription>
+												<div className="min-h-[20px]">
+													<FormMessage />
+												</div>
 											</FormItem>
 										)}
 									/>
@@ -480,41 +684,98 @@ function RouteComponent() {
 							{/* Step 2: Ubicación */}
 							{currentStep === 2 && (
 								<div className="space-y-4">
-									<MapWithAutocomplete
-										initialAddress={form.getValues("address")}
-										initialLat={
-											form.getValues("latitude")
-												? parseFloat(form.getValues("latitude") ?? "")
-												: undefined
-										}
-										initialLng={
-											form.getValues("longitude")
-												? parseFloat(form.getValues("longitude") ?? "")
-												: undefined
-										}
-										onLocationChange={(location: MapLocation) => {
-											form.setValue("address", location.address, {
-												shouldValidate: true,
-											});
-											form.setValue("latitude", location.lat.toString(), {
-												shouldValidate: true,
-											});
-											form.setValue("longitude", location.lng.toString(), {
-												shouldValidate: true,
-											});
-										}}
-										googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-										googleMapsMapId="314bbedb82bc2f8947b9d13c"
-										addressLabel="Dirección *"
-										placeholder="Buscar dirección..."
-										mapHeight="16rem"
-										locationRestriction={{
-											south: -33.04,
-											west: -60.74,
-											north: -32.9,
-											east: -60.6,
-										}}
+									<FormField
+										control={form.control}
+										name="address"
+										render={() => (
+											<FormItem>
+												<MapWithAutocomplete
+													initialAddress={form.getValues("address")}
+													initialLat={
+														form.getValues("latitude")
+															? Number.parseFloat(
+																	form.getValues("latitude") ?? "",
+																)
+															: undefined
+													}
+													initialLng={
+														form.getValues("longitude")
+															? Number.parseFloat(
+																	form.getValues("longitude") ?? "",
+																)
+															: undefined
+													}
+													onLocationChange={(location: MapLocation) => {
+														form.setValue("address", location.address, {
+															shouldValidate: true,
+														});
+														form.setValue("latitude", location.lat.toString(), {
+															shouldValidate: true,
+														});
+														form.setValue(
+															"longitude",
+															location.lng.toString(),
+															{
+																shouldValidate: true,
+															},
+														);
+														// Limpiar errores al seleccionar ubicación
+														form.clearErrors([
+															"address",
+															"latitude",
+															"longitude",
+														]);
+													}}
+													googleMapsApiKey={
+														import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+													}
+													googleMapsMapId="314bbedb82bc2f8947b9d13c"
+													addressLabel="Dirección *"
+													placeholder="Buscar dirección..."
+													mapHeight="16rem"
+													locationRestriction={{
+														south: -33.04,
+														west: -60.74,
+														north: -32.9,
+														east: -60.6,
+													}}
+												/>
+												<div className="min-h-[20px]">
+													<FormMessage />
+													{/* Mostrar error si no se ha seleccionado ubicación en el mapa */}
+													{(form.formState.errors.latitude ||
+														form.formState.errors.longitude) &&
+														!form.formState.errors.address && (
+															<p className="text-sm font-medium text-destructive">
+																Selecciona una ubicación en el mapa haciendo
+																clic o buscando una dirección
+															</p>
+														)}
+												</div>
+											</FormItem>
+										)}
 									/>
+									{/* Indicador visual de estado de ubicación - altura fija para evitar saltos */}
+									<div className="min-h-[48px] sm:min-h-[48px]">
+										{form.watch("latitude") &&
+											form.watch("longitude") &&
+											form.watch("address") &&
+											form.formState.dirtyFields.address && (
+												<div className="flex items-center gap-2 text-xs sm:text-sm text-green-600 bg-green-50 p-2.5 sm:p-3 rounded-lg">
+													<CheckCircle className="w-4 h-4 shrink-0" />
+													<span>Ubicación seleccionada correctamente</span>
+												</div>
+											)}
+										{(!form.watch("latitude") || !form.watch("longitude")) && (
+											<div className="flex items-center gap-2 text-xs sm:text-sm text-amber-600 bg-amber-50 p-2.5 sm:p-3 rounded-lg">
+												<MapPin className="w-4 h-4 shrink-0" />
+												<span>
+													Haz clic en el mapa o busca una dirección para
+													seleccionar la ubicación de tu tienda
+												</span>
+											</div>
+										)}
+									</div>
 								</div>
 							)}
 
@@ -522,21 +783,21 @@ function RouteComponent() {
 							{currentStep === 3 && (
 								<div className="space-y-6">
 									<div>
-										<h3 className="text-lg font-medium mb-4">
+										<h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">
 											Servicios disponibles
 										</h3>
-										<div className="space-y-4">
+										<div className="space-y-3 sm:space-y-4">
 											<FormField
 												control={form.control}
 												name="acceptsDelivery"
 												render={({ field }) => (
-													<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-														<div className="space-y-0.5">
-															<FormLabel className="flex items-center gap-2 text-base">
-																<Truck className="w-4 h-4" />
-																Servicio a domicilio
+													<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4 gap-3">
+														<div className="space-y-0.5 min-w-0 flex-1">
+															<FormLabel className="flex items-center gap-2 text-sm sm:text-base">
+																<Truck className="w-4 h-4 shrink-0" />
+																<span>Servicio a domicilio</span>
 															</FormLabel>
-															<FormDescription>
+															<FormDescription className="text-xs sm:text-sm">
 																Ofrece entrega de productos en el domicilio del
 																cliente
 															</FormDescription>
@@ -555,13 +816,13 @@ function RouteComponent() {
 												control={form.control}
 												name="acceptsPickup"
 												render={({ field }) => (
-													<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-														<div className="space-y-0.5">
-															<FormLabel className="flex items-center gap-2 text-base">
-																<ShoppingBag className="w-4 h-4" />
-																Recolección en tienda
+													<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4 gap-3">
+														<div className="space-y-0.5 min-w-0 flex-1">
+															<FormLabel className="flex items-center gap-2 text-sm sm:text-base">
+																<ShoppingBag className="w-4 h-4 shrink-0" />
+																<span>Recolección en tienda</span>
 															</FormLabel>
-															<FormDescription>
+															<FormDescription className="text-xs sm:text-sm">
 																Los clientes pueden recoger sus pedidos en tu
 																tienda
 															</FormDescription>
@@ -580,13 +841,13 @@ function RouteComponent() {
 												control={form.control}
 												name="acceptsReservations"
 												render={({ field }) => (
-													<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-														<div className="space-y-0.5">
-															<FormLabel className="flex items-center gap-2 text-base">
-																<Calendar className="w-4 h-4" />
-																Reservaciones
+													<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4 gap-3">
+														<div className="space-y-0.5 min-w-0 flex-1">
+															<FormLabel className="flex items-center gap-2 text-sm sm:text-base">
+																<Calendar className="w-4 h-4 shrink-0" />
+																<span>Reservaciones</span>
 															</FormLabel>
-															<FormDescription>
+															<FormDescription className="text-xs sm:text-sm">
 																Permite a los clientes hacer reservaciones
 															</FormDescription>
 														</div>
@@ -604,121 +865,16 @@ function RouteComponent() {
 
 									{/* Sección de Tags */}
 									<div>
-										<h3 className="text-lg font-medium mb-4 flex items-center gap-2">
-											<Tag className="w-5 h-5" />
-											Tags de tu negocio
-										</h3>
-										<p className="text-sm text-gray-600 mb-4">
-											Agrega etiquetas que describan tu negocio para que los
-											clientes te encuentren más fácilmente
-										</p>
-
 										<FormField
 											control={form.control}
 											name="tags"
 											render={({ field }) => (
 												<FormItem>
 													<FormControl>
-														<div className="space-y-4">
-															{/* Input para agregar nuevo tag */}
-															<div className="flex gap-2">
-																<Input
-																	placeholder="Escribe un tag y presiona Enter..."
-																	value={newTag}
-																	onChange={(e) => setNewTag(e.target.value)}
-																	onKeyDown={(e) => {
-																		if (e.key === "Enter") {
-																			e.preventDefault();
-																			const trimmedTag = newTag.trim();
-																			if (
-																				trimmedTag &&
-																				!field.value?.includes(trimmedTag)
-																			) {
-																				field.onChange([
-																					...(field.value || []),
-																					trimmedTag,
-																				]);
-																				setNewTag("");
-																			}
-																		}
-																	}}
-																/>
-																<Button
-																	type="button"
-																	variant="outline"
-																	onClick={() => {
-																		const trimmedTag = newTag.trim();
-																		if (
-																			trimmedTag &&
-																			!field.value?.includes(trimmedTag)
-																		) {
-																			field.onChange([
-																				...(field.value || []),
-																				trimmedTag,
-																			]);
-																			setNewTag("");
-																		}
-																	}}
-																>
-																	<Plus className="w-4 h-4" />
-																</Button>
-															</div>
-
-															{/* Tags seleccionados */}
-															{field.value && field.value.length > 0 && (
-																<div className="flex flex-wrap gap-2">
-																	{field.value.map((tag) => (
-																		<Badge
-																			key={tag}
-																			className="px-3 py-1.5 text-sm flex items-center gap-1 border-0"
-																			style={getTagColor(tag)}
-																		>
-																			{tag}
-																			<button
-																				type="button"
-																				onClick={() => {
-																					field.onChange(
-																						field.value?.filter(
-																							(t) => t !== tag,
-																						),
-																					);
-																				}}
-																				className="ml-1 hover:opacity-70 transition-opacity"
-																			>
-																				<X className="w-3 h-3" />
-																			</button>
-																		</Badge>
-																	))}
-																</div>
-															)}
-
-															{/* Tags sugeridos */}
-															<div>
-																<p className="text-sm text-muted-foreground mb-2">
-																	Sugerencias:
-																</p>
-																<div className="flex flex-wrap gap-2">
-																	{DEFAULT_TAGS.filter(
-																		(tag) => !field.value?.includes(tag),
-																	).map((tag) => (
-																		<Badge
-																			key={tag}
-																			className="px-3 py-1.5 text-sm cursor-pointer transition-all hover:scale-105 hover:shadow-sm border-0 opacity-70 hover:opacity-100"
-																			style={getTagColor(tag)}
-																			onClick={() => {
-																				field.onChange([
-																					...(field.value || []),
-																					tag,
-																				]);
-																			}}
-																		>
-																			<Plus className="w-3 h-3 mr-1" />
-																			{tag}
-																		</Badge>
-																	))}
-																</div>
-															</div>
-														</div>
+														<TagSelector
+															value={field.value || []}
+															onChange={field.onChange}
+														/>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
@@ -728,16 +884,18 @@ function RouteComponent() {
 
 									{form.watch("acceptsDelivery") && (
 										<div>
-											<h3 className="text-lg font-medium mb-4">
+											<h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">
 												Configuración de entrega
 											</h3>
-											<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+											<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
 												<FormField
 													control={form.control}
 													name="deliveryRadius"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Radio de entrega (km)</FormLabel>
+															<FormLabel className="text-sm">
+																Radio de entrega (km)
+															</FormLabel>
 															<FormControl>
 																<Input
 																	type="number"
@@ -750,7 +908,9 @@ function RouteComponent() {
 																	}
 																/>
 															</FormControl>
-															<FormMessage />
+															<div className="min-h-[20px]">
+																<FormMessage />
+															</div>
 														</FormItem>
 													)}
 												/>
@@ -760,7 +920,9 @@ function RouteComponent() {
 													name="minimumOrder"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Pedido mínimo ($)</FormLabel>
+															<FormLabel className="text-sm">
+																Pedido mínimo ($)
+															</FormLabel>
 															<FormControl>
 																<Input
 																	type="number"
@@ -771,7 +933,9 @@ function RouteComponent() {
 																	}
 																/>
 															</FormControl>
-															<FormMessage />
+															<div className="min-h-[20px]">
+																<FormMessage />
+															</div>
 														</FormItem>
 													)}
 												/>
@@ -781,7 +945,9 @@ function RouteComponent() {
 													name="deliveryFee"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Costo de entrega ($)</FormLabel>
+															<FormLabel className="text-sm">
+																Costo de entrega ($)
+															</FormLabel>
 															<FormControl>
 																<Input
 																	type="number"
@@ -792,7 +958,9 @@ function RouteComponent() {
 																	}
 																/>
 															</FormControl>
-															<FormMessage />
+															<div className="min-h-[20px]">
+																<FormMessage />
+															</div>
 														</FormItem>
 													)}
 												/>
@@ -804,18 +972,61 @@ function RouteComponent() {
 
 							{/* Step 4: Horarios */}
 							{currentStep === 4 && (
-								<div className="space-y-4">
+								<div className="space-y-3 sm:space-y-4">
 									<div>
-										<h3 className="text-lg font-medium mb-4">
+										<h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-4">
 											Horarios de atención
 										</h3>
-										<p className="text-sm text-gray-600 mb-6">
+										<p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
 											Define los horarios en que tu tienda estará disponible
 											para recibir pedidos. Puedes agregar múltiples turnos por
 											día.
 										</p>
 									</div>
-									<div className="space-y-4">
+
+									{/* Contenedor con altura fija para mensajes de estado */}
+									<div className="min-h-[44px] sm:min-h-[48px]">
+										{/* Mensaje de error si no hay días activos */}
+										{form.formState.errors.businessHours ? (
+											<div className="flex items-center gap-2 text-xs sm:text-sm text-red-600 bg-red-50 p-2.5 sm:p-3 rounded-lg border border-red-200">
+												<Clock className="w-4 h-4 shrink-0" />
+												<span>
+													Debes tener al menos un día con horario de atención
+													activo
+												</span>
+											</div>
+										) : (
+											/* Indicador de días activos */
+											(() => {
+												const openDays =
+													form
+														.watch("businessHours")
+														?.filter((day) => !day.isClosed).length || 0;
+												if (openDays === 0) {
+													return (
+														<div className="flex items-center gap-2 text-xs sm:text-sm text-amber-600 bg-amber-50 p-2.5 sm:p-3 rounded-lg">
+															<Clock className="w-4 h-4 shrink-0" />
+															<span>
+																Activa al menos un día para que tus clientes
+																sepan cuándo pueden visitarte
+															</span>
+														</div>
+													);
+												}
+												return (
+													<div className="flex items-center gap-2 text-xs sm:text-sm text-green-600 bg-green-50 p-2.5 sm:p-3 rounded-lg">
+														<CheckCircle className="w-4 h-4 shrink-0" />
+														<span>
+															{openDays}{" "}
+															{openDays === 1 ? "día activo" : "días activos"}
+														</span>
+													</div>
+												);
+											})()
+										)}
+									</div>
+
+									<div className="space-y-3 sm:space-y-4">
 										{DAYS_OF_WEEK.map((day, dayIndex) => {
 											const isClosed = form.watch(
 												`businessHours.${dayIndex}.isClosed`,
@@ -826,27 +1037,29 @@ function RouteComponent() {
 											return (
 												<div
 													key={dayIndex}
-													className="p-4 border rounded-lg space-y-3"
+													className="p-2.5 sm:p-4 border rounded-lg space-y-2 sm:space-y-3"
 												>
-													<div className="flex items-center gap-4">
-														<FormField
-															control={form.control}
-															name={`businessHours.${dayIndex}.isClosed`}
-															render={({ field }) => (
-																<FormItem className="flex items-center space-x-2">
-																	<FormControl>
-																		<Switch
-																			checked={!field.value}
-																			onCheckedChange={(checked) =>
-																				field.onChange(!checked)
-																			}
-																		/>
-																	</FormControl>
-																</FormItem>
-															)}
-														/>
-														<div className="w-24 text-sm font-medium">
-															{day}
+													<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+														<div className="flex items-center gap-2 sm:gap-4">
+															<FormField
+																control={form.control}
+																name={`businessHours.${dayIndex}.isClosed`}
+																render={({ field }) => (
+																	<FormItem className="flex items-center space-x-2">
+																		<FormControl>
+																			<Switch
+																				checked={!field.value}
+																				onCheckedChange={(checked) =>
+																					field.onChange(!checked)
+																				}
+																			/>
+																		</FormControl>
+																	</FormItem>
+																)}
+															/>
+															<div className="w-20 sm:w-24 text-xs sm:text-sm font-medium">
+																{day}
+															</div>
 														</div>
 
 														{!isClosed && (
@@ -854,7 +1067,7 @@ function RouteComponent() {
 																{timeSlots.map((_, slotIndex) => (
 																	<div
 																		key={slotIndex}
-																		className="flex items-center gap-2"
+																		className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap"
 																	>
 																		<FormField
 																			control={form.control}
@@ -864,14 +1077,14 @@ function RouteComponent() {
 																					<FormControl>
 																						<Input
 																							type="time"
-																							className="w-32"
+																							className="w-[5.5rem] sm:w-32 text-sm"
 																							{...field}
 																						/>
 																					</FormControl>
 																				</FormItem>
 																			)}
 																		/>
-																		<span className="text-sm text-gray-500">
+																		<span className="text-xs sm:text-sm text-gray-500">
 																			-
 																		</span>
 																		<FormField
@@ -882,7 +1095,7 @@ function RouteComponent() {
 																					<FormControl>
 																						<Input
 																							type="time"
-																							className="w-32"
+																							className="w-[5.5rem] sm:w-32 text-sm"
 																							{...field}
 																						/>
 																					</FormControl>
@@ -894,6 +1107,7 @@ function RouteComponent() {
 																				type="button"
 																				variant="ghost"
 																				size="icon"
+																				className="h-8 w-8 sm:h-9 sm:w-9"
 																				onClick={() => addTimeSlot(dayIndex)}
 																				title="Agregar turno"
 																			>
@@ -904,6 +1118,7 @@ function RouteComponent() {
 																				type="button"
 																				variant="ghost"
 																				size="icon"
+																				className="h-8 w-8 sm:h-9 sm:w-9"
 																				onClick={() =>
 																					removeTimeSlot(dayIndex, slotIndex)
 																				}
@@ -926,29 +1141,29 @@ function RouteComponent() {
 
 							{/* Step 5: Resumen */}
 							{currentStep === 5 && (
-								<div className="space-y-6">
+								<div className="space-y-4 sm:space-y-6">
 									<div>
-										<h3 className="text-lg font-medium mb-4">
+										<h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-4">
 											Resumen de configuración
 										</h3>
-										<p className="text-sm text-gray-600 mb-6">
+										<p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
 											Revisa la información antes de crear tu tienda
 										</p>
 									</div>
 
-									<div className="space-y-4">
+									<div className="space-y-3 sm:space-y-4">
 										{/* Información básica */}
-										<div className="border rounded-lg p-4">
-											<h4 className="font-medium mb-2 flex items-center gap-2">
-												<Store className="w-4 h-4" />
+										<div className="border rounded-lg p-3 sm:p-4">
+											<h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+												<Store className="w-4 h-4 shrink-0" />
 												Información básica
 											</h4>
-											<div className="space-y-1 text-sm">
+											<div className="space-y-1 text-xs sm:text-sm">
 												<p>
 													<strong>Nombre:</strong> {form.watch("name")}
 												</p>
 												{form.watch("description") && (
-													<p>
+													<p className="break-words">
 														<strong>Descripción:</strong>{" "}
 														{form.watch("description")}
 													</p>
@@ -959,7 +1174,7 @@ function RouteComponent() {
 													</p>
 												)}
 												{form.watch("email") && (
-													<p>
+													<p className="break-all">
 														<strong>Email:</strong> {form.watch("email")}
 													</p>
 												)}
@@ -967,33 +1182,46 @@ function RouteComponent() {
 										</div>
 
 										{/* Ubicación */}
-										<div className="border rounded-lg p-4">
-											<h4 className="font-medium mb-2 flex items-center gap-2">
-												<MapPin className="w-4 h-4" />
+										<div className="border rounded-lg p-3 sm:p-4">
+											<h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+												<MapPin className="w-4 h-4 shrink-0" />
 												Ubicación
 											</h4>
-											<div className="text-sm">
-												<p>{form.watch("address")}</p>
+											<div className="text-xs sm:text-sm">
+												<p className="break-words">{form.watch("address")}</p>
 											</div>
 										</div>
 
 										{/* Servicios */}
-										<div className="border rounded-lg p-4">
-											<h4 className="font-medium mb-2 flex items-center gap-2">
-												<Settings className="w-4 h-4" />
+										<div className="border rounded-lg p-3 sm:p-4">
+											<h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+												<Settings className="w-4 h-4 shrink-0" />
 												Servicios
 											</h4>
-											<div className="flex flex-wrap gap-2">
+											<div className="flex flex-wrap gap-1.5 sm:gap-2">
 												{form.watch("acceptsDelivery") && (
-													<Badge variant="secondary">Entrega a domicilio</Badge>
+													<Badge
+														variant="secondary"
+														className="text-xs sm:text-sm"
+													>
+														Entrega a domicilio
+													</Badge>
 												)}
 												{form.watch("acceptsPickup") && (
-													<Badge variant="secondary">
+													<Badge
+														variant="secondary"
+														className="text-xs sm:text-sm"
+													>
 														Recolección en tienda
 													</Badge>
 												)}
 												{form.watch("acceptsReservations") && (
-													<Badge variant="secondary">Reservaciones</Badge>
+													<Badge
+														variant="secondary"
+														className="text-xs sm:text-sm"
+													>
+														Reservaciones
+													</Badge>
 												)}
 											</div>
 										</div>
@@ -1004,16 +1232,16 @@ function RouteComponent() {
 					</Card>
 
 					{/* Navigation */}
-					<div className="flex justify-between mt-6">
+					<div className="flex justify-between mt-4 sm:mt-6">
 						<Button
 							type="button"
 							variant="outline"
 							onClick={prevStep}
 							disabled={currentStep === 1}
-							className="flex items-center gap-2 bg-transparent"
+							className="flex items-center gap-1 sm:gap-2 bg-transparent text-sm sm:text-base px-3 sm:px-4"
 						>
 							<ChevronLeft className="w-4 h-4" />
-							Anterior
+							<span className="hidden xs:inline">Anterior</span>
 						</Button>
 
 						{currentStep < STEPS.length ? (
@@ -1023,16 +1251,17 @@ function RouteComponent() {
 									e.preventDefault();
 									nextStep();
 								}}
-								className="flex items-center gap-2"
+								className="flex items-center gap-1 sm:gap-2 text-sm sm:text-base px-3 sm:px-4"
 							>
-								Siguiente
+								<span className="hidden xs:inline">Siguiente</span>
+								<span className="xs:hidden">Sig.</span>
 								<ChevronRight className="w-4 h-4" />
 							</Button>
 						) : (
 							<Button
 								type="submit"
 								disabled={mutation.isPending || currentStep !== STEPS.length}
-								className="flex items-center gap-2"
+								className="flex items-center gap-1 sm:gap-2 text-sm sm:text-base px-3 sm:px-4"
 							>
 								{mutation.isPending ? "Creando..." : "Crear Tienda"}
 								<CheckCircle className="w-4 h-4" />
