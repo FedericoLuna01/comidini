@@ -109,12 +109,27 @@ export const createProductCategorySchema = insertProductCategorySchema.omit({
 	shopId: true,
 });
 
+export const updateProductCategorySchema = insertProductCategorySchema
+	.omit({ shopId: true })
+	.partial();
+
+export const reorderItemsSchema = z.array(
+	z.object({
+		id: z.number(),
+		sortOrder: z.number().min(0),
+	}),
+);
+
 export type InsertProductCategorySchema = z.infer<
 	typeof insertProductCategorySchema
 >;
 export type CreateProductCategorySchema = z.infer<
 	typeof createProductCategorySchema
 >;
+export type UpdateProductCategorySchema = z.infer<
+	typeof updateProductCategorySchema
+>;
+export type ReorderItemsSchema = z.infer<typeof reorderItemsSchema>;
 
 const SelectProductCategory = createSelectSchema(productCategory);
 

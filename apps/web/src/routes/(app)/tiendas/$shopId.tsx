@@ -68,8 +68,19 @@ function RouteComponent() {
 
 	console.log(products);
 
-	const categories = products?.map((product) => product.product_category.name);
-	const uniqueCategories = Array.from(new Set(categories));
+	// Get unique categories sorted by sortOrder
+	const categoriesMap = new Map<string, { name: string; sortOrder: number }>();
+	products?.forEach((p) => {
+		if (p.product_category && !categoriesMap.has(p.product_category.name)) {
+			categoriesMap.set(p.product_category.name, {
+				name: p.product_category.name,
+				sortOrder: p.product_category.sortOrder ?? 0,
+			});
+		}
+	});
+	const uniqueCategories = Array.from(categoriesMap.values())
+		.sort((a, b) => a.sortOrder - b.sortOrder)
+		.map((c) => c.name);
 
 	const handleAddToCart = (product: {
 		id: number;
@@ -315,9 +326,12 @@ function RouteComponent() {
 					{/* Grid de productos por categoría */}
 					<div className="p-6">
 						{uniqueCategories?.map((category) => {
-							const categoryProducts = products?.filter(
-								(p) => p.product_category.name === category,
-							);
+							const categoryProducts = products
+								?.filter((p) => p.product_category?.name === category)
+								.sort(
+									(a, b) =>
+										(a.product.sortOrder ?? 0) - (b.product.sortOrder ?? 0),
+								);
 							return (
 								<div
 									key={category}

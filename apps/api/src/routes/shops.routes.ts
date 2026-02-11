@@ -1,7 +1,13 @@
 import {
 	createProductCategory,
+	deleteProductCategory,
 	getProductCategoriesByShopId,
+	getProductCategoryById,
+	getProductCountByCategory,
+	reorderProductCategories,
+	updateProductCategory,
 } from "@repo/db/src/services/category";
+import { reorderProducts } from "@repo/db/src/services/products";
 import {
 	createManyShopHours,
 	createShop,
@@ -13,7 +19,11 @@ import {
 	updateShop,
 	updateShopHours,
 } from "@repo/db/src/services/shops";
-import { createProductCategorySchema } from "@repo/db/src/types/product";
+import {
+	createProductCategorySchema,
+	reorderItemsSchema,
+	updateProductCategorySchema,
+} from "@repo/db/src/types/product";
 import {
 	type CreateShopHours,
 	createShopHoursSchema,
@@ -360,6 +370,189 @@ router.post(
 			});
 		} catch (error) {
 			console.error("Error creating category:", error);
+			res.status(500).json({ error: "Error interno del servidor" });
+		}
+	},
+);
+
+// Update a category
+router.patch(
+	"/:shopId/category/:categoryId",
+	requireShopUser,
+	requireShop,
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			if (!req.shop) {
+				res.status(404).json({ error: "Tienda no encontrada" });
+				return;
+			}
+
+			const categoryId = Number(req.params.categoryId);
+
+			if (Number.isNaN(categoryId)) {
+				res.status(400).json({ error: "ID de categoría inválido" });
+				return;
+			}
+
+			// Verify the category belongs to this shop
+			const existingCategory = await getProductCategoryById(categoryId);
+
+			if (!existingCategory) {
+				res.status(404).json({ error: "Categoría no encontrada" });
+				return;
+			}
+
+			if (existingCategory.shopId !== req.shop.id) {
+				res.status(403).json({ error: "No autorizado" });
+				return;
+			}
+
+			const validatedFields = updateProductCategorySchema.safeParse(req.body);
+
+			if (!validatedFields.success) {
+				res.status(400).json({
+					error: "Datos de categoría inválidos",
+					details: validatedFields.error,
+				});
+				return;
+			}
+
+			const updatedCategory = await updateProductCategory(
+				categoryId,
+				validatedFields.data,
+			);
+
+			res.json({
+				message: "Categoría actualizada exitosamente",
+				category: updatedCategory,
+			});
+		} catch (error) {
+			console.error("Error updating category:", error);
+			res.status(500).json({ error: "Error interno del servidor" });
+		}
+	},
+);
+
+// Delete a category
+router.delete(
+	"/:shopId/category/:categoryId",
+	requireShopUser,
+	requireShop,
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			if (!req.shop) {
+				res.status(404).json({ error: "Tienda no encontrada" });
+				return;
+			}
+
+			const categoryId = Number(req.params.categoryId);
+
+			if (Number.isNaN(categoryId)) {
+				res.status(400).json({ error: "ID de categoría inválido" });
+				return;
+			}
+
+			// Verify the category belongs to this shop
+			const existingCategory = await getProductCategoryById(categoryId);
+
+			if (!existingCategory) {
+				res.status(404).json({ error: "Categoría no encontrada" });
+				return;
+			}
+
+			if (existingCategory.shopId !== req.shop.id) {
+				res.status(403).json({ error: "No autorizado" });
+				return;
+			}
+
+			// Get product count
+			const productCount = await getProductCountByCategory(categoryId);
+
+			const deletedCategory = await deleteProductCategory(categoryId);
+
+			res.json({
+				message: "Categoría eliminada exitosamente",
+				category: deletedCategory,
+				productsAffected: productCount,
+			});
+		} catch (error) {
+			console.error("Error deleting category:", error);
+			res.status(500).json({ error: "Error interno del servidor" });
+		}
+	},
+);
+
+// Reorder categories
+router.patch(
+	"/:shopId/categories/reorder",
+	requireShopUser,
+	requireShop,
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			if (!req.shop) {
+				res.status(404).json({ error: "Tienda no encontrada" });
+				return;
+			}
+
+			const validatedFields = reorderItemsSchema.safeParse(req.body);
+
+			if (!validatedFields.success) {
+				res.status(400).json({
+					error: "Datos de ordenamiento inválidos",
+					details: validatedFields.error,
+				});
+				return;
+			}
+
+			const reorderedCategories = await reorderProductCategories(
+				req.shop.id,
+				validatedFields.data,
+			);
+
+			res.json({
+				message: "Categorías reordenadas exitosamente",
+				categories: reorderedCategories,
+			});
+		} catch (error) {
+			console.error("Error reordering categories:", error);
+			res.status(500).json({ error: "Error interno del servidor" });
+		}
+	},
+);
+
+// Reorder products
+router.patch(
+	"/:shopId/products/reorder",
+	requireShopUser,
+	requireShop,
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			if (!req.shop) {
+				res.status(404).json({ error: "Tienda no encontrada" });
+				return;
+			}
+
+			const validatedFields = reorderItemsSchema.safeParse(req.body);
+
+			if (!validatedFields.success) {
+				res.status(400).json({
+					error: "Datos de ordenamiento inválidos",
+					details: validatedFields.error,
+				});
+				return;
+			}
+
+			const reorderedProducts = await reorderProducts(
+				req.shop.id,
+				validatedFields.data,
+			);
+
+			res.json({
+				message: "Productos reordenados exitosamente",
+				products: reorderedProducts,
+			});
+		} catch (error) {
+			console.error("Error reordering products:", error);
 			res.status(500).json({ error: "Error interno del servidor" });
 		}
 	},

@@ -16,6 +16,7 @@ import { Route as PrimerosPasosIndexRouteImport } from './routes/primeros-pasos/
 import { Route as DashboardLayoutDashboardIndexRouteImport } from './routes/_dashboard-layout/dashboard/index'
 import { Route as DashboardLayoutDashboardProductosIndexRouteImport } from './routes/_dashboard-layout/dashboard/productos/index'
 import { Route as DashboardLayoutDashboardPedidosIndexRouteImport } from './routes/_dashboard-layout/dashboard/pedidos/index'
+import { Route as DashboardLayoutDashboardOrganizarMenuIndexRouteImport } from './routes/_dashboard-layout/dashboard/organizar-menu/index'
 import { Route as DashboardLayoutDashboardHorariosIndexRouteImport } from './routes/_dashboard-layout/dashboard/horarios/index'
 import { Route as DashboardLayoutDashboardConfiguracionIndexRouteImport } from './routes/_dashboard-layout/dashboard/configuracion/index'
 import { Route as DashboardLayoutDashboardProductosNuevoProductoRouteImport } from './routes/_dashboard-layout/dashboard/productos/nuevo-producto'
@@ -59,6 +60,12 @@ const DashboardLayoutDashboardPedidosIndexRoute =
     path: '/dashboard/pedidos/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutDashboardOrganizarMenuIndexRoute =
+  DashboardLayoutDashboardOrganizarMenuIndexRouteImport.update({
+    id: '/dashboard/organizar-menu/',
+    path: '/dashboard/organizar-menu/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 const DashboardLayoutDashboardHorariosIndexRoute =
   DashboardLayoutDashboardHorariosIndexRouteImport.update({
     id: '/dashboard/horarios/',
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/productos/nuevo-producto': typeof DashboardLayoutDashboardProductosNuevoProductoRoute
   '/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionIndexRoute
   '/dashboard/horarios': typeof DashboardLayoutDashboardHorariosIndexRoute
+  '/dashboard/organizar-menu': typeof DashboardLayoutDashboardOrganizarMenuIndexRoute
   '/dashboard/pedidos': typeof DashboardLayoutDashboardPedidosIndexRoute
   '/dashboard/productos': typeof DashboardLayoutDashboardProductosIndexRoute
   '/dashboard/productos/editar-producto/$productId': typeof DashboardLayoutDashboardProductosEditarProductoProductIdRoute
@@ -112,6 +120,7 @@ export interface FileRoutesByTo {
   '/dashboard/productos/nuevo-producto': typeof DashboardLayoutDashboardProductosNuevoProductoRoute
   '/dashboard/configuracion': typeof DashboardLayoutDashboardConfiguracionIndexRoute
   '/dashboard/horarios': typeof DashboardLayoutDashboardHorariosIndexRoute
+  '/dashboard/organizar-menu': typeof DashboardLayoutDashboardOrganizarMenuIndexRoute
   '/dashboard/pedidos': typeof DashboardLayoutDashboardPedidosIndexRoute
   '/dashboard/productos': typeof DashboardLayoutDashboardProductosIndexRoute
   '/dashboard/productos/editar-producto/$productId': typeof DashboardLayoutDashboardProductosEditarProductoProductIdRoute
@@ -127,6 +136,7 @@ export interface FileRoutesById {
   '/_dashboard-layout/dashboard/productos/nuevo-producto': typeof DashboardLayoutDashboardProductosNuevoProductoRoute
   '/_dashboard-layout/dashboard/configuracion/': typeof DashboardLayoutDashboardConfiguracionIndexRoute
   '/_dashboard-layout/dashboard/horarios/': typeof DashboardLayoutDashboardHorariosIndexRoute
+  '/_dashboard-layout/dashboard/organizar-menu/': typeof DashboardLayoutDashboardOrganizarMenuIndexRoute
   '/_dashboard-layout/dashboard/pedidos/': typeof DashboardLayoutDashboardPedidosIndexRoute
   '/_dashboard-layout/dashboard/productos/': typeof DashboardLayoutDashboardProductosIndexRoute
   '/_dashboard-layout/dashboard/productos/editar-producto/$productId': typeof DashboardLayoutDashboardProductosEditarProductoProductIdRoute
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/dashboard/productos/nuevo-producto'
     | '/dashboard/configuracion'
     | '/dashboard/horarios'
+    | '/dashboard/organizar-menu'
     | '/dashboard/pedidos'
     | '/dashboard/productos'
     | '/dashboard/productos/editar-producto/$productId'
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/dashboard/productos/nuevo-producto'
     | '/dashboard/configuracion'
     | '/dashboard/horarios'
+    | '/dashboard/organizar-menu'
     | '/dashboard/pedidos'
     | '/dashboard/productos'
     | '/dashboard/productos/editar-producto/$productId'
@@ -169,6 +181,7 @@ export interface FileRouteTypes {
     | '/_dashboard-layout/dashboard/productos/nuevo-producto'
     | '/_dashboard-layout/dashboard/configuracion/'
     | '/_dashboard-layout/dashboard/horarios/'
+    | '/_dashboard-layout/dashboard/organizar-menu/'
     | '/_dashboard-layout/dashboard/pedidos/'
     | '/_dashboard-layout/dashboard/productos/'
     | '/_dashboard-layout/dashboard/productos/editar-producto/$productId'
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutDashboardPedidosIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/_dashboard-layout/dashboard/organizar-menu/': {
+      id: '/_dashboard-layout/dashboard/organizar-menu/'
+      path: '/dashboard/organizar-menu'
+      fullPath: '/dashboard/organizar-menu'
+      preLoaderRoute: typeof DashboardLayoutDashboardOrganizarMenuIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
     '/_dashboard-layout/dashboard/horarios/': {
       id: '/_dashboard-layout/dashboard/horarios/'
       path: '/dashboard/horarios'
@@ -276,6 +296,7 @@ interface DashboardLayoutRouteChildren {
   DashboardLayoutDashboardProductosNuevoProductoRoute: typeof DashboardLayoutDashboardProductosNuevoProductoRoute
   DashboardLayoutDashboardConfiguracionIndexRoute: typeof DashboardLayoutDashboardConfiguracionIndexRoute
   DashboardLayoutDashboardHorariosIndexRoute: typeof DashboardLayoutDashboardHorariosIndexRoute
+  DashboardLayoutDashboardOrganizarMenuIndexRoute: typeof DashboardLayoutDashboardOrganizarMenuIndexRoute
   DashboardLayoutDashboardPedidosIndexRoute: typeof DashboardLayoutDashboardPedidosIndexRoute
   DashboardLayoutDashboardProductosIndexRoute: typeof DashboardLayoutDashboardProductosIndexRoute
   DashboardLayoutDashboardProductosEditarProductoProductIdRoute: typeof DashboardLayoutDashboardProductosEditarProductoProductIdRoute
@@ -291,6 +312,8 @@ const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
     DashboardLayoutDashboardConfiguracionIndexRoute,
   DashboardLayoutDashboardHorariosIndexRoute:
     DashboardLayoutDashboardHorariosIndexRoute,
+  DashboardLayoutDashboardOrganizarMenuIndexRoute:
+    DashboardLayoutDashboardOrganizarMenuIndexRoute,
   DashboardLayoutDashboardPedidosIndexRoute:
     DashboardLayoutDashboardPedidosIndexRoute,
   DashboardLayoutDashboardProductosIndexRoute:

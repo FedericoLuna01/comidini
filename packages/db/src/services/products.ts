@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, inArray } from "drizzle-orm";
 import { db } from "../config";
 import {
 	modifierGroup,
@@ -166,4 +166,36 @@ export const updateProduct = async (
 
 export const deleteProductById = async (productId: number) => {
 	await db.delete(product).where(eq(product.id, productId));
+};
+
+export const reorderProducts = async (
+	shopId: number,
+	productOrders: { id: number; sortOrder: number }[],
+) => {
+	const productIds = productOrders.map((p) => p.id);
+
+	// Verify all products belong to the shop
+	const products = await db
+		.select()
+		.from(product)
+		.where(inArray(product.id, productIds));
+
+	const validProductIds = products
+		.filter((p) => p.shopId === shopId)
+		.map((p) => p.id);
+
+	// Update each product's sortOrder
+	const updates = await Promise.all(
+		productOrders
+			.filter((p) => validProductIds.includes(p.id))
+			.map((p) =>
+				db
+					.update(product)
+					.set({ sortOrder: p.sortOrder, updatedAt: new Date() })
+					.where(eq(product.id, p.id))
+					.returning(),
+			),
+	);
+
+	return updates.flat();
 };
