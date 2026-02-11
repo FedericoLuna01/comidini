@@ -33,6 +33,7 @@ import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import {
 	ClockIcon,
+	GripVerticalIcon,
 	Home,
 	PackageOpenIcon,
 	Settings,
@@ -51,6 +52,11 @@ const shopItems = [
 		title: "Productos",
 		to: "/dashboard/productos",
 		icon: PackageOpenIcon,
+	},
+	{
+		title: "Organizar Menú",
+		to: "/dashboard/organizar-menu",
+		icon: GripVerticalIcon,
 	},
 	{
 		title: "Pedidos",

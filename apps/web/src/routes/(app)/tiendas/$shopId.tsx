@@ -93,6 +93,22 @@ function RouteComponent() {
 		return <div>Tienda no encontrada</div>;
 	}
 
+	console.log(products);
+
+	// Get unique categories sorted by sortOrder
+	const categoriesMap = new Map<string, { name: string; sortOrder: number }>();
+	products?.forEach((p) => {
+		if (p.product_category && !categoriesMap.has(p.product_category.name)) {
+			categoriesMap.set(p.product_category.name, {
+				name: p.product_category.name,
+				sortOrder: p.product_category.sortOrder ?? 0,
+			});
+		}
+	});
+	const uniqueCategories = Array.from(categoriesMap.values())
+		.sort((a, b) => a.sortOrder - b.sortOrder)
+		.map((c) => c.name);
+
 	const handleAddToCart = (product: {
 		id: number;
 		name: string;
@@ -355,30 +371,13 @@ function RouteComponent() {
 
 					{/* Grid de productos por categoría */}
 					<div className="p-6">
-						{debouncedSearch && filteredProducts?.length === 0 && (
-							<div className="text-center py-16">
-								<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-									<Search className="h-8 w-8 text-muted-foreground" />
-								</div>
-								<h3 className="text-lg font-semibold">
-									No se encontraron productos
-								</h3>
-								<p className="mt-2 text-muted-foreground">
-									No hay productos que coincidan con "{debouncedSearch}"
-								</p>
-								<Button
-									variant="outline"
-									className="mt-4"
-									onClick={() => setSearchQuery("")}
-								>
-									Limpiar búsqueda
-								</Button>
-							</div>
-						)}
-						{filteredCategories?.map((category) => {
-							const categoryProducts = filteredProducts?.filter(
-								(p) => p.product_category.name === category,
-							);
+						{uniqueCategories?.map((category) => {
+							const categoryProducts = products
+								?.filter((p) => p.product_category?.name === category)
+								.sort(
+									(a, b) =>
+										(a.product.sortOrder ?? 0) - (b.product.sortOrder ?? 0),
+								);
 							return (
 								<div
 									key={category}
