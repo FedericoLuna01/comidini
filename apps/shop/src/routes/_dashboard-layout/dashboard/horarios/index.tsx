@@ -233,31 +233,35 @@ function RouteComponent() {
 
 							return (
 								<div key={dayIndex} className="p-4 border rounded-lg space-y-3">
-									<div className="flex items-center gap-4">
-										<FormField
-											control={form.control}
-											name={`businessHours.${dayIndex}.isClosed`}
-											render={({ field }) => (
-												<FormItem className="flex flex-row items-center gap-2">
-													<FormControl>
-														<Switch
-															checked={!field.value}
-															onCheckedChange={(checked) =>
-																field.onChange(!checked)
-															}
-														/>
-													</FormControl>
-												</FormItem>
-											)}
-										/>
-										<p className="w-28 font-medium">{day}</p>
+									<div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+										<div className="flex items-center gap-3 sm:gap-4">
+											<FormField
+												control={form.control}
+												name={`businessHours.${dayIndex}.isClosed`}
+												render={({ field }) => (
+													<FormItem className="flex flex-row items-center gap-2">
+														<FormControl>
+															<Switch
+																checked={!field.value}
+																onCheckedChange={(checked) =>
+																	field.onChange(!checked)
+																}
+															/>
+														</FormControl>
+													</FormItem>
+												)}
+											/>
+											<p className="w-24 sm:w-28 font-medium text-sm sm:text-base">
+												{day}
+											</p>
+										</div>
 
 										{!isClosed && (
-											<div className="flex-1 space-y-2">
+											<div className="flex-1 space-y-2 pl-0 sm:pl-0">
 												{timeSlots.map((_, slotIndex) => (
 													<div
 														key={slotIndex}
-														className="flex items-center gap-2"
+														className="flex items-center gap-2 flex-wrap sm:flex-nowrap"
 													>
 														<FormField
 															control={form.control}
@@ -267,7 +271,7 @@ function RouteComponent() {
 																	<FormControl>
 																		<Input
 																			type="time"
-																			className="w-32"
+																			className="w-28 sm:w-32"
 																			{...field}
 																		/>
 																	</FormControl>
@@ -283,7 +287,7 @@ function RouteComponent() {
 																	<FormControl>
 																		<Input
 																			type="time"
-																			className="w-32"
+																			className="w-28 sm:w-32"
 																			{...field}
 																		/>
 																	</FormControl>

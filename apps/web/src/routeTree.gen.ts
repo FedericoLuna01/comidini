@@ -18,6 +18,7 @@ import { Route as authIniciarSesionRouteImport } from './routes/(auth)/iniciar-s
 import { Route as appRegistrarNegocioRouteImport } from './routes/(app)/registrar-negocio'
 import { Route as appTiendasIndexRouteImport } from './routes/(app)/tiendas/index'
 import { Route as appPerfilIndexRouteImport } from './routes/(app)/perfil/index'
+import { Route as appBuscarIndexRouteImport } from './routes/(app)/buscar/index'
 import { Route as appTiendasShopIdRouteImport } from './routes/(app)/tiendas/$shopId'
 import { Route as appPerfilEditarRouteImport } from './routes/(app)/perfil/editar'
 import { Route as appTiendasMapaIndexRouteImport } from './routes/(app)/tiendas/mapa/index'
@@ -67,6 +68,11 @@ const appPerfilIndexRoute = appPerfilIndexRouteImport.update({
   path: '/perfil/',
   getParentRoute: () => appRouteRoute,
 } as any)
+const appBuscarIndexRoute = appBuscarIndexRouteImport.update({
+  id: '/buscar/',
+  path: '/buscar/',
+  getParentRoute: () => appRouteRoute,
+} as any)
 const appTiendasShopIdRoute = appTiendasShopIdRouteImport.update({
   id: '/tiendas/$shopId',
   path: '/tiendas/$shopId',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/perfil/editar': typeof appPerfilEditarRoute
   '/tiendas/$shopId': typeof appTiendasShopIdRoute
+  '/buscar': typeof appBuscarIndexRoute
   '/perfil': typeof appPerfilIndexRoute
   '/tiendas': typeof appTiendasIndexRoute
   '/tiendas/mapa': typeof appTiendasMapaIndexRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/perfil/editar': typeof appPerfilEditarRoute
   '/tiendas/$shopId': typeof appTiendasShopIdRoute
+  '/buscar': typeof appBuscarIndexRoute
   '/perfil': typeof appPerfilIndexRoute
   '/tiendas': typeof appTiendasIndexRoute
   '/tiendas/mapa': typeof appTiendasMapaIndexRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/(landing-page)/': typeof landingPageIndexRoute
   '/(app)/perfil/editar': typeof appPerfilEditarRoute
   '/(app)/tiendas/$shopId': typeof appTiendasShopIdRoute
+  '/(app)/buscar/': typeof appBuscarIndexRoute
   '/(app)/perfil/': typeof appPerfilIndexRoute
   '/(app)/tiendas/': typeof appTiendasIndexRoute
   '/(app)/tiendas/mapa/': typeof appTiendasMapaIndexRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/restablecer-contrasena'
     | '/perfil/editar'
     | '/tiendas/$shopId'
+    | '/buscar'
     | '/perfil'
     | '/tiendas'
     | '/tiendas/mapa'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/restablecer-contrasena'
     | '/perfil/editar'
     | '/tiendas/$shopId'
+    | '/buscar'
     | '/perfil'
     | '/tiendas'
     | '/tiendas/mapa'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/(landing-page)/'
     | '/(app)/perfil/editar'
     | '/(app)/tiendas/$shopId'
+    | '/(app)/buscar/'
     | '/(app)/perfil/'
     | '/(app)/tiendas/'
     | '/(app)/tiendas/mapa/'
@@ -241,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appPerfilIndexRouteImport
       parentRoute: typeof appRouteRoute
     }
+    '/(app)/buscar/': {
+      id: '/(app)/buscar/'
+      path: '/buscar'
+      fullPath: '/buscar'
+      preLoaderRoute: typeof appBuscarIndexRouteImport
+      parentRoute: typeof appRouteRoute
+    }
     '/(app)/tiendas/$shopId': {
       id: '/(app)/tiendas/$shopId'
       path: '/tiendas/$shopId'
@@ -269,6 +288,7 @@ interface appRouteRouteChildren {
   appRegistrarNegocioRoute: typeof appRegistrarNegocioRoute
   appPerfilEditarRoute: typeof appPerfilEditarRoute
   appTiendasShopIdRoute: typeof appTiendasShopIdRoute
+  appBuscarIndexRoute: typeof appBuscarIndexRoute
   appPerfilIndexRoute: typeof appPerfilIndexRoute
   appTiendasIndexRoute: typeof appTiendasIndexRoute
   appTiendasMapaIndexRoute: typeof appTiendasMapaIndexRoute
@@ -278,6 +298,7 @@ const appRouteRouteChildren: appRouteRouteChildren = {
   appRegistrarNegocioRoute: appRegistrarNegocioRoute,
   appPerfilEditarRoute: appPerfilEditarRoute,
   appTiendasShopIdRoute: appTiendasShopIdRoute,
+  appBuscarIndexRoute: appBuscarIndexRoute,
   appPerfilIndexRoute: appPerfilIndexRoute,
   appTiendasIndexRoute: appTiendasIndexRoute,
   appTiendasMapaIndexRoute: appTiendasMapaIndexRoute,

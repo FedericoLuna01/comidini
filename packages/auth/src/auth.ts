@@ -69,9 +69,17 @@ export const auth = betterAuth({
 	secret: process.env.BETTER_AUTH_SECRET,
 	baseURL: process.env.BETTER_AUTH_URL,
 	trustedOrigins: [
-		process.env.ADMIN_BETTER_AUTH_URL,
-		process.env.WEB_BETTER_AUTH_URL,
-		process.env.SHOP_BETTER_AUTH_URL,
+		// Agregar URLs con y sin barra final para compatibilidad
+		...[
+			process.env.ADMIN_BETTER_AUTH_URL,
+			process.env.WEB_BETTER_AUTH_URL,
+			process.env.SHOP_BETTER_AUTH_URL,
+		].flatMap((url) => {
+			if (!url) return [];
+			// Normalizar: remover barra final si existe y agregar ambas versiones
+			const baseUrl = url.endsWith("/") ? url.slice(0, -1) : url;
+			return [baseUrl, `${baseUrl}/`];
+		}),
 	],
 	user: {
 		modelName: "user",

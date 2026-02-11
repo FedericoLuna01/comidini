@@ -30,6 +30,7 @@ import {
 	ImageUploadField,
 	type UploadedImageData,
 } from "../../../../../components/image-upload-field";
+import { TagSelector } from "../../../../../components/tag-selector";
 
 interface EditShopFormProps {
 	shop: SelectShop;
@@ -404,6 +405,32 @@ export const EditShopForm = ({ shop }: EditShopFormProps) => {
 							)}
 						/>
 					</div>
+				</div>
+
+				{/* Tags */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-medium">Tags de tu negocio</h3>
+					<p className="text-sm text-muted-foreground">
+						Selecciona las etiquetas que describan tu negocio para que los
+						clientes te encuentren más fácilmente
+					</p>
+
+					<FormField
+						control={form.control}
+						name="tags"
+						render={({ field }) => (
+							<FormItem>
+								<FormControl>
+									<TagSelector
+										value={field.value || []}
+										onChange={field.onChange}
+										disabled={mutation.isPending}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 				</div>
 
 				{/* Imágenes */}

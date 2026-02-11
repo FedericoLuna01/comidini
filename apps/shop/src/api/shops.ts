@@ -16,7 +16,14 @@ export async function createShop(data: CreateShop) {
 		body: JSON.stringify(data),
 	});
 
-	return response.json();
+	const result = await response.json();
+
+	if (!response.ok) {
+		console.error("Error creating shop:", result);
+		throw new Error(result.error || "Error al crear la tienda");
+	}
+
+	return result;
 }
 
 export async function updateShop(data: UpdateShop, shopId: number) {
@@ -57,6 +64,28 @@ export async function updateShopHours(hoursData: CreateShopHours[]) {
 
 	if (!response.ok) {
 		throw new Error("Failed to update shop hours");
+	}
+
+	return response.json();
+}
+
+export interface ShopStatus {
+	shop: {
+		id: number;
+		name: string;
+		// ... otros campos
+	} | null;
+	hasShop: boolean;
+}
+
+export async function getShopStatus(): Promise<ShopStatus> {
+	const response = await fetch(`${API_URL}/shops/status`, {
+		method: "GET",
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch shop status");
 	}
 
 	return response.json();

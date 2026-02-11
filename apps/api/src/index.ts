@@ -6,6 +6,7 @@ import express from "express";
 import cartRoutes from "./routes/cart.routes";
 import ordersRoutes from "./routes/orders.routes";
 import productsRoutes from "./routes/products.routes";
+import searchRoutes from "./routes/search.routes";
 import shopsRoutes from "./routes/shops.routes";
 import ticketsRoutes from "./routes/tickets.routes";
 import uploadRoutes from "./routes/upload.routes";
@@ -54,6 +55,7 @@ apiRouter.get("/", (req, res) => {
 apiRouter.use("/shops", shopsRoutes);
 apiRouter.use("/upload", uploadRoutes);
 apiRouter.use("/products", productsRoutes);
+apiRouter.use("/search", searchRoutes);
 apiRouter.use("/cart", cartRoutes);
 apiRouter.use("/orders", ordersRoutes);
 apiRouter.use("/tickets", ticketsRoutes);
