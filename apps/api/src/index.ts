@@ -4,6 +4,7 @@ import type { SelectShop } from "@repo/db/src/types/shop";
 import cors from "cors";
 import express from "express";
 import cartRoutes from "./routes/cart.routes";
+import mercadopagoRoutes from "./routes/mercadopago.routes";
 import ordersRoutes from "./routes/orders.routes";
 import productsRoutes from "./routes/products.routes";
 import searchRoutes from "./routes/search.routes";
@@ -48,7 +49,7 @@ apiRouter.use(express.json());
 // Mount the API router with the prefix /api
 app.use("/api", apiRouter);
 
-apiRouter.get("/", (req, res) => {
+apiRouter.get("/", (_, res) => {
 	res.send("Welcome to the API!");
 });
 
@@ -58,6 +59,7 @@ apiRouter.use("/products", productsRoutes);
 apiRouter.use("/search", searchRoutes);
 apiRouter.use("/cart", cartRoutes);
 apiRouter.use("/orders", ordersRoutes);
+apiRouter.use("/mercadopago", mercadopagoRoutes);
 apiRouter.use("/tickets", ticketsRoutes);
 
 app.listen(port, () => {

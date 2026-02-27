@@ -18,6 +18,7 @@ import {
 	orderItemAddon,
 	orderItemModifier,
 	orderStatusHistory,
+	shop,
 } from "../schema/shop-schema";
 import type { Order } from "../types/shop";
 
@@ -43,7 +44,7 @@ export const createOrderFromCart = async (params: {
 	customerEmail?: string;
 	customerPhone: string;
 	type: "delivery" | "pickup" | "dine_in";
-	paymentMethod: "cash" | "card" | "transfer";
+	paymentMethod: "cash" | "card" | "transfer" | "mercadopago";
 	deliveryAddress?: string;
 	deliveryInstructions?: string;
 	notes?: string;
@@ -177,7 +178,9 @@ export const createOrderFromCart = async (params: {
 
 		for (const modItem of modifiers) {
 			if (!modItem.option || !modItem.group) continue;
-			const modUnitPrice = Number.parseFloat(modItem.option.priceAdjustment);
+			const modUnitPrice = Number.parseFloat(
+				modItem.option.priceAdjustment ?? "0",
+			);
 			const modTotalPrice = modUnitPrice * modItem.cartItemModifier.quantity;
 			modifiersPrice += modTotalPrice;
 
@@ -215,7 +218,27 @@ export const createOrderFromCart = async (params: {
 		});
 	}
 
-	const total = subtotal; // Aquí se pueden agregar impuestos, delivery fee, etc.
+	// Obtener datos de la tienda para delivery fee y descuento en efectivo
+	const [shopData] = await db
+		.select({
+			deliveryFee: shop.deliveryFee,
+			cashDiscountPercentage: shop.cashDiscountPercentage,
+		})
+		.from(shop)
+		.where(eq(shop.id, shopId));
+
+	// Calcular delivery fee (solo si es delivery)
+	const deliveryFeeAmount =
+		type === "delivery" ? Number(shopData?.deliveryFee ?? 0) : 0;
+
+	// Calcular descuento por pago en efectivo
+	const cashDiscountPct =
+		paymentMethod === "cash"
+			? Number(shopData?.cashDiscountPercentage ?? 0)
+			: 0;
+	const discountAmount = subtotal * (cashDiscountPct / 100);
+
+	const total = subtotal + deliveryFeeAmount - discountAmount;
 
 	// Crear la orden
 	const [createdOrder] = await db
@@ -224,7 +247,7 @@ export const createOrderFromCart = async (params: {
 			shopId,
 			customerId,
 			orderNumber: generateOrderNumber(),
-			status: "pending",
+			status: "CREATED",
 			type,
 			customerName,
 			customerEmail,
@@ -232,6 +255,8 @@ export const createOrderFromCart = async (params: {
 			deliveryAddress,
 			deliveryInstructions,
 			subtotal: subtotal.toFixed(2),
+			deliveryFee: deliveryFeeAmount.toFixed(2),
+			discountAmount: discountAmount.toFixed(2),
 			total: total.toFixed(2),
 			paymentMethod,
 			paymentStatus: "pending",
@@ -296,7 +321,7 @@ export const createOrderFromCart = async (params: {
 	// Crear historial de estado inicial
 	await db.insert(orderStatusHistory).values({
 		orderId: createdOrder.id,
-		status: "pending",
+		status: "CREATED",
 		notes: "Orden creada",
 		createdBy: customerId,
 	});
@@ -395,8 +420,8 @@ export const updateOrderStatus = async (params: {
 		.set({
 			status,
 			updatedAt: new Date(),
-			...(status === "confirmed" && { confirmedAt: new Date() }),
-			...(status === "delivered" && { completedAt: new Date() }),
+			...(status === "PAID" && { confirmedAt: new Date() }),
+			...(status === "SCANNED" && { completedAt: new Date() }),
 		})
 		.where(eq(order.id, orderId))
 		.returning();
@@ -417,10 +442,17 @@ export const updateOrderStatus = async (params: {
  */
 export const getOrdersByCustomerId = async (customerId: string) => {
 	const orders = await db
-		.select()
+		.select({
+			order,
+			shopName: shop.name,
+		})
 		.from(order)
+		.leftJoin(shop, eq(order.shopId, shop.id))
 		.where(eq(order.customerId, customerId))
 		.orderBy(desc(order.createdAt));
 
-	return orders;
+	return orders.map((row) => ({
+		...row.order,
+		shopName: row.shopName,
+	}));
 };

@@ -49,6 +49,8 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	Clock,
+	CreditCard,
+	DollarSign,
 	Globe,
 	Mail,
 	MapPin,
@@ -127,6 +129,9 @@ const formSchema = createShopSchema
 			.string()
 			.min(1, { message: "Debes seleccionar una ubicación en el mapa" }),
 		businessHours: z.array(businessHoursSchema),
+		// Pagos
+		acceptsCash: z.boolean().optional(),
+		cashDiscountPercentage: z.string().optional(),
 	})
 	.refine(
 		(data) => {
@@ -276,6 +281,8 @@ function RouteComponent() {
 			logo: "",
 			banner: "",
 			tags: [],
+			acceptsCash: true,
+			cashDiscountPercentage: "0",
 			businessHours: DAYS_OF_WEEK.map((_, index) => ({
 				dayOfWeek: index,
 				isClosed: index === 0, // Domingo cerrado por defecto
@@ -371,6 +378,8 @@ function RouteComponent() {
 					"acceptsDelivery",
 					"acceptsPickup",
 					"acceptsReservations",
+					"acceptsCash",
+					"cashDiscountPercentage",
 				];
 			case 4:
 				return ["businessHours"];
@@ -402,6 +411,11 @@ function RouteComponent() {
 			...(data.logo && { logo: data.logo }),
 			...(data.banner && { banner: data.banner }),
 			...(data.tags && data.tags.length > 0 && { tags: data.tags }),
+			// Pagos
+			acceptsCash: data.acceptsCash,
+			...(data.cashDiscountPercentage && {
+				cashDiscountPercentage: data.cashDiscountPercentage,
+			}),
 			// Campos de delivery - asegurar que sean strings
 			...(data.deliveryRadius !== undefined && {
 				deliveryRadius: data.deliveryRadius,
@@ -880,6 +894,86 @@ function RouteComponent() {
 												</FormItem>
 											)}
 										/>
+									</div>
+
+									{/* Sección de Métodos de Pago */}
+									<div>
+										<h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">
+											Métodos de pago
+										</h3>
+										<div className="space-y-3 sm:space-y-4">
+											<FormField
+												control={form.control}
+												name="acceptsCash"
+												render={({ field }) => (
+													<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4 gap-3">
+														<div className="space-y-0.5 min-w-0 flex-1">
+															<FormLabel className="flex items-center gap-2 text-sm sm:text-base">
+																<DollarSign className="w-4 h-4 shrink-0" />
+																<span>Efectivo</span>
+															</FormLabel>
+															<FormDescription className="text-xs sm:text-sm">
+																Acepta pagos en efectivo al momento de la
+																entrega o retiro
+															</FormDescription>
+														</div>
+														<FormControl>
+															<Switch
+																checked={field.value}
+																onCheckedChange={field.onChange}
+															/>
+														</FormControl>
+													</FormItem>
+												)}
+											/>
+
+											{form.watch("acceptsCash") && (
+												<div className="ml-4 sm:ml-8">
+													<FormField
+														control={form.control}
+														name="cashDiscountPercentage"
+														render={({ field }) => (
+															<FormItem>
+																<FormLabel className="text-sm">
+																	Descuento por pago en efectivo (%)
+																</FormLabel>
+																<FormControl>
+																	<Input
+																		type="number"
+																		placeholder="0"
+																		min="0"
+																		max="100"
+																		step="0.5"
+																		{...field}
+																		onChange={(e) =>
+																			field.onChange(e.target.value || "0")
+																		}
+																	/>
+																</FormControl>
+																<FormDescription className="text-xs">
+																	Opcional. Ofrece un descuento a quienes paguen
+																	en efectivo.
+																</FormDescription>
+																<FormMessage />
+															</FormItem>
+														)}
+													/>
+												</div>
+											)}
+
+											<div className="rounded-lg border p-3 sm:p-4 bg-muted/50">
+												<div className="flex items-center gap-2 mb-2">
+													<CreditCard className="w-4 h-4 shrink-0" />
+													<span className="text-sm sm:text-base font-medium">
+														Mercado Pago
+													</span>
+												</div>
+												<p className="text-xs sm:text-sm text-muted-foreground">
+													Podrás vincular tu cuenta de Mercado Pago después de
+													crear tu tienda, desde la sección de configuración.
+												</p>
+											</div>
+										</div>
 									</div>
 
 									{form.watch("acceptsDelivery") && (

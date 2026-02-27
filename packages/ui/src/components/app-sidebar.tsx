@@ -39,12 +39,7 @@ export function AppSidebar({
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton size="lg" asChild>
-							<Link
-								to="/"
-								className="flex items-center justify-center w-full h-full text-lg font-bold text-sidebar-foreground hover:text-sidebar-foreground"
-							>
-								<Logo />
-							</Link>
+							<Logo />
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>

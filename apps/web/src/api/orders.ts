@@ -12,7 +12,7 @@ export interface CreateOrderData {
 	customerEmail?: string;
 	customerPhone: string;
 	type: "delivery" | "pickup" | "dine_in";
-	paymentMethod: "cash" | "card" | "transfer";
+	paymentMethod: "cash" | "card" | "transfer" | "mercadopago";
 	deliveryAddress?: string;
 	deliveryInstructions?: string;
 	notes?: string;
@@ -38,8 +38,9 @@ export interface Order {
 	paymentMethod: string;
 	paymentStatus: string;
 	notes: string | null;
-	createdAt: Date;
-	updatedAt: Date;
+	shopName: string | null;
+	createdAt: string;
+	updatedAt: string;
 }
 
 // ===== QUERY FUNCTIONS =====
@@ -105,3 +106,73 @@ export const createOrderMutationOptions = (): UseMutationOptions<
 	mutationKey: ["create-order"],
 	mutationFn: createOrder,
 });
+
+// ===== MERCADOPAGO PREFERENCE =====
+
+export interface MpPreferenceResponse {
+	preferenceId: string;
+	initPoint: string;
+	sandboxInitPoint: string;
+}
+
+/**
+ * Crea una preferencia de Mercado Pago para una orden existente
+ */
+const createMpPreference = async (
+	orderId: number,
+): Promise<MpPreferenceResponse> => {
+	const response = await fetch(`${API_URL}/mercadopago/preference`, {
+		method: "POST",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ orderId }),
+	});
+
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(
+			error.error || "Error al crear la preferencia de Mercado Pago",
+		);
+	}
+
+	return response.json();
+};
+
+export const createMpPreferenceMutationOptions = (): UseMutationOptions<
+	MpPreferenceResponse,
+	Error,
+	number
+> => ({
+	mutationKey: ["create-mp-preference"],
+	mutationFn: createMpPreference,
+});
+
+// ===== ORDER BY ID =====
+
+/**
+ * Obtiene una orden por ID con sus items
+ */
+const getOrderById = async (orderId: number) => {
+	const response = await fetch(`${API_URL}/orders/${orderId}`, {
+		method: "GET",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+
+	if (!response.ok) {
+		throw new Error("Error al obtener la orden");
+	}
+
+	return response.json();
+};
+
+export const orderByIdQueryOptions = (orderId: number) =>
+	queryOptions({
+		queryKey: ["order-by-id", orderId],
+		queryFn: () => getOrderById(orderId),
+		staleTime: 1000 * 30,
+	});

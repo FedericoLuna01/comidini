@@ -41,28 +41,22 @@ export const Route = createFileRoute(
 });
 
 const statusLabels: Record<Order["status"], string> = {
-	pending: "Pendiente",
-	confirmed: "Confirmado",
-	preparing: "En preparación",
-	ready: "Listo",
-	in_delivery: "En camino",
-	delivered: "Entregado",
-	cancelled: "Cancelado",
-	refunded: "Reembolsado",
+	CREATED: "Creado",
+	PENDING_PAYMENT: "Pago pendiente",
+	PAID: "Pagado",
+	SCANNED: "Entregado",
+	CANCELLED: "Cancelado",
 };
 
 const statusVariants: Record<
 	Order["status"],
 	"default" | "secondary" | "destructive" | "outline"
 > = {
-	pending: "outline",
-	confirmed: "secondary",
-	preparing: "secondary",
-	ready: "default",
-	in_delivery: "default",
-	delivered: "default",
-	cancelled: "destructive",
-	refunded: "destructive",
+	CREATED: "outline",
+	PENDING_PAYMENT: "secondary",
+	PAID: "default",
+	SCANNED: "default",
+	CANCELLED: "destructive",
 };
 
 const typeLabels: Record<Order["type"], string> = {
@@ -75,6 +69,7 @@ const paymentMethodLabels: Record<Order["paymentMethod"], string> = {
 	cash: "Efectivo",
 	card: "Tarjeta",
 	transfer: "Transferencia",
+	mercadopago: "MercadoPago",
 };
 
 function RouteComponent() {
@@ -111,63 +106,41 @@ function RouteComponent() {
 
 	const getNextActions = () => {
 		switch (order.status) {
-			case "pending":
+			case "CREATED":
 				return [
 					{
-						status: "confirmed" as const,
-						label: "Confirmar",
-						icon: <Check className="mr-2 h-4 w-4" />,
+						status: "PENDING_PAYMENT" as const,
+						label: "Pendiente de pago",
+						icon: <Package className="mr-2 h-4 w-4" />,
 						variant: "default" as const,
 					},
 					{
-						status: "cancelled" as const,
+						status: "CANCELLED" as const,
 						label: "Cancelar",
 						icon: <X className="mr-2 h-4 w-4" />,
 						variant: "destructive" as const,
 					},
 				];
-			case "confirmed":
+			case "PENDING_PAYMENT":
 				return [
 					{
-						status: "preparing" as const,
-						label: "En preparación",
-						icon: <ChefHat className="mr-2 h-4 w-4" />,
-						variant: "default" as const,
-					},
-				];
-			case "preparing":
-				return [
-					{
-						status: "ready" as const,
-						label: "Listo",
-						icon: <Package className="mr-2 h-4 w-4" />,
-						variant: "default" as const,
-					},
-				];
-			case "ready":
-				if (order.type === "delivery") {
-					return [
-						{
-							status: "in_delivery" as const,
-							label: "En camino",
-							icon: <Truck className="mr-2 h-4 w-4" />,
-							variant: "default" as const,
-						},
-					];
-				}
-				return [
-					{
-						status: "delivered" as const,
-						label: "Entregado",
+						status: "PAID" as const,
+						label: "Marcar como pagado",
 						icon: <Check className="mr-2 h-4 w-4" />,
 						variant: "default" as const,
 					},
+					{
+						status: "CANCELLED" as const,
+						label: "Cancelar",
+						icon: <X className="mr-2 h-4 w-4" />,
+						variant: "destructive" as const,
+					},
 				];
-			case "in_delivery":
+			case "PAID":
 				return [
 					{
-						status: "delivered" as const,
-						label: "Entregado",
+						status: "SCANNED" as const,
+						label: "QR escaneado",
 						icon: <Check className="mr-2 h-4 w-4" />,
 						variant: "default" as const,
 					},

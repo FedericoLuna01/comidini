@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { ActiveOrdersBanner } from "../../components/active-orders-banner";
 import { AppHeader } from "../../components/app-header";
 
 export const Route = createFileRoute("/(app)")({
@@ -10,6 +11,7 @@ function AppLayout() {
 		<>
 			<AppHeader />
 			<Outlet />
+			<ActiveOrdersBanner />
 		</>
 	);
 }

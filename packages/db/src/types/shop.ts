@@ -62,6 +62,11 @@ export const insertShopSchema = createInsertSchema(shop, {
 	acceptsPickup: z.boolean(),
 	acceptsReservations: z.boolean(),
 
+	// Pagos
+	acceptsCash: z.boolean().optional(),
+	cashDiscountPercentage: z.string().optional(),
+	mpEnabled: z.boolean().optional(),
+
 	logo: z.string().optional(),
 	banner: z.string().optional(),
 	tags: z.array(z.string()).optional(),
@@ -111,6 +116,12 @@ export const updateShopSchema = createUpdateSchema(shop, {
 	acceptsDelivery: z.boolean(),
 	acceptsPickup: z.boolean(),
 	acceptsReservations: z.boolean(),
+
+	// Pagos
+	acceptsCash: z.boolean().optional(),
+	cashDiscountPercentage: z.string().optional(),
+	mpEnabled: z.boolean().optional(),
+
 	logo: z.string().optional(),
 	banner: z.string().optional(),
 	tags: z.array(z.string()).optional(),
@@ -219,17 +230,8 @@ export const insertOrderSchema = createInsertSchema(order, {
 		.string()
 		.min(1, { message: "El número de orden es requerido" }),
 	status: z
-		.enum([
-			"pending",
-			"confirmed",
-			"preparing",
-			"ready",
-			"in_delivery",
-			"delivered",
-			"cancelled",
-			"refunded",
-		])
-		.default("pending"),
+		.enum(["CREATED", "PENDING_PAYMENT", "PAID", "SCANNED", "CANCELLED"])
+		.default("CREATED"),
 	type: z.enum(["delivery", "pickup", "dine_in"]).default("delivery"),
 	customerName: z
 		.string()
@@ -266,7 +268,13 @@ export const insertOrderSchema = createInsertSchema(order, {
 	total: z.number().min(0, { message: "El total no puede ser negativo" }),
 
 	// Información de pago
-	paymentMethod: z.enum(["cash", "card", "transfer", "digital_wallet"]),
+	paymentMethod: z.enum([
+		"cash",
+		"card",
+		"transfer",
+		"digital_wallet",
+		"mercadopago",
+	]),
 	paymentStatus: z
 		.enum(["pending", "paid", "failed", "refunded"])
 		.default("pending"),
@@ -331,14 +339,11 @@ export const insertOrderStatusHistorySchema = createInsertSchema(
 	orderStatusHistory,
 	{
 		status: z.enum([
-			"pending",
-			"confirmed",
-			"preparing",
-			"ready",
-			"in_delivery",
-			"delivered",
-			"cancelled",
-			"refunded",
+			"CREATED",
+			"PENDING_PAYMENT",
+			"PAID",
+			"SCANNED",
+			"CANCELLED",
 		]),
 		notes: z
 			.string()
@@ -427,7 +432,7 @@ export const createOrderSchema = z.object({
 		.min(1, { message: "Debe agregar al menos un producto" }),
 
 	// Información de pago
-	paymentMethod: z.enum(["cash", "card", "transfer"]),
+	paymentMethod: z.enum(["cash", "card", "transfer", "mercadopago"]),
 
 	// Cupón (opcional)
 	couponCode: z.string().optional(),
@@ -450,14 +455,11 @@ export const validateCouponSchema = z.object({
 // Esquema para actualizar el estado de una orden
 export const updateOrderStatusSchema = z.object({
 	status: z.enum([
-		"pending",
-		"confirmed",
-		"preparing",
-		"ready",
-		"in_delivery",
-		"delivered",
-		"cancelled",
-		"refunded",
+		"CREATED",
+		"PENDING_PAYMENT",
+		"PAID",
+		"SCANNED",
+		"CANCELLED",
 	]),
 	notes: z.string().max(1000).optional(),
 });
@@ -476,20 +478,11 @@ export const searchProductsSchema = z.object({
 export const filterOrdersSchema = z.object({
 	shopId: z.number().min(1),
 	status: z
-		.enum([
-			"pending",
-			"confirmed",
-			"preparing",
-			"ready",
-			"in_delivery",
-			"delivered",
-			"cancelled",
-			"refunded",
-		])
+		.enum(["CREATED", "PENDING_PAYMENT", "PAID", "SCANNED", "CANCELLED"])
 		.optional(),
 	type: z.enum(["delivery", "pickup", "dine_in"]).optional(),
 	paymentMethod: z
-		.enum(["cash", "card", "transfer", "digital_wallet"])
+		.enum(["cash", "card", "transfer", "digital_wallet", "mercadopago"])
 		.optional(),
 	paymentStatus: z.enum(["pending", "paid", "failed", "refunded"]).optional(),
 	customerId: z.string().optional(),

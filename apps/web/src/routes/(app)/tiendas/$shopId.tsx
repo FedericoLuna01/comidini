@@ -8,7 +8,7 @@ import {
 	APIProvider,
 	Map as GoogleMap,
 } from "@vis.gl/react-google-maps";
-import { ClockIcon, Search, ShoppingBagIcon, TruckIcon } from "lucide-react";
+import { ClockIcon, ShoppingBagIcon, TruckIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { allProductsByShopIdQueryOptions } from "../../../api/products";
 import {
@@ -285,7 +285,7 @@ function RouteComponent() {
 						</div>
 					</div>
 				</div>
-				<section className="container mx-auto py-8">
+				<section className="container mx-auto py-8 px-4 md:px-8">
 					<h2 className="text-2xl font-bold mb-4">Ubicación</h2>
 					<div className="w-full h-[400px] rounded-lg overflow-hidden border border-border shadow-sm">
 						<APIProvider
@@ -321,7 +321,7 @@ function RouteComponent() {
 						</APIProvider>
 					</div>
 				</section>
-				<div className="px-8 grid grid-cols-[300px_1fr_350px] gap-4 border-t border-border">
+				<div className="px-4 md:px-8 grid grid-cols-[300px_1fr_350px] gap-4 border-t border-border">
 					{/* Sidebar de categorías */}
 					<aside className="border-r border-l sticky top-[4.5rem] h-[100vh] overflow-y-auto">
 						{/* Search input for shop */}

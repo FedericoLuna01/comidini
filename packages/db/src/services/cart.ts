@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, or } from "drizzle-orm";
 import { db } from "../config";
 import {
 	cart,
@@ -22,6 +22,19 @@ import type {
 } from "../types/cart";
 
 /**
+ * Construye la condición WHERE para buscar carritos por userId y/o sessionId.
+ * Busca por ambos con OR cuando están disponibles para encontrar carritos
+ * creados como guest (sessionId) o como usuario autenticado (userId).
+ */
+const buildCartWhere = (userId?: string, sessionId?: string) => {
+	const conditions = [];
+	if (userId) conditions.push(eq(cart.userId, userId));
+	if (sessionId) conditions.push(eq(cart.sessionId, sessionId));
+	if (conditions.length === 0) return undefined;
+	return conditions.length > 1 ? or(...conditions) : conditions[0];
+};
+
+/**
  * Obtiene o crea un carrito para un usuario o sesión guest
  */
 export const getOrCreateCart = async (params: {
@@ -32,9 +45,9 @@ export const getOrCreateCart = async (params: {
 	const { userId, sessionId, shopId } = params;
 
 	// Buscar carrito existente
-	const where = userId
-		? and(eq(cart.userId, userId), eq(cart.shopId, shopId))
-		: and(eq(cart.sessionId, sessionId!), eq(cart.shopId, shopId));
+	const ownerWhere = buildCartWhere(userId, sessionId);
+	if (!ownerWhere) throw new Error("userId or sessionId required");
+	const where = and(ownerWhere, eq(cart.shopId, shopId));
 
 	const [existingCart] = await db.select().from(cart).where(where).limit(1);
 
@@ -64,9 +77,8 @@ export const getCartWithItems = async (params: {
 }) => {
 	const { userId, sessionId } = params;
 
-	const where = userId
-		? eq(cart.userId, userId)
-		: eq(cart.sessionId, sessionId!);
+	const where = buildCartWhere(userId, sessionId);
+	if (!where) return null;
 
 	const [userCart] = await db.select().from(cart).where(where).limit(1);
 
@@ -120,9 +132,8 @@ export const getAllCartsWithItems = async (params: {
 }) => {
 	const { userId, sessionId } = params;
 
-	const where = userId
-		? eq(cart.userId, userId)
-		: eq(cart.sessionId, sessionId!);
+	const where = buildCartWhere(userId, sessionId);
+	if (!where) return [];
 
 	// Obtener todos los carritos del usuario
 	const userCarts = await db.select().from(cart).where(where);
@@ -210,9 +221,8 @@ export const clearAllCarts = async (params: {
 }) => {
 	const { userId, sessionId } = params;
 
-	const where = userId
-		? eq(cart.userId, userId)
-		: eq(cart.sessionId, sessionId!);
+	const where = buildCartWhere(userId, sessionId);
+	if (!where) return 0;
 
 	// Obtener todos los carritos del usuario
 	const userCarts = await db.select().from(cart).where(where);
@@ -695,9 +705,8 @@ export const getCartWithItemsAndModifiers = async (params: {
 }) => {
 	const { userId, sessionId } = params;
 
-	const where = userId
-		? eq(cart.userId, userId)
-		: eq(cart.sessionId, sessionId!);
+	const where = buildCartWhere(userId, sessionId);
+	if (!where) return null;
 
 	const [userCart] = await db.select().from(cart).where(where).limit(1);
 

@@ -90,3 +90,47 @@ export async function getShopStatus(): Promise<ShopStatus> {
 
 	return response.json();
 }
+
+// ============================================================
+// Mercado Pago API Functions
+// ============================================================
+
+export async function getMercadoPagoAuthUrl(): Promise<{ authUrl: string }> {
+	const response = await fetch(`${API_URL}/mercadopago/oauth/authorize`, {
+		method: "GET",
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to get MP auth URL");
+	}
+
+	return response.json();
+}
+
+export async function getMercadoPagoStatus(): Promise<{
+	linked: boolean;
+	userId: string | null;
+}> {
+	const response = await fetch(`${API_URL}/mercadopago/status`, {
+		method: "GET",
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to get MP status");
+	}
+
+	return response.json();
+}
+
+export async function disconnectMercadoPago(): Promise<void> {
+	const response = await fetch(`${API_URL}/mercadopago/oauth/disconnect`, {
+		method: "POST",
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to disconnect MP");
+	}
+}
