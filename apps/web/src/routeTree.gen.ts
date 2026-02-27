@@ -21,6 +21,8 @@ import { Route as appPerfilIndexRouteImport } from './routes/(app)/perfil/index'
 import { Route as appBuscarIndexRouteImport } from './routes/(app)/buscar/index'
 import { Route as appTiendasShopIdRouteImport } from './routes/(app)/tiendas/$shopId'
 import { Route as appPerfilEditarRouteImport } from './routes/(app)/perfil/editar'
+import { Route as appPedidoOrderIdRouteImport } from './routes/(app)/pedido/$orderId'
+import { Route as appCheckoutShopIdRouteImport } from './routes/(app)/checkout/$shopId'
 import { Route as appTiendasMapaIndexRouteImport } from './routes/(app)/tiendas/mapa/index'
 
 const appRouteRoute = appRouteRouteImport.update({
@@ -83,6 +85,16 @@ const appPerfilEditarRoute = appPerfilEditarRouteImport.update({
   path: '/perfil/editar',
   getParentRoute: () => appRouteRoute,
 } as any)
+const appPedidoOrderIdRoute = appPedidoOrderIdRouteImport.update({
+  id: '/pedido/$orderId',
+  path: '/pedido/$orderId',
+  getParentRoute: () => appRouteRoute,
+} as any)
+const appCheckoutShopIdRoute = appCheckoutShopIdRouteImport.update({
+  id: '/checkout/$shopId',
+  path: '/checkout/$shopId',
+  getParentRoute: () => appRouteRoute,
+} as any)
 const appTiendasMapaIndexRoute = appTiendasMapaIndexRouteImport.update({
   id: '/tiendas/mapa/',
   path: '/tiendas/mapa/',
@@ -96,6 +108,8 @@ export interface FileRoutesByFullPath {
   '/olvide-contrasena': typeof authOlvideContrasenaRoute
   '/registrarse': typeof authRegistrarseRoute
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
+  '/checkout/$shopId': typeof appCheckoutShopIdRoute
+  '/pedido/$orderId': typeof appPedidoOrderIdRoute
   '/perfil/editar': typeof appPerfilEditarRoute
   '/tiendas/$shopId': typeof appTiendasShopIdRoute
   '/buscar': typeof appBuscarIndexRoute
@@ -110,6 +124,8 @@ export interface FileRoutesByTo {
   '/olvide-contrasena': typeof authOlvideContrasenaRoute
   '/registrarse': typeof authRegistrarseRoute
   '/restablecer-contrasena': typeof authRestablecerContrasenaRoute
+  '/checkout/$shopId': typeof appCheckoutShopIdRoute
+  '/pedido/$orderId': typeof appPedidoOrderIdRoute
   '/perfil/editar': typeof appPerfilEditarRoute
   '/tiendas/$shopId': typeof appTiendasShopIdRoute
   '/buscar': typeof appBuscarIndexRoute
@@ -126,6 +142,8 @@ export interface FileRoutesById {
   '/(auth)/registrarse': typeof authRegistrarseRoute
   '/(auth)/restablecer-contrasena': typeof authRestablecerContrasenaRoute
   '/(landing-page)/': typeof landingPageIndexRoute
+  '/(app)/checkout/$shopId': typeof appCheckoutShopIdRoute
+  '/(app)/pedido/$orderId': typeof appPedidoOrderIdRoute
   '/(app)/perfil/editar': typeof appPerfilEditarRoute
   '/(app)/tiendas/$shopId': typeof appTiendasShopIdRoute
   '/(app)/buscar/': typeof appBuscarIndexRoute
@@ -142,6 +160,8 @@ export interface FileRouteTypes {
     | '/olvide-contrasena'
     | '/registrarse'
     | '/restablecer-contrasena'
+    | '/checkout/$shopId'
+    | '/pedido/$orderId'
     | '/perfil/editar'
     | '/tiendas/$shopId'
     | '/buscar'
@@ -156,6 +176,8 @@ export interface FileRouteTypes {
     | '/olvide-contrasena'
     | '/registrarse'
     | '/restablecer-contrasena'
+    | '/checkout/$shopId'
+    | '/pedido/$orderId'
     | '/perfil/editar'
     | '/tiendas/$shopId'
     | '/buscar'
@@ -171,6 +193,8 @@ export interface FileRouteTypes {
     | '/(auth)/registrarse'
     | '/(auth)/restablecer-contrasena'
     | '/(landing-page)/'
+    | '/(app)/checkout/$shopId'
+    | '/(app)/pedido/$orderId'
     | '/(app)/perfil/editar'
     | '/(app)/tiendas/$shopId'
     | '/(app)/buscar/'
@@ -274,6 +298,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appPerfilEditarRouteImport
       parentRoute: typeof appRouteRoute
     }
+    '/(app)/pedido/$orderId': {
+      id: '/(app)/pedido/$orderId'
+      path: '/pedido/$orderId'
+      fullPath: '/pedido/$orderId'
+      preLoaderRoute: typeof appPedidoOrderIdRouteImport
+      parentRoute: typeof appRouteRoute
+    }
+    '/(app)/checkout/$shopId': {
+      id: '/(app)/checkout/$shopId'
+      path: '/checkout/$shopId'
+      fullPath: '/checkout/$shopId'
+      preLoaderRoute: typeof appCheckoutShopIdRouteImport
+      parentRoute: typeof appRouteRoute
+    }
     '/(app)/tiendas/mapa/': {
       id: '/(app)/tiendas/mapa/'
       path: '/tiendas/mapa'
@@ -286,6 +324,8 @@ declare module '@tanstack/react-router' {
 
 interface appRouteRouteChildren {
   appRegistrarNegocioRoute: typeof appRegistrarNegocioRoute
+  appCheckoutShopIdRoute: typeof appCheckoutShopIdRoute
+  appPedidoOrderIdRoute: typeof appPedidoOrderIdRoute
   appPerfilEditarRoute: typeof appPerfilEditarRoute
   appTiendasShopIdRoute: typeof appTiendasShopIdRoute
   appBuscarIndexRoute: typeof appBuscarIndexRoute
@@ -296,6 +336,8 @@ interface appRouteRouteChildren {
 
 const appRouteRouteChildren: appRouteRouteChildren = {
   appRegistrarNegocioRoute: appRegistrarNegocioRoute,
+  appCheckoutShopIdRoute: appCheckoutShopIdRoute,
+  appPedidoOrderIdRoute: appPedidoOrderIdRoute,
   appPerfilEditarRoute: appPerfilEditarRoute,
   appTiendasShopIdRoute: appTiendasShopIdRoute,
   appBuscarIndexRoute: appBuscarIndexRoute,

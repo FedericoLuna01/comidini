@@ -44,6 +44,18 @@ export const shop = pgTable("shop", {
 	acceptsPickup: boolean("accepts_pickup").$defaultFn(() => true),
 	acceptsReservations: boolean("accepts_reservations").$defaultFn(() => false),
 
+	// Configuración de pagos
+	acceptsCash: boolean("accepts_cash").$defaultFn(() => true),
+	cashDiscountPercentage: numeric("cash_discount_percentage", {
+		precision: 5,
+		scale: 2,
+	}).$defaultFn(() => "0"),
+	mpEnabled: boolean("mp_enabled").$defaultFn(() => false),
+	mpUserId: text("mp_user_id"),
+	mpAccessToken: text("mp_access_token"),
+	mpRefreshToken: text("mp_refresh_token"),
+	mpPublicKey: text("mp_public_key"),
+
 	// Metadatos
 	logo: text("logo"),
 	banner: text("banner"),
@@ -102,14 +114,11 @@ export const shopCategoryRelation = pgTable("shop_category_relation", {
 
 // Estados de orden
 export const orderStatusEnum = pgEnum("order_status", [
-	"pending", // Pendiente
-	"confirmed", // Confirmada
-	"preparing", // En preparación
-	"ready", // Lista
-	"in_delivery", // En entrega
-	"delivered", // Entregada
-	"cancelled", // Cancelada
-	"refunded", // Reembolsada
+	"CREATED", // Creada
+	"PENDING_PAYMENT", // Pendiente de pago
+	"PAID", // Pagada
+	"SCANNED", // QR escaneado
+	"CANCELLED", // Cancelada
 ]);
 
 // Métodos de pago
@@ -117,6 +126,7 @@ export const paymentMethodEnum = pgEnum("payment_method", [
 	"cash", // Efectivo
 	"card", // Tarjeta
 	"transfer", // Transferencia
+	"mercadopago", // Mercado Pago
 ]);
 
 // Tipos de orden
@@ -178,7 +188,7 @@ export const order = pgTable("order", {
 	orderNumber: text("order_number").notNull(), // Número único de orden
 	status: orderStatusEnum("status")
 		.notNull()
-		.$defaultFn(() => "pending"),
+		.$defaultFn(() => "CREATED"),
 	type: orderTypeEnum("type")
 		.notNull()
 		.$defaultFn(() => "delivery"),

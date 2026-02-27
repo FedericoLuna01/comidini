@@ -19,7 +19,7 @@ import {
 	Eye,
 	MoreHorizontal,
 	Package,
-	Truck,
+	QrCode,
 	X,
 } from "lucide-react";
 import type React from "react";
@@ -34,64 +34,39 @@ const nextStatusActions: Record<
 	Order["status"],
 	Array<{ status: Order["status"]; label: string; icon: React.ReactNode }>
 > = {
-	pending: [
+	CREATED: [
 		{
-			status: "confirmed",
-			label: "Confirmar",
-			icon: <Check className="mr-2 h-4 w-4" />,
-		},
-		{
-			status: "cancelled",
-			label: "Cancelar",
-			icon: <X className="mr-2 h-4 w-4" />,
-		},
-	],
-	confirmed: [
-		{
-			status: "preparing",
-			label: "En preparación",
-			icon: <ChefHat className="mr-2 h-4 w-4" />,
-		},
-		{
-			status: "cancelled",
-			label: "Cancelar",
-			icon: <X className="mr-2 h-4 w-4" />,
-		},
-	],
-	preparing: [
-		{
-			status: "ready",
-			label: "Listo",
+			status: "PENDING_PAYMENT",
+			label: "Pendiente de pago",
 			icon: <Package className="mr-2 h-4 w-4" />,
 		},
 		{
-			status: "cancelled",
+			status: "CANCELLED",
 			label: "Cancelar",
 			icon: <X className="mr-2 h-4 w-4" />,
 		},
 	],
-	ready: [
+	PENDING_PAYMENT: [
 		{
-			status: "in_delivery",
-			label: "En camino",
-			icon: <Truck className="mr-2 h-4 w-4" />,
-		},
-		{
-			status: "delivered",
-			label: "Entregado",
+			status: "PAID",
+			label: "Marcar como pagado",
 			icon: <Check className="mr-2 h-4 w-4" />,
 		},
-	],
-	in_delivery: [
 		{
-			status: "delivered",
-			label: "Entregado",
-			icon: <Check className="mr-2 h-4 w-4" />,
+			status: "CANCELLED",
+			label: "Cancelar",
+			icon: <X className="mr-2 h-4 w-4" />,
 		},
 	],
-	delivered: [],
-	cancelled: [],
-	refunded: [],
+	PAID: [
+		{
+			status: "SCANNED",
+			label: "QR escaneado",
+			icon: <QrCode className="mr-2 h-4 w-4" />,
+		},
+	],
+	SCANNED: [],
+	CANCELLED: [],
 };
 
 export const RowActionsDropdown: React.FC<RowActionsDropdownProps> = ({

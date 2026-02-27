@@ -6,37 +6,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@repo/ui/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@repo/ui/components/ui/dialog";
-import { Input } from "@repo/ui/components/ui/input";
-import { Label } from "@repo/ui/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@repo/ui/components/ui/select";
 import { Separator } from "@repo/ui/components/ui/separator";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
-import { useState } from "react";
 import {
 	cartByShopQueryOptions,
 	removeCartItemMutationOptions,
 	updateCartItemMutationOptions,
 } from "../api/cart";
-import {
-	type CreateOrderData,
-	createOrderMutationOptions,
-} from "../api/orders";
 
 interface ShopCartColumnProps {
 	shopId: number;
@@ -44,21 +23,10 @@ interface ShopCartColumnProps {
 
 export function ShopCartColumn({ shopId }: ShopCartColumnProps) {
 	const queryClient = useQueryClient();
+	const navigate = useNavigate();
 	const { data: cartData, isPending } = useQuery(
 		cartByShopQueryOptions(shopId),
 	);
-	const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-
-	// Form state
-	const [customerName, setCustomerName] = useState("");
-	const [customerPhone, setCustomerPhone] = useState("");
-	const [customerEmail, setCustomerEmail] = useState("");
-	const [orderType, setOrderType] = useState<"delivery" | "pickup">("pickup");
-	const [paymentMethod, setPaymentMethod] = useState<
-		"cash" | "card" | "transfer"
-	>("cash");
-	const [deliveryAddress, setDeliveryAddress] = useState("");
-	const [notes, setNotes] = useState("");
 
 	const updateMutation = useMutation({
 		...updateCartItemMutationOptions(),
@@ -83,26 +51,6 @@ export function ShopCartColumn({ shopId }: ShopCartColumnProps) {
 		},
 	});
 
-	const createOrderMutation = useMutation({
-		...createOrderMutationOptions(),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["cart-by-shop", shopId] });
-			queryClient.invalidateQueries({ queryKey: ["all-carts"] });
-			queryClient.invalidateQueries({ queryKey: ["cart"] });
-			toast.success("¡Pedido realizado con éxito!");
-			setIsCheckoutOpen(false);
-			// Reset form
-			setCustomerName("");
-			setCustomerPhone("");
-			setCustomerEmail("");
-			setDeliveryAddress("");
-			setNotes("");
-		},
-		onError: (error) => {
-			toast.error(error.message);
-		},
-	});
-
 	const handleQuantityChange = (
 		itemId: number,
 		currentQuantity: number,
@@ -119,32 +67,8 @@ export function ShopCartColumn({ shopId }: ShopCartColumnProps) {
 		}
 	};
 
-	const handleCheckout = () => {
-		if (!customerName.trim()) {
-			toast.error("El nombre es requerido");
-			return;
-		}
-		if (!customerPhone.trim()) {
-			toast.error("El teléfono es requerido");
-			return;
-		}
-		if (orderType === "delivery" && !deliveryAddress.trim()) {
-			toast.error("La dirección es requerida para delivery");
-			return;
-		}
-
-		const orderData: CreateOrderData = {
-			shopId,
-			customerName,
-			customerPhone,
-			customerEmail: customerEmail || undefined,
-			type: orderType,
-			paymentMethod,
-			deliveryAddress: orderType === "delivery" ? deliveryAddress : undefined,
-			notes: notes || undefined,
-		};
-
-		createOrderMutation.mutate(orderData);
+	const handleGoToCheckout = () => {
+		navigate({ to: "/checkout/$shopId", params: { shopId: String(shopId) } });
 	};
 
 	const calculateTotals = () => {
@@ -360,124 +284,9 @@ export function ShopCartColumn({ shopId }: ShopCartColumnProps) {
 
 			{hasItems && (
 				<CardFooter>
-					<Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-						<DialogTrigger asChild>
-							<Button className="w-full" size="lg">
-								Completar pedido
-							</Button>
-						</DialogTrigger>
-						<DialogContent className="sm:max-w-md">
-							<DialogHeader>
-								<DialogTitle>Completar pedido</DialogTitle>
-								<DialogDescription>
-									Ingresa tus datos para realizar el pedido
-								</DialogDescription>
-							</DialogHeader>
-							<div className="space-y-4 py-4">
-								<div className="space-y-2">
-									<Label htmlFor="customerName">Nombre *</Label>
-									<Input
-										id="customerName"
-										value={customerName}
-										onChange={(e) => setCustomerName(e.target.value)}
-										placeholder="Tu nombre"
-									/>
-								</div>
-								<div className="space-y-2">
-									<Label htmlFor="customerPhone">Teléfono *</Label>
-									<Input
-										id="customerPhone"
-										value={customerPhone}
-										onChange={(e) => setCustomerPhone(e.target.value)}
-										placeholder="Tu teléfono"
-									/>
-								</div>
-								<div className="space-y-2">
-									<Label htmlFor="customerEmail">Email (opcional)</Label>
-									<Input
-										id="customerEmail"
-										type="email"
-										value={customerEmail}
-										onChange={(e) => setCustomerEmail(e.target.value)}
-										placeholder="tu@email.com"
-									/>
-								</div>
-								<div className="space-y-2">
-									<Label>Tipo de pedido *</Label>
-									<Select
-										value={orderType}
-										onValueChange={(value) =>
-											setOrderType(value as "delivery" | "pickup")
-										}
-									>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="pickup">Retiro en local</SelectItem>
-											<SelectItem value="delivery">Delivery</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-								{orderType === "delivery" && (
-									<div className="space-y-2">
-										<Label htmlFor="deliveryAddress">Dirección *</Label>
-										<Input
-											id="deliveryAddress"
-											value={deliveryAddress}
-											onChange={(e) => setDeliveryAddress(e.target.value)}
-											placeholder="Tu dirección"
-										/>
-									</div>
-								)}
-								<div className="space-y-2">
-									<Label>Método de pago *</Label>
-									<Select
-										value={paymentMethod}
-										onValueChange={(value) =>
-											setPaymentMethod(value as "cash" | "card" | "transfer")
-										}
-									>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="cash">Efectivo</SelectItem>
-											<SelectItem value="card">Tarjeta</SelectItem>
-											<SelectItem value="transfer">Transferencia</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-								<div className="space-y-2">
-									<Label htmlFor="notes">Notas (opcional)</Label>
-									<Input
-										id="notes"
-										value={notes}
-										onChange={(e) => setNotes(e.target.value)}
-										placeholder="Instrucciones especiales"
-									/>
-								</div>
-
-								<Separator />
-
-								<div className="flex justify-between font-semibold">
-									<span>Total a pagar</span>
-									<span>${totals.total.toFixed(2)}</span>
-								</div>
-
-								<Button
-									className="w-full"
-									size="lg"
-									onClick={handleCheckout}
-									disabled={createOrderMutation.isPending}
-								>
-									{createOrderMutation.isPending
-										? "Procesando..."
-										: "Confirmar pedido"}
-								</Button>
-							</div>
-						</DialogContent>
-					</Dialog>
+					<Button className="w-full" size="lg" onClick={handleGoToCheckout}>
+						Completar pedido
+					</Button>
 				</CardFooter>
 			)}
 		</Card>

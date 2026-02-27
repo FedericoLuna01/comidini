@@ -61,7 +61,10 @@ export const createShop = async (shopData: InsertShop) => {
 	return createdShop;
 };
 
-export const updateShop = async (shopId: number, shopData: UpdateShop) => {
+export const updateShop = async (
+	shopId: number,
+	shopData: Partial<UpdateShop> & Record<string, unknown>,
+) => {
 	const [updatedShop] = await db
 		.update(shop)
 		.set({

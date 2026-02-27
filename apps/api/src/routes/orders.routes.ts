@@ -1,3 +1,5 @@
+import { auth } from "@repo/auth";
+import { fromNodeHeaders } from "@repo/auth/server";
 import { getAllCartsWithItems } from "@repo/db/src/services/cart";
 import {
 	createOrderFromCart,
@@ -8,6 +10,7 @@ import {
 } from "@repo/db/src/services/orders";
 import { updateOrderStatusSchema } from "@repo/db/src/types/shop";
 import { Router } from "express";
+import { requireAuth } from "../middlewares/requireAuth";
 
 const router: Router = Router();
 
@@ -29,6 +32,28 @@ router.get("/shop/:shopId", async (req, res) => {
 		res.status(200).json(orders);
 	} catch (error) {
 		console.error("Error al obtener órdenes:", error);
+		res.status(500).json({ error: "Error al obtener las órdenes" });
+	}
+});
+
+/**
+ * GET /api/orders/my-orders
+ * Obtiene las órdenes del usuario autenticado
+ */
+router.get("/my-orders", requireAuth, async (req, res) => {
+	try {
+		const userId = req.session?.user?.id;
+
+		if (!userId) {
+			res.status(401).json({ error: "No autenticado" });
+			return;
+		}
+
+		const orders = await getOrdersByCustomerId(userId);
+
+		res.status(200).json(orders);
+	} catch (error) {
+		console.error("Error al obtener órdenes del usuario:", error);
 		res.status(500).json({ error: "Error al obtener las órdenes" });
 	}
 });
@@ -88,7 +113,11 @@ router.get("/customer/:customerId", async (req, res) => {
  */
 router.post("/", async (req, res) => {
 	try {
-		const userId = req.session?.user?.id;
+		// Resolve session to get userId (session is not set without requireAuth middleware)
+		const session = await auth.api.getSession({
+			headers: fromNodeHeaders(req.headers),
+		});
+		const userId = session?.user?.id;
 		const sessionId = req.headers["x-session-id"] as string;
 
 		if (!userId && !sessionId) {

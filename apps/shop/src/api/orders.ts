@@ -10,15 +10,7 @@ export interface Order {
 	shopId: number;
 	customerId: string | null;
 	orderNumber: string;
-	status:
-		| "pending"
-		| "confirmed"
-		| "preparing"
-		| "ready"
-		| "in_delivery"
-		| "delivered"
-		| "cancelled"
-		| "refunded";
+	status: "CREATED" | "PENDING_PAYMENT" | "PAID" | "SCANNED" | "CANCELLED";
 	type: "delivery" | "pickup" | "dine_in";
 	customerName: string;
 	customerEmail: string | null;
@@ -30,7 +22,7 @@ export interface Order {
 	deliveryFee: string;
 	discountAmount: string;
 	total: string;
-	paymentMethod: "cash" | "card" | "transfer";
+	paymentMethod: "cash" | "card" | "transfer" | "mercadopago";
 	paymentStatus: string;
 	notes: string | null;
 	createdAt: string;

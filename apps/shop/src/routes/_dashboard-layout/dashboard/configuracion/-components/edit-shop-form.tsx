@@ -23,9 +23,21 @@ import { Input } from "@repo/ui/components/ui/input";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { Spinner } from "@repo/ui/components/ui/spinner";
 import { Textarea } from "@repo/ui/components/ui/textarea";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	CheckCircle,
+	CreditCard,
+	DollarSign,
+	ExternalLink,
+	Unlink,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
-import { updateShop } from "../../../../../api/shops";
+import {
+	disconnectMercadoPago,
+	getMercadoPagoAuthUrl,
+	getMercadoPagoStatus,
+	updateShop,
+} from "../../../../../api/shops";
 import {
 	ImageUploadField,
 	type UploadedImageData,
@@ -38,6 +50,11 @@ interface EditShopFormProps {
 
 export const EditShopForm = ({ shop }: EditShopFormProps) => {
 	const queryClient = useQueryClient();
+
+	const mpStatusQuery = useQuery({
+		queryKey: ["mercadopago-status"],
+		queryFn: getMercadoPagoStatus,
+	});
 
 	const form = useForm<UpdateShop>({
 		resolver: zodResolver(updateShopSchema),
@@ -56,6 +73,9 @@ export const EditShopForm = ({ shop }: EditShopFormProps) => {
 			acceptsDelivery: shop.acceptsDelivery ?? true,
 			acceptsPickup: shop.acceptsPickup ?? true,
 			acceptsReservations: shop.acceptsReservations ?? false,
+			acceptsCash: shop.acceptsCash ?? true,
+			cashDiscountPercentage: shop.cashDiscountPercentage ?? "0",
+			mpEnabled: shop.mpEnabled ?? false,
 			logo: shop.logo ?? undefined,
 			banner: shop.banner ?? undefined,
 			tags: shop.tags ?? [],
@@ -73,6 +93,28 @@ export const EditShopForm = ({ shop }: EditShopFormProps) => {
 		onError: (error) => {
 			toast.error("Error al actualizar la tienda");
 			console.error("Error updating shop:", error);
+		},
+	});
+
+	const mpLinkMutation = useMutation({
+		mutationFn: getMercadoPagoAuthUrl,
+		onSuccess: (data) => {
+			window.location.href = data.authUrl;
+		},
+		onError: () => {
+			toast.error("Error al vincular Mercado Pago");
+		},
+	});
+
+	const mpDisconnectMutation = useMutation({
+		mutationFn: disconnectMercadoPago,
+		onSuccess: () => {
+			toast.success("Mercado Pago desvinculado exitosamente");
+			queryClient.invalidateQueries({ queryKey: ["mercadopago-status"] });
+			queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+		},
+		onError: () => {
+			toast.error("Error al desvincular Mercado Pago");
 		},
 	});
 
@@ -431,6 +473,136 @@ export const EditShopForm = ({ shop }: EditShopFormProps) => {
 							</FormItem>
 						)}
 					/>
+				</div>
+
+				{/* Configuración de Pagos */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-medium">Configuración de pagos</h3>
+					<p className="text-sm text-muted-foreground">
+						Define cómo tus clientes pueden pagar sus pedidos
+					</p>
+
+					<div className="space-y-4">
+						{/* Efectivo */}
+						<FormField
+							control={form.control}
+							name="acceptsCash"
+							render={({ field }) => (
+								<FormItem className="flex items-start p-4 border rounded-md">
+									<FormControl>
+										<Checkbox
+											checked={field.value}
+											onCheckedChange={field.onChange}
+											disabled={mutation.isPending}
+										/>
+									</FormControl>
+									<div className="grid gap-2">
+										<FormLabel className="flex items-center gap-2">
+											<DollarSign className="w-4 h-4" />
+											Acepta efectivo
+										</FormLabel>
+										<FormDescription>
+											Permite que los clientes paguen en efectivo al momento de
+											la entrega o retiro.
+										</FormDescription>
+									</div>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						{form.watch("acceptsCash") && (
+							<div className="ml-8">
+								<FormField
+									control={form.control}
+									name="cashDiscountPercentage"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Descuento por pago en efectivo (%)</FormLabel>
+											<FormControl>
+												<Input
+													type="number"
+													placeholder="0"
+													min="0"
+													max="100"
+													step="0.5"
+													{...field}
+													onChange={(e) =>
+														field.onChange(e.target.value || "0")
+													}
+													disabled={mutation.isPending}
+												/>
+											</FormControl>
+											<FormDescription>
+												Opcional. Ofrece un descuento a quienes paguen en
+												efectivo.
+											</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+						)}
+
+						{/* Mercado Pago */}
+						<div className="p-4 border rounded-md space-y-3">
+							<div className="flex items-center gap-2">
+								<CreditCard className="w-4 h-4" />
+								<span className="font-medium">Mercado Pago</span>
+							</div>
+							<p className="text-sm text-muted-foreground">
+								Acepta pagos con tarjeta de débito, crédito y otros medios a
+								través de Mercado Pago.
+							</p>
+
+							{mpStatusQuery.isLoading ? (
+								<div className="flex items-center gap-2 text-sm text-muted-foreground">
+									<Spinner />
+									Verificando estado...
+								</div>
+							) : mpStatusQuery.data?.linked ? (
+								<div className="space-y-2">
+									<div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded">
+										<CheckCircle className="w-4 h-4" />
+										Cuenta vinculada
+										{mpStatusQuery.data.userId && (
+											<span className="text-muted-foreground">
+												(ID: {mpStatusQuery.data.userId})
+											</span>
+										)}
+									</div>
+									<Button
+										type="button"
+										variant="destructive"
+										size="sm"
+										onClick={() => mpDisconnectMutation.mutate()}
+										disabled={mpDisconnectMutation.isPending}
+									>
+										{mpDisconnectMutation.isPending ? (
+											<Spinner />
+										) : (
+											<Unlink className="w-4 h-4 mr-2" />
+										)}
+										Desvincular cuenta
+									</Button>
+								</div>
+							) : (
+								<Button
+									type="button"
+									variant="outline"
+									onClick={() => mpLinkMutation.mutate()}
+									disabled={mpLinkMutation.isPending}
+								>
+									{mpLinkMutation.isPending ? (
+										<Spinner />
+									) : (
+										<ExternalLink className="w-4 h-4 mr-2" />
+									)}
+									Vincular cuenta de Mercado Pago
+								</Button>
+							)}
+						</div>
+					</div>
 				</div>
 
 				{/* Imágenes */}

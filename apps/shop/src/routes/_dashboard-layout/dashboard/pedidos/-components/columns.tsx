@@ -4,28 +4,22 @@ import type { Order } from "../../../../../api/orders";
 import { RowActionsDropdown } from "./row-actions-dropdown";
 
 const statusLabels: Record<Order["status"], string> = {
-	pending: "Pendiente",
-	confirmed: "Confirmado",
-	preparing: "En preparación",
-	ready: "Listo",
-	in_delivery: "En camino",
-	delivered: "Entregado",
-	cancelled: "Cancelado",
-	refunded: "Reembolsado",
+	CREATED: "Creado",
+	PENDING_PAYMENT: "Pago pendiente",
+	PAID: "Pagado",
+	SCANNED: "Entregado",
+	CANCELLED: "Cancelado",
 };
 
 const statusVariants: Record<
 	Order["status"],
 	"default" | "secondary" | "destructive" | "outline"
 > = {
-	pending: "outline",
-	confirmed: "secondary",
-	preparing: "secondary",
-	ready: "default",
-	in_delivery: "default",
-	delivered: "default",
-	cancelled: "destructive",
-	refunded: "destructive",
+	CREATED: "outline",
+	PENDING_PAYMENT: "secondary",
+	PAID: "default",
+	SCANNED: "default",
+	CANCELLED: "destructive",
 };
 
 const typeLabels: Record<Order["type"], string> = {
@@ -38,6 +32,7 @@ const paymentMethodLabels: Record<Order["paymentMethod"], string> = {
 	cash: "Efectivo",
 	card: "Tarjeta",
 	transfer: "Transferencia",
+	mercadopago: "MercadoPago",
 };
 
 export const columns: ColumnDef<Order>[] = [

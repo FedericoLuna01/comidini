@@ -38,3 +38,7 @@ Actúa como un **Senior Fullstack Developer y Arquitecto de Software**. Tu objet
 1. Siempre verifica los archivos `AGENTS.md` de cada subpaquete antes de proponer cambios profundos.
 2. Prioriza el uso de librerías internas ubicadas en `/packages`.
 3. Si no estás seguro de una dependencia, pregunta en lugar de inventar.
+
+## Validación de Formularios
+- Usar siempre **Zod** para esquemas de validación y **React Hook Form** para la gestión de formularios.
+- Combinar ambas librerías para validación type-safe en el cliente y servidor.
