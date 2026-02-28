@@ -7,7 +7,8 @@ export type { UserWithRole } from "better-auth/plugins";
 
 export const authClient = createAuthClient({
 	/** The base URL of the server (optional if you're using the same domain) */
-	baseURL: "http://localhost:3001",
+	// baseURL: "http://localhost:3001",
+	baseURL: "https://api.antojados.app",
 	plugins: [
 		adminClient({
 			ac,
