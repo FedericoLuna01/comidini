@@ -19,7 +19,8 @@
 		"tipados",
 		"ultracite",
 		"unban",
-		"Urquiza"
+		"Urquiza",
+		"vaul"
 	],
 	"typescript.tsdk": "node_modules/typescript/lib",
 	"editor.defaultFormatter": "biomejs.biome",

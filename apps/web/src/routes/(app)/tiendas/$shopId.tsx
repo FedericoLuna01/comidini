@@ -78,11 +78,18 @@ function RouteComponent() {
 		);
 	}, [products, debouncedSearch]);
 
-	// Get categories that have filtered products
+	// Get categories that have filtered products, sorted by sortOrder
 	const filteredCategories = useMemo(() => {
 		if (!filteredProducts) return [];
-		const cats = filteredProducts.map((p) => p.product_category.name);
-		return Array.from(new Set(cats));
+		const catsMap = new Map<string, number>();
+		for (const p of filteredProducts) {
+			if (!catsMap.has(p.product_category.name)) {
+				catsMap.set(p.product_category.name, p.product_category.sortOrder ?? 0);
+			}
+		}
+		return Array.from(catsMap.entries())
+			.sort((a, b) => a[1] - b[1])
+			.map(([name]) => name);
 	}, [filteredProducts]);
 
 	if (isPending || productsPending) {
@@ -105,9 +112,6 @@ function RouteComponent() {
 			});
 		}
 	});
-	const uniqueCategories = Array.from(categoriesMap.values())
-		.sort((a, b) => a.sortOrder - b.sortOrder)
-		.map((c) => c.name);
 
 	const handleAddToCart = (product: {
 		id: number;
@@ -371,8 +375,8 @@ function RouteComponent() {
 
 					{/* Grid de productos por categoría */}
 					<div className="p-6">
-						{uniqueCategories?.map((category) => {
-							const categoryProducts = products
+						{filteredCategories?.map((category) => {
+							const categoryProducts = filteredProducts
 								?.filter((p) => p.product_category?.name === category)
 								.sort(
 									(a, b) =>

@@ -25,13 +25,29 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 // Middleware
+const allowedOrigins = [
+	"http://localhost:5173",
+	"http://localhost:5174",
+	"http://localhost:5175",
+	process.env.ADMIN_URL,
+	process.env.WEB_URL,
+	process.env.SHOP_URL,
+].filter(Boolean) as string[];
+
 app.use(
 	cors({
-		origin: [
-			"http://localhost:5173",
-			"http://localhost:5174",
-			"http://localhost:5175",
-		],
+		origin: (origin, callback) => {
+			// allow requests with no origin (like mobile apps or curl requests)
+			if (!origin) return callback(null, true);
+			if (
+				allowedOrigins.indexOf(origin) !== -1 ||
+				process.env.NODE_ENV !== "production"
+			) {
+				callback(null, true);
+			} else {
+				callback(new Error("Not allowed by CORS"));
+			}
+		},
 		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 		credentials: true,
 	}),
@@ -62,6 +78,6 @@ apiRouter.use("/orders", ordersRoutes);
 apiRouter.use("/mercadopago", mercadopagoRoutes);
 apiRouter.use("/tickets", ticketsRoutes);
 
-app.listen(port, () => {
-	console.log(`API server running at http://localhost:${port}`);
+app.listen(Number(port), "0.0.0.0", () => {
+	console.log(`API server running at http://0.0.0.0:${port}`);
 });

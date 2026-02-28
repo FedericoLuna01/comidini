@@ -1,0 +1,75 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: comidini-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-comidini}
+    ports:
+      - "5432:5432"
+    volumes:
+      - comidini-test-vol:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: comidini-api
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:password@db:5432/comidini}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
+      WEB_URL: ${WEB_BETTER_AUTH_URL:-http://localhost:8080}
+      ADMIN_URL: ${ADMIN_BETTER_AUTH_URL:-http://localhost:8081}
+      SHOP_URL: ${SHOP_BETTER_AUTH_URL:-http://localhost:8082}
+      WEB_BETTER_AUTH_URL: ${WEB_BETTER_AUTH_URL:-http://localhost:8080}
+      ADMIN_BETTER_AUTH_URL: ${ADMIN_BETTER_AUTH_URL:-http://localhost:8081}
+      SHOP_BETTER_AUTH_URL: ${SHOP_BETTER_AUTH_URL:-http://localhost:8082}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+    container_name: comidini-web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+    container_name: comidini-admin
+    ports:
+      - "8081:80"
+    depends_on:
+      - api
+
+  shop:
+    build:
+      context: .
+      dockerfile: apps/shop/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+    container_name: comidini-shop
+    ports:
+      - "8082:80"
+    depends_on:
+      - api
+
+volumes:
+  comidini-test-vol:

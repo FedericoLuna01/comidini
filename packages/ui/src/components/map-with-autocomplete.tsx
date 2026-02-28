@@ -124,7 +124,6 @@ const GoogleMapInternal = ({
 
 	useEffect(() => {
 		// Importar dinámicamente para evitar errores en SSR
-		// @ts-expect-error - @vis.gl/react-google-maps is a peer dependency
 		import("@vis.gl/react-google-maps")
 			.then((module) => {
 				setMapComponents({
@@ -147,12 +146,12 @@ const GoogleMapInternal = ({
 		);
 	}
 
-	const { APIProvider, Map, AdvancedMarker } = MapComponents;
+	const { APIProvider, Map: GoogleMaps, AdvancedMarker } = MapComponents;
 
 	return (
 		<APIProvider apiKey={apiKey} libraries={["places", "marker"]} language="es">
 			<div style={{ height: mapHeight, width: "100%" }}>
-				<Map
+				<GoogleMaps
 					className="w-full h-full rounded-lg"
 					mapId={mapId}
 					center={center}
@@ -173,7 +172,7 @@ const GoogleMapInternal = ({
 					}}
 				>
 					{markerPosition && <AdvancedMarker position={markerPosition} />}
-				</Map>
+				</GoogleMaps>
 			</div>
 		</APIProvider>
 	);

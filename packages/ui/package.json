@@ -53,7 +53,7 @@
     "@hookform/resolvers": "^5.1.1",
     "@tanstack/react-router": "^1.121.27",
     "@tanstack/react-table": "^8.21.3",
-    "@vis.gl/react-google-maps": "^1.5.4",
+    "@vis.gl/react-google-maps": "^1.7.1",
     "react-hook-form": "7.58.1"
   },
   "exports": {

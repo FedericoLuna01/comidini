@@ -19,7 +19,6 @@ import {
 } from "@repo/ui/components/ui/form";
 import { Input } from "@repo/ui/components/ui/input";
 import { toast } from "@repo/ui/components/ui/sonner";
-import { Link } from "@tanstack/react-router";
 import { AlertCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -101,7 +100,7 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
 				</CardDescription>
 				<CardAction>
 					<Button variant="link" asChild>
-						<Link to="/registrarse">Registrarse</Link>
+						<a href="/registrarse">Registrarse</a>
 					</Button>
 				</CardAction>
 			</CardHeader>
@@ -133,9 +132,9 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
 											asChild
 											className="p-0 h-auto text-xs"
 										>
-											<Link to="/olvide-contrasena">
+											<a href="/olvide-contrasena">
 												¿Olvidaste tu contraseña?
-											</Link>
+											</a>
 										</Button>
 									</div>
 									<FormControl>

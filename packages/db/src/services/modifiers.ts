@@ -126,6 +126,8 @@ export const updateModifierGroup = async (
 		// Update or create options
 		for (let i = 0; i < options.length; i++) {
 			const optionData = options[i];
+			if (!optionData) continue;
+			
 			const optionWithId = optionData as typeof optionData & { id?: number };
 
 			if (optionWithId.id && existingOptionIds.includes(optionWithId.id)) {

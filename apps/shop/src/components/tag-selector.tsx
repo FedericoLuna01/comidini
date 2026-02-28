@@ -17,7 +17,6 @@ import {
 	Globe,
 	Leaf,
 	Search,
-	ShoppingBag,
 	Store,
 	UtensilsCrossed,
 	X,
@@ -30,85 +29,155 @@ export const TAG_CATEGORIES = {
 		label: "Comidas",
 		icon: UtensilsCrossed,
 		tags: [
-			"parrilla",
-			"pizza",
-			"hamburguesa",
-			"empanadas",
-			"milanesas",
-			"pastas",
-			"sushi",
-			"tacos",
-			"burritos",
-			"shawarma",
-			"kebab",
-			"pollo",
-			"mariscos",
-			"pescado",
-			"asado",
-			"lomito",
-			"choripan",
-			"panchos",
-			"sandwiches",
-			"wraps",
-			"ensaladas",
-			"sopas",
-			"guisos",
-			"wok",
-			"ramen",
-			"poke",
-			"ceviche",
-			"tapas",
-			"picadas",
-			"medialunas",
-			"facturas",
-			"tostadas",
-			"tortillas",
-			"canelones",
-			"lasagna",
-			"ñoquis",
-			"ravioles",
-			"fideos",
-			"arroz",
-			"risotto",
-			"curry",
-			"falafel",
-			"hummus",
+			"Vegetariana",
+			"Vegana",
+			"Hamburguesa",
+			"Hamburguesa veggie",
+			"Hamburguesa vegana",
+			"Pizza",
+			"Panchos",
+			"Fideos",
+			"Torpedo",
+			"Carlitos",
+			"Ñoquis",
+			"Ravioles",
+			"Sorrentinos",
+			"Lasagna",
+			"Pasta rellena",
+			"Pasta vegana",
+			"Pasta sin gluten",
+			"Canelones",
+			"Papas fritas",
+			"Tortilla",
+			"Arroz frito",
+			"Papas rústicas",
+			"Nuggets veggie",
+			"Wraps",
+			"Tacos",
+			"Burritos",
+			"Baozi",
+			"Rollitos primavera",
+			"Anticuchos",
+			"Quesadillas",
+			"Wok",
+			"Salteado de verduras",
+			"Helados",
+			"Tortas",
+			"Té",
+			"Arroz jazmín",
+			"Fideos de arroz",
+			"Dumplings",
+			"Spring rolls",
+			"Curry asiático",
+			"Sushi",
+			"Sushi veggie",
+			"Ramen",
+			"Ceviche",
+			"Arroz chaufa",
+			"Lomo saltado",
+			"Empanadas bolivianas",
+			"Hummus",
+			"Kebab",
+			"Wok de verduras",
+			"Dumplings",
+			"Sandwiches",
+			"Empanadas",
+			"Milanesas",
+			"Choripanes",
+			"Asado",
+			"Parrillada",
+			"Pizza",
+			"Pizza vegana",
+			"Pizza sin gluten",
+			"Fugazzeta",
+			"Calzone",
+			"Focaccia",
+			"Pan casero",
+			"Pan sin TACC",
+			"Tartas",
+			"Quiche",
+			"Milanesas veggie",
+			"Milanesas veganas",
+			"Wok de verduras",
+			"Salteados",
+			"Curry",
+			"Guisos",
+			"Bowls",
+			"Buddha bowl",
+			"Platos calientes",
+			"Platos fríos",
+			"Ensaladas",
+			"Ensaladas gourmet",
+			"Ensaladas completas",
+			"Buñuelos",
+			"Shawarma",
+			"Falafel",
+			"Onigiri",
+			"Yakimeshi",
+			"Gyozas",
+			"Tempura",
+			"Rabas",
+			"Pescado",
+			"Comida de mar",
+			"Comida de río",
+			"Bowl veggie",
+			"Bowl vegano",
+			"Bowl proteico",
+			"Bowl saludable",
+			"Postres veganos",
+			"Tortas",
+			"Tortas veganas",
+			"Vegetariano",
+			"Vegano",
+			"Plant-based",
+			"Sin TACC",
+			"Apta celíacos",
+			"Sin gluten",
+			"Kosher",
+			"Orgánica",
+			"Saludable",
+			"Keto",
+			"Low carb",
+			"Sin lactosa",
+			"Apta diabéticos",
+			"Brownies",
+			"Cookies",
+			"Helado vegano",
+			"Dulces sin azúcar",
+			"Café",
+			"Café de especialidad",
+			"Submarino",
+			"Latte",
+			"Leches vegetales",
+			"Jugos naturales",
+			"Licuados",
+			"Smoothies",
+			"Bebidas detox",
+			"Té",
+			"Kombucha",
+			"Cerveza",
+			"Vino",
+			"Cerveza sin alcohol",
+			"Gaseosas",
 		],
 	},
 	tipoLocal: {
 		label: "Tipo de local",
 		icon: Store,
 		tags: [
-			"restaurante",
-			"cafeteria",
-			"bodegon",
-			"cerveceria",
-			"pizzeria",
-			"heladeria",
-			"panaderia",
-			"pasteleria",
-			"rotiseria",
-			"food truck",
-			"bar",
-			"pub",
-			"bistro",
-			"trattoria",
-			"cantina",
-			"taberna",
-			"confiteria",
-			"casa de comidas",
-			"comedor",
-			"buffet",
-			"autoservicio",
-			"delivery only",
-			"dark kitchen",
-			"cocina fantasma",
-			"kiosco",
-			"almacen",
-			"vinoteca",
-			"tea house",
-			"juice bar",
-			"smoothie bar",
+			"Restaurante",
+			"Bodegón",
+			"Cafetería",
+			"Tenedor Libre",
+			"Parrilla",
+			"Heladería",
+			"Bar",
+			"Cervecería",
+			"Hamburguesería",
+			"Pizzería",
+			"Panchería",
+			"Vegano",
+			"Vegetariano",
 		],
 	},
 	estiloComida: {
@@ -171,26 +240,6 @@ export const TAG_CATEGORIES = {
 			"frappe",
 		],
 	},
-	modalidad: {
-		label: "Modalidad",
-		icon: ShoppingBag,
-		tags: [
-			"take-away",
-			"comer en el local",
-			"delivery",
-			"retiro en local",
-			"reservas",
-			"eventos",
-			"catering",
-			"pedidos anticipados",
-			"mesa compartida",
-			"terraza",
-			"patio",
-			"salon privado",
-			"barra",
-			"mostrador",
-		],
-	},
 	especiales: {
 		label: "Especiales / Dietéticos",
 		icon: Leaf,
@@ -209,11 +258,7 @@ export const TAG_CATEGORIES = {
 			"apto diabeticos",
 			"apto celiacos",
 			"kosher",
-			"halal",
 			"plant based",
-			"raw food",
-			"macrobiotico",
-			"ayurveda",
 			"fit",
 			"saludable",
 			"light",
@@ -249,12 +294,14 @@ const TAG_COLORS: Record<
 	tipoLocal: { bg: "oklch(0.90 0.10 25)", text: "oklch(0.40 0.15 25)" }, // Naranja suave
 	estiloComida: { bg: "oklch(0.88 0.12 45)", text: "oklch(0.45 0.18 45)" }, // Amarillo cálido
 	bebidas: { bg: "oklch(0.88 0.08 80)", text: "oklch(0.40 0.12 80)" }, // Marrón café
-	modalidad: { bg: "oklch(0.90 0.08 150)", text: "oklch(0.40 0.12 150)" }, // Verde menta
 	especiales: { bg: "oklch(0.88 0.10 200)", text: "oklch(0.40 0.15 200)" }, // Azul cielo
 };
 
-export const getTagColor = (tag: string) => {
-	const category = findTagCategory(tag);
+export const getTagColor = (
+	tag: string,
+	categoryKey?: keyof typeof TAG_CATEGORIES,
+) => {
+	const category = categoryKey ?? findTagCategory(tag);
 	const color = TAG_COLORS[category];
 	return { backgroundColor: color.bg, color: color.text };
 };
@@ -282,7 +329,6 @@ export function TagSelector({
 			tipoLocal: [],
 			estiloComida: [],
 			bebidas: [],
-			modalidad: [],
 			especiales: [],
 		};
 
@@ -407,17 +453,22 @@ export function TagSelector({
 						Tags seleccionados ({value.length})
 					</p>
 					<div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
-						{value.map((tag) => (
-							<Badge
-								key={tag}
-								className="px-3 py-1.5 text-sm cursor-pointer transition-all hover:scale-105 hover:shadow-sm border-0 gap-1 capitalize"
-								style={getTagColor(tag)}
-								onClick={() => handleTagClick(tag)}
-							>
-								{tag}
-								<X className="w-3 h-3 ml-1" />
-							</Badge>
-						))}
+						{Object.entries(groupedSelectedTags).flatMap(([catKey, tags]) =>
+							tags.map((tag) => (
+								<Badge
+									key={`${catKey}-${tag}`}
+									className="px-3 py-1.5 text-sm cursor-pointer transition-all hover:scale-105 hover:shadow-sm border-0 gap-1 capitalize"
+									style={getTagColor(
+										tag,
+										catKey as keyof typeof TAG_CATEGORIES,
+									)}
+									onClick={() => handleTagClick(tag)}
+								>
+									{tag}
+									<X className="w-3 h-3 ml-1" />
+								</Badge>
+							)),
+						)}
 					</div>
 				</div>
 			)}
@@ -427,7 +478,7 @@ export function TagSelector({
 				<p className="text-sm font-medium text-muted-foreground">
 					Selecciona tags por categoría
 				</p>
-				<ScrollArea className="h-[320px] rounded-lg border">
+				<ScrollArea className="h-60 rounded-lg border">
 					<div className="p-2 space-y-1">
 						{Object.keys(filteredCategories).length === 0 ? (
 							<div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
@@ -480,7 +531,7 @@ export function TagSelector({
 												)}
 											</CollapsibleTrigger>
 											<CollapsibleContent className="pt-2 pb-2 px-2">
-												<div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1">
+												<div className="flex flex-wrap gap-1.5 overflow-y-auto p-1">
 													{category.tags.map((tag) => {
 														const selected = isTagSelected(tag);
 														return (
@@ -490,7 +541,10 @@ export function TagSelector({
 																	"px-2.5 py-1 text-xs cursor-pointer transition-all hover:scale-105 hover:shadow-sm border-0 gap-1 capitalize",
 																	selected ? "" : "opacity-50 hover:opacity-80",
 																)}
-																style={getTagColor(tag)}
+																style={getTagColor(
+																	tag,
+																	categoryKey as keyof typeof TAG_CATEGORIES,
+																)}
 																onClick={() => handleTagClick(tag)}
 															>
 																{selected && <Check className="w-3 h-3" />}
