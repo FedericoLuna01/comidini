@@ -38,6 +38,7 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL}
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY}
     container_name: comidini-web
     ports:
       - "7070:80"
@@ -62,6 +63,7 @@ services:
       dockerfile: apps/shop/Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL}
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY}
     container_name: comidini-shop
     ports:
       - "7072:80"

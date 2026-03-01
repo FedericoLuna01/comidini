@@ -598,6 +598,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.0.8
         version: 4.0.8
+      '@tanstack/react-query':
+        specifier: ^5.90.21
+        version: 5.90.21(react@19.1.0)
       '@turbo/gen':
         specifier: ^2.4.2
         version: 2.4.2(@types/node@20.17.19)(typescript@5.7.3)

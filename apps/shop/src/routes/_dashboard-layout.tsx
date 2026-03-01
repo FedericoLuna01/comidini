@@ -102,7 +102,7 @@ export const Route = createFileRoute("/_dashboard-layout")({
 						queryKey: ["dashboard"],
 						queryFn: async () => {
 							const response = await fetch(
-								"http://localhost:3001/api/shops/status",
+								`${import.meta.env.VITE_API_URL}/shops/status`,
 								{
 									credentials: "include",
 								},
