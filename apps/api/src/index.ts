@@ -22,7 +22,7 @@ declare global {
 }
 
 const app = express();
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3001;
 
 // Middleware
 const allowedOrigins = [

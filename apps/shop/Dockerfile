@@ -21,6 +21,8 @@ COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_GOOGLE_MAPS_API_KEY=${VITE_GOOGLE_MAPS_API_KEY}
 RUN pnpm turbo build --filter=${APP_NAME}...
 
 FROM nginx:alpine AS runner

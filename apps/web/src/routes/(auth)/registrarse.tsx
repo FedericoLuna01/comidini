@@ -1,6 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { GoogleIcon } from "@repo/ui/components/icons/index";
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+} from "@repo/ui/components/ui/alert";
 import { Button } from "@repo/ui/components/ui/button";
 import {
 	Card,
@@ -20,8 +25,9 @@ import {
 } from "@repo/ui/components/ui/form";
 import { Input } from "@repo/ui/components/ui/input";
 import { toast } from "@repo/ui/components/ui/sonner";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, EyeOff } from "lucide-react";
+import { AlertCircleIcon, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -40,11 +46,23 @@ const formSchema = z
 		}),
 		password: z
 			.string()
-			.min(6, {
-				message: "La contraseña debe tener al menos 6 caracteres",
+			.min(8, {
+				message: "La contraseña debe tener al menos 8 caracteres",
 			})
-			.max(100, {
-				message: "La contraseña no puede tener más de 100 caracteres",
+			.max(128, {
+				message: "La contraseña no puede tener más de 128 caracteres",
+			})
+			.regex(/[A-Z]/, {
+				message: "La contraseña debe contener al menos una letra mayúscula",
+			})
+			.regex(/[a-z]/, {
+				message: "La contraseña debe contener al menos una letra minúscula",
+			})
+			.regex(/[0-9]/, {
+				message: "La contraseña debe contener al menos un número",
+			})
+			.regex(/[^A-Za-z0-9]/, {
+				message: "La contraseña debe contener al menos un carácter especial",
 			}),
 		confirmPassword: z.string(),
 	})
@@ -53,9 +71,49 @@ const formSchema = z
 		path: ["confirmPassword"],
 	});
 
+const REGISTER_ERROR_MESSAGES: Record<
+	string,
+	{ title: string; description: string }
+> = {
+	USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: {
+		title: "Cuenta existente",
+		description: "Ya existe una cuenta con este correo electrónico.",
+	},
+	TOO_MANY_REQUESTS: {
+		title: "Demasiados intentos",
+		description:
+			"Has realizado demasiados intentos. Por favor, espera un momento antes de intentar de nuevo.",
+	},
+	FAILED_TO_CREATE_USER: {
+		title: "Error al crear cuenta",
+		description: "No se pudo crear la cuenta. Por favor, inténtalo de nuevo.",
+	},
+	PASSWORD_TOO_SHORT: {
+		title: "Contraseña muy corta",
+		description: "La contraseña debe tener al menos 7 caracteres.",
+	},
+	PASSWORD_TOO_LONG: {
+		title: "Contraseña muy larga",
+		description: "La contraseña no puede tener más de 100 caracteres.",
+	},
+	INVALID_EMAIL: {
+		title: "Email inválido",
+		description: "El correo electrónico ingresado no es válido.",
+	},
+};
+
+const DEFAULT_REGISTER_ERROR = {
+	title: "Error al registrarse",
+	description: "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
+};
+
 function RegisterPage() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [error, setError] = useState<{
+		title: string;
+		description: string;
+	} | null>(null);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -74,31 +132,38 @@ function RegisterPage() {
 		});
 	};
 
-	const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-		const { name, email, password } = values;
-		const { data, error } = await authClient.signUp.email({
-			email,
-			password,
-			name,
-			image: "",
-		});
-
-		if (error && error.code === "USER_ALREADY_EXISTS") {
-			form.setError("email", {
-				type: "manual",
-				message: "Ya existe una cuenta con este correo electrónico",
+	const registerMutation = useMutation({
+		mutationFn: async (values: z.infer<typeof formSchema>) => {
+			const { name, email, password } = values;
+			const { data, error: signUpError } = await authClient.signUp.email({
+				email,
+				password,
+				name,
+				image: "",
 			});
-			return;
-		}
 
-		if (error) {
-			toast.error("Error al registrarse. Por favor, inténtalo de nuevo.");
-			console.error("Registration error:", error);
-			return;
-		}
+			if (signUpError) {
+				const code = signUpError.code;
+				const mapped = code ? REGISTER_ERROR_MESSAGES[code] : undefined;
+				setError(mapped ?? DEFAULT_REGISTER_ERROR);
 
-		toast.success("Registro exitoso. Por favor, inicia sesión.");
-		console.log("Registration successful:", data);
+				if (code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+					form.setError("email", {
+						type: "manual",
+						message: "Ya existe una cuenta con este correo electrónico",
+					});
+				}
+				return;
+			}
+
+			toast.success("Registro exitoso. Por favor, inicia sesión.");
+			console.log("Registration successful:", data);
+		},
+	});
+
+	const handleSubmit = (values: z.infer<typeof formSchema>) => {
+		setError(null);
+		registerMutation.mutate(values);
 	};
 
 	return (
@@ -128,7 +193,11 @@ function RegisterPage() {
 									<FormItem>
 										<FormLabel>Nombre</FormLabel>
 										<FormControl>
-											<Input placeholder="Juan Perez" {...field} />
+											<Input
+												placeholder="Juan Perez"
+												disabled={registerMutation.isPending}
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -144,6 +213,7 @@ function RegisterPage() {
 											<Input
 												type="email"
 												placeholder="juan@gmail.com"
+												disabled={registerMutation.isPending}
 												{...field}
 											/>
 										</FormControl>
@@ -162,6 +232,7 @@ function RegisterPage() {
 												<Input
 													type={showPassword ? "text" : "password"}
 													placeholder="••••••••"
+													disabled={registerMutation.isPending}
 													{...field}
 												/>
 												<Button
@@ -170,6 +241,7 @@ function RegisterPage() {
 													size="sm"
 													className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
 													onClick={() => setShowPassword(!showPassword)}
+													disabled={registerMutation.isPending}
 												>
 													{showPassword ? (
 														<EyeOff className="h-4 w-4" />
@@ -194,6 +266,7 @@ function RegisterPage() {
 												<Input
 													type={showConfirmPassword ? "text" : "password"}
 													placeholder="••••••••"
+													disabled={registerMutation.isPending}
 													{...field}
 												/>
 												<Button
@@ -204,6 +277,7 @@ function RegisterPage() {
 													onClick={() =>
 														setShowConfirmPassword(!showConfirmPassword)
 													}
+													disabled={registerMutation.isPending}
 												>
 													{showConfirmPassword ? (
 														<EyeOff className="h-4 w-4" />
@@ -218,7 +292,23 @@ function RegisterPage() {
 								)}
 							/>
 							<div className="mt-6 flex flex-col gap-4">
-								<Button type="submit" className="w-full">
+								{error && (
+									<Alert variant="destructive">
+										<AlertCircleIcon />
+										<AlertTitle>{error.title}</AlertTitle>
+										<AlertDescription>
+											<p>{error.description}</p>
+										</AlertDescription>
+									</Alert>
+								)}
+								<Button
+									type="submit"
+									className="w-full"
+									disabled={registerMutation.isPending}
+								>
+									{registerMutation.isPending && (
+										<Loader2 className="h-4 w-4 animate-spin" />
+									)}
 									Registrarse
 								</Button>
 								<Button
@@ -226,6 +316,7 @@ function RegisterPage() {
 									variant="outline"
 									className="w-full"
 									onClick={handleLoginWithGoogle}
+									disabled={registerMutation.isPending}
 								>
 									<GoogleIcon />
 									Ingresar con Google

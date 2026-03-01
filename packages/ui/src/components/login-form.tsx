@@ -18,13 +18,56 @@ import {
 	FormMessage,
 } from "@repo/ui/components/ui/form";
 import { Input } from "@repo/ui/components/ui/input";
-import { toast } from "@repo/ui/components/ui/sonner";
-import { AlertCircleIcon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { AlertCircleIcon, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { GoogleIcon } from "./icons/index.js";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert.js";
+
+const LOGIN_ERROR_MESSAGES: Record<
+	string,
+	{ title: string; description: string }
+> = {
+	INVALID_EMAIL_OR_PASSWORD: {
+		title: "Credenciales incorrectas",
+		description: "El correo electrónico o la contraseña son incorrectos.",
+	},
+	BANNED_USER: {
+		title: "Cuenta suspendida",
+		description:
+			"Tu cuenta ha sido suspendida. Si crees que esto es un error, por favor contacta al soporte.",
+	},
+	EMAIL_NOT_VERIFIED: {
+		title: "Email no verificado",
+		description:
+			"Tu correo electrónico no ha sido verificado. Revisa tu bandeja de entrada.",
+	},
+	TOO_MANY_REQUESTS: {
+		title: "Demasiados intentos",
+		description:
+			"Has realizado demasiados intentos. Por favor, espera un momento antes de intentar de nuevo.",
+	},
+	CREDENTIAL_ACCOUNT_NOT_FOUND: {
+		title: "Cuenta no encontrada",
+		description:
+			"No se encontró una cuenta con credenciales. Intenta iniciar sesión con Google.",
+	},
+	SOCIAL_ACCOUNT_ALREADY_LINKED: {
+		title: "Cuenta ya vinculada",
+		description: "Esta cuenta social ya está vinculada a otro usuario.",
+	},
+	SESSION_EXPIRED: {
+		title: "Sesión expirada",
+		description: "Tu sesión ha expirado. Por favor, inicia sesión de nuevo.",
+	},
+};
+
+const DEFAULT_LOGIN_ERROR = {
+	title: "Error al iniciar sesión",
+	description: "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
+};
 
 const formSchema = z.object({
 	email: z.string().email({
@@ -32,16 +75,19 @@ const formSchema = z.object({
 	}),
 	password: z
 		.string()
-		.min(6, {
-			message: "La contraseña debe tener al menos 6 caracteres",
+		.min(8, {
+			message: "La contraseña debe tener al menos 8 caracteres",
 		})
-		.max(100, {
-			message: "La contraseña no puede tener más de 100 caracteres",
+		.max(128, {
+			message: "La contraseña no puede tener más de 128 caracteres",
 		}),
 });
 
 export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
-	const [userBanned, setUserBanned] = useState(false);
+	const [error, setError] = useState<{
+		title: string;
+		description: string;
+	} | null>(null);
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -57,38 +103,39 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
 		});
 	};
 
-	async function onSubmit(values: z.infer<typeof formSchema>) {
-		const { email, password } = values;
-		await authClient.signIn.email(
-			{
-				email,
-				password,
-				callbackURL,
-			},
-			{
-				onSuccess(context) {
-					console.log("Login successful:", context);
+	const loginMutation = useMutation({
+		mutationFn: async (values: z.infer<typeof formSchema>) => {
+			const { email, password } = values;
+			await authClient.signIn.email(
+				{
+					email,
+					password,
+					callbackURL,
 				},
-				onError(context) {
-					if (context.error.code === "INVALID_EMAIL_OR_PASSWORD") {
-						form.setError("email", {
-							type: "manual",
-							message: "Correo electrónico o contraseña incorrectos.",
-						});
-						return;
-					}
+				{
+					onSuccess(context) {
+						console.log("Login successful:", context);
+					},
+					onError(context) {
+						const code = context.error.code;
+						const errorInfo = LOGIN_ERROR_MESSAGES[code] ?? DEFAULT_LOGIN_ERROR;
+						setError(errorInfo);
 
-					if (context.error.code === "BANNED_USER") {
-						setUserBanned(true);
-						return;
-					}
-
-					toast.error(
-						"Inicio de sesión fallido. Por favor, inténtalo de nuevo.",
-					);
+						if (code === "INVALID_EMAIL_OR_PASSWORD") {
+							form.setError("email", {
+								type: "manual",
+								message: "Correo electrónico o contraseña incorrectos.",
+							});
+						}
+					},
 				},
-			},
-		);
+			);
+		},
+	});
+
+	function onSubmit(values: z.infer<typeof formSchema>) {
+		setError(null);
+		loginMutation.mutate(values);
 	}
 
 	return (
@@ -114,7 +161,11 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
 								<FormItem>
 									<FormLabel>Email</FormLabel>
 									<FormControl>
-										<Input placeholder="juan@gmail.com" {...field} />
+										<Input
+											placeholder="juan@gmail.com"
+											disabled={loginMutation.isPending}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -132,39 +183,47 @@ export const LoginForm = ({ callbackURL }: { callbackURL: string }) => {
 											asChild
 											className="p-0 h-auto text-xs"
 										>
-											<a href="/olvide-contrasena">
-												¿Olvidaste tu contraseña?
-											</a>
+											<a href="/olvide-contrasena">¿Olvidaste tu contraseña?</a>
 										</Button>
 									</div>
 									<FormControl>
-										<Input type="password" placeholder="********" {...field} />
+										<Input
+											type="password"
+											placeholder="********"
+											disabled={loginMutation.isPending}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
 						<div className="text-right"></div>
-						{userBanned && (
+						{error && (
 							<Alert variant="destructive">
 								<AlertCircleIcon />
-								<AlertTitle>Cuenta suspendida</AlertTitle>
+								<AlertTitle>{error.title}</AlertTitle>
 								<AlertDescription>
-									<p>
-										Tu cuenta ha sido suspendida. Si crees que esto es un error,
-										por favor contacta al soporte.
-									</p>
+									<p>{error.description}</p>
 								</AlertDescription>
 							</Alert>
 						)}
-						<Button type="submit" className="w-full">
+						<Button
+							type="submit"
+							className="w-full"
+							disabled={loginMutation.isPending}
+						>
+							{loginMutation.isPending && (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							)}
 							Iniciar sesión
 						</Button>
 						<Button
 							type="button"
 							variant="outline"
-							className="w-full "
+							className="w-full"
 							onClick={handleLoginWithGoogle}
+							disabled={loginMutation.isPending}
 						>
 							<GoogleIcon />
 							Ingresar con Google

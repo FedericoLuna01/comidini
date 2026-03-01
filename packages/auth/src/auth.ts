@@ -44,6 +44,8 @@ export const auth = betterAuth({
 	},
 	emailAndPassword: {
 		enabled: true,
+		minPasswordLength: 8,
+		maxPasswordLength: 128,
 		sendResetPassword: async ({ user, url, token }) => {
 			await sendResetPassword({ email: user.email, url, firstName: user.name });
 		},

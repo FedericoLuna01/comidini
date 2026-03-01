@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { authClient } from "@repo/auth/client";
 import { type CreateShop, createShopSchema } from "@repo/db/src/types/shop";
 import {
 	type MapLocation,
@@ -106,12 +107,10 @@ const formSchema = createShopSchema
 			.max(20, { message: "Máx. 20 dígitos" }),
 		// Email OBLIGATORIO
 		email: z
-			.string()
-			.min(1, { message: "El email es obligatorio" })
-			.email({ message: "Ingresa un email válido (ej: ejemplo@correo.com)" }),
+			.email({ message: "Ingresa un email válido (ej: ejemplo@correo.com)" })
+			.min(1, { message: "El email es obligatorio" }),
 		// Website OPCIONAL
 		website: z
-			.string()
 			.url({ message: "Ingresa una URL válida (ej: https://www.ejemplo.com)" })
 			.optional()
 			.or(z.literal("")),
@@ -173,21 +172,33 @@ type FormValues = z.infer<typeof formSchema>;
 
 export const Route = createFileRoute("/primeros-pasos/")({
 	beforeLoad: async () => {
+		// Verificar si el usuario está autenticado
+		const session = await authClient.getSession();
+
+		if (!session.data) {
+			throw redirect({
+				to: "/iniciar-sesion",
+			});
+		}
+
+		if (session.data.user.role !== "shop") {
+			throw redirect({
+				to: "/",
+			});
+		}
+
 		// Verificar si el usuario ya tiene una tienda
 		try {
 			const status = await getShopStatus();
 			if (status.hasShop) {
-				// Si ya tiene tienda, redirigir al dashboard
 				throw redirect({
 					to: "/dashboard",
 				});
 			}
 		} catch (error) {
-			// Si hay error de autenticación, dejar pasar (el dashboard lo manejará)
 			if (error instanceof Error && error.message.includes("redirect")) {
 				throw error;
 			}
-			// Si el error es de otro tipo, continuar con el onboarding
 			console.error("Error checking shop status:", error);
 		}
 	},
