@@ -1,8 +1,18 @@
 import { authClient } from "@repo/auth/client";
 import { Badge } from "@repo/ui/components/ui/badge";
+import { Button } from "@repo/ui/components/ui/button";
+import {
+	Drawer,
+	DrawerContent,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+} from "@repo/ui/components/ui/drawer";
+import { cn } from "@repo/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, Clock, Package, Truck } from "lucide-react";
+import { useState } from "react";
 import { myOrdersQueryOptions, type Order } from "../api/orders";
 
 const ACTIVE_STATUSES = new Set([
@@ -32,13 +42,20 @@ const STATUS_ICON: Record<
 	READY: Package,
 };
 
-function ActiveOrderItem({ order }: { order: Order }) {
+function ActiveOrderItem({
+	order,
+	onOrderClick,
+}: {
+	order: Order;
+	onOrderClick: () => void;
+}) {
 	const Icon = STATUS_ICON[order.status] ?? Package;
 
 	return (
 		<Link
 			to="/pedido/$orderId"
 			params={{ orderId: String(order.id) }}
+			onClick={onOrderClick}
 			className="flex items-center gap-3 px-4 py-3 hover:bg-primary/5 transition-colors group"
 		>
 			<div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -61,6 +78,7 @@ function ActiveOrderItem({ order }: { order: Order }) {
 }
 
 export function ActiveOrdersBanner() {
+	const [open, setOpen] = useState(false);
 	const { data: session } = authClient.useSession();
 
 	const { data: orders } = useQuery({
@@ -74,33 +92,60 @@ export function ActiveOrdersBanner() {
 	if (!activeOrders || activeOrders.length === 0) return null;
 
 	return (
-		<div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md">
-			<div className="bg-background border border-border rounded-xl shadow-lg overflow-hidden ring-1 ring-black/5">
-				<div className="flex items-center gap-2 px-4 py-2 bg-primary/5 border-b border-border">
+		<>
+			<div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+				<Button
+					variant="outline"
+					onClick={() => setOpen(true)}
+					className="rounded-full shadow-lg gap-2 px-5 py-2"
+				>
 					<Badge
 						variant="secondary"
 						className="bg-primary/10 text-primary border-none text-xs font-semibold"
 					>
 						{activeOrders.length}
 					</Badge>
-					<span className="text-sm font-semibold text-foreground">
+					<span className="text-sm font-semibold">
 						{activeOrders.length === 1 ? "Pedido activo" : "Pedidos activos"}
 					</span>
-				</div>
-				<div className="divide-y divide-border max-h-[200px] overflow-y-auto">
-					{activeOrders.slice(0, 3).map((order) => (
-						<ActiveOrderItem key={order.id} order={order} />
-					))}
-					{activeOrders.length > 3 && (
-						<Link
-							to="/perfil"
-							className="block text-center text-xs text-muted-foreground py-2 hover:text-foreground transition-colors"
-						>
-							Ver todos los pedidos ({activeOrders.length})
-						</Link>
-					)}
-				</div>
+				</Button>
 			</div>
-		</div>
+
+			<Drawer open={open} onOpenChange={setOpen}>
+				<DrawerContent
+					className={cn("max-w-4xl mx-auto px-2 sm:px-4 md:px-12 pb-0", {
+						"pb-6": activeOrders.length === 1,
+					})}
+				>
+					<DrawerHeader className="flex flex-row items-center justify-between">
+						<DrawerTitle>
+							{activeOrders.length === 1 ? "Pedido activo" : "Pedidos activos"}
+						</DrawerTitle>
+					</DrawerHeader>
+
+					<div className="divide-y divide-border overflow-y-auto max-h-[40vh] px-2">
+						{activeOrders.map((order) => (
+							<ActiveOrderItem
+								key={order.id}
+								order={order}
+								onOrderClick={() => setOpen(false)}
+							/>
+						))}
+					</div>
+
+					{activeOrders.length > 3 && (
+						<DrawerFooter>
+							<Link
+								to="/perfil"
+								onClick={() => setOpen(false)}
+								className="text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+							>
+								Ver todos los pedidos ({activeOrders.length})
+							</Link>
+						</DrawerFooter>
+					)}
+				</DrawerContent>
+			</Drawer>
+		</>
 	);
 }
