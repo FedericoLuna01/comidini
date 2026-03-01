@@ -8,23 +8,24 @@ import dotenv from "dotenv";
 import { ac, admin, shop, user } from "./permissions";
 
 // Cargar variables de entorno desde el archivo .env en la raíz del proyecto
+dotenv.config({ path: "../../.env" });
 dotenv.config({ path: "../../../.env" });
+dotenv.config({ path: "../../../../.env" });
+
+// Obtener URLs con fallbacks
+const ADMIN_URL = process.env.ADMIN_BETTER_AUTH_URL || process.env.ADMIN_URL;
+const WEB_URL = process.env.WEB_BETTER_AUTH_URL || process.env.WEB_URL;
+const SHOP_URL = process.env.SHOP_BETTER_AUTH_URL || process.env.SHOP_URL;
 
 // Validar que las variables de entorno requeridas estén definidas
 if (!process.env.BETTER_AUTH_SECRET) {
 	throw new Error("BETTER_AUTH_SECRET environment variable is required");
 }
 
-if (!process.env.ADMIN_BETTER_AUTH_URL) {
-	throw new Error("ADMIN_BETTER_AUTH_URL environment variable is required");
-}
-
-if (!process.env.WEB_BETTER_AUTH_URL) {
-	throw new Error("WEB_BETTER_AUTH_URL environment variable is required");
-}
-
-if (!process.env.SHOP_BETTER_AUTH_URL) {
-	throw new Error("SHOP_BETTER_AUTH_URL environment variable is required");
+if (!ADMIN_URL || !WEB_URL || !SHOP_URL) {
+	console.warn(
+		"Warning: Some frontend URLs are not defined in environment variables",
+	);
 }
 
 export const auth = betterAuth({
@@ -33,7 +34,7 @@ export const auth = betterAuth({
 		schema,
 	}),
 	onAPIError: {
-		errorURL: `${process.env.WEB_BETTER_AUTH_URL}/iniciar-sesion`,
+		errorURL: `${WEB_URL || ""}/iniciar-sesion`,
 	},
 	session: {
 		cookieCache: {
@@ -71,6 +72,9 @@ export const auth = betterAuth({
 	trustedOrigins: [
 		// Agregar URLs con y sin barra final para compatibilidad
 		...[
+			ADMIN_URL,
+			WEB_URL,
+			SHOP_URL,
 			process.env.ADMIN_BETTER_AUTH_URL,
 			process.env.WEB_BETTER_AUTH_URL,
 			process.env.SHOP_BETTER_AUTH_URL,

@@ -41,11 +41,11 @@ ENV HOME=/home/expressjs
 COPY --from=installer /app .
 
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=3002
 ENV PNPM_HOME="/home/expressjs/.pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-EXPOSE 3001
+EXPOSE 3002
 
 # Run the API with pnpm filter so it finds the app-specific start script
 CMD ["pnpm", "--filter", "api", "start"]
